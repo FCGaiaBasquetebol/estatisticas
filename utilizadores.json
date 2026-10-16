@@ -1,5 +1,5 @@
 {
- "atualizado": 1792188803898,
+ "atualizado": 1792188832259,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -9,6 +9,22 @@
    "ativo": true,
    "salt": "tldBaT0bBaWVI0CfxncfGg==",
    "hash": "hkjb9UVH9oh1NB3hVEI3LLDL/85Dy5+FxL5xbZGaQPc="
+  },
+  {
+   "utilizador": "joaquim.oliveira",
+   "nome": "Joaquim Oliveira",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-18 Masc A",
+    "Sub-18 Masc B",
+    "Sub-16 Masc A",
+    "Sub-16 Masc B",
+    "Sub-14 Masc A",
+    "Sub-14 Masc B"
+   ],
+   "ativo": true,
+   "salt": "EY79qsCaq7eTHN6n/72dxw==",
+   "hash": "cYxuJJH4ZM9ZR2iGrFYR49s0u8ojvHn0R+auMsaA3Ng="
   }
  ]
 }
