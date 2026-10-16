@@ -349,6 +349,49 @@ body.fit .pbp.mini{flex:none;margin-top:5px}body.fit .pbp.mini li+li{display:non
 .pp{max-width:520px!important}.pp-g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px}
 .pp-g .btn{padding:16px 6px;font-size:17px;display:flex;flex-direction:column;align-items:center;gap:2px}.pp-g .btn small{font-size:10px;letter-spacing:1px;opacity:.8}
 .pp-g .btn.cur{border-color:var(--gold);color:var(--gold)}
+
+/* ===== v5: legibilidade à beira do campo ===== */
+/* campo de madeira: o elemento que se reconhece de relance */
+svg.court.live .c-floor{fill:url(#maple)}
+svg.court.live .c-paint{fill:rgba(226,184,18,.55);stroke:#2b1f0e;stroke-width:6}
+svg.court.live .c-line,svg.court.live .c-3p{stroke:#2b1f0e;stroke-width:6}
+svg.court.live .c-board{stroke:#2b1f0e}svg.court.live .c-rim{stroke:#e2541b;stroke-width:8}
+svg.court.live .mk-ok{fill:#1e9e4a;stroke:#fff;stroke-width:6;opacity:1}
+svg.court.live .mk-ko{stroke:#c62828;stroke-width:12}
+svg.court.live .mk-tmp{stroke:#000;stroke-width:7}
+svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
+.cwrap.o svg.court.live .c-floor{fill:#9fb0c2}.cwrap.o svg.court.live .c-paint{fill:rgba(90,160,255,.35)}
+.cwrap.o svg.court.live .mk-ok{fill:#1659c7}
+.cmask{background:rgba(0,0,0,.55)!important;color:#fff!important}
+/* atleta escolhido: foto + nome, para confirmar a quem vai a estatística */
+.selname{font-family:var(--f-cond)!important;font-weight:700;font-size:22px!important;text-transform:none!important;letter-spacing:.2px;display:flex;align-items:center;gap:8px;color:var(--muted)}
+.selname.has{color:var(--gold)}.selname .av{width:34px;height:34px;flex:none}.selname .av .nb{font-size:13px!important}
+.selname span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.selname.o{color:#8cbcff}
+/* cartões: pontos à direita, faltas em pontos */
+.pl{position:relative;grid-template-columns:44px minmax(0,1fr) auto}
+.pl .sm{display:flex!important;align-items:center;gap:8px;margin-top:2px}
+.pips{display:inline-flex;gap:3px;align-items:center}.pips i{width:8px;height:8px;border-radius:50%;background:#3a3a3a;display:block}
+.pips i.on{background:var(--gold)}.pips.f4 i.on{background:#ff9f2e}.pips.f5 i.on{background:var(--ko)}
+.pips em{font-style:normal;font-size:10px;font-weight:800;color:var(--ko);margin-left:2px}
+.pl .mn{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.pl .pts{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--f-cond);font-size:10px;font-weight:700;color:var(--dim);line-height:1}
+.pl .pts b{font-family:var(--f-disp);font-weight:400;font-size:24px;color:var(--ink)}
+.pl.bench .pts b{font-size:18px}
+.flash{position:absolute;left:50%;top:50%;z-index:3;background:#f2f2ee;color:#000;border:2px solid #fff;border-radius:999px;padding:3px 12px;font-family:var(--f-cond);font-weight:800;font-size:17px;white-space:nowrap;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.6);animation:flash 1.4s ease-out forwards}
+.flash.ok{background:#1e9e4a;border-color:#1e9e4a}.flash.ko{background:#8f2420;border-color:#c62828}.flash.fo{background:var(--gold);border-color:var(--gold);color:#000}
+@keyframes flash{0%{transform:translate(-50%,-50%) scale(.7);opacity:0}12%{transform:translate(-50%,-50%);opacity:1}75%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-80%)}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;opacity:1;transform:translate(-50%,-50%)}}
+/* barra de baixo: última jogada + anular, à mão de semear */
+.lastbar{display:flex;align-items:center;gap:10px;margin-top:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 4px 4px 12px;min-height:46px;flex:none}
+.lastbar .lq{font-family:var(--f-cond);font-weight:700;color:var(--dim);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.lastbar .lt{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lastbar .lt.hint{color:var(--dim);font-size:13px;white-space:normal}
+.undo{flex:none;min-height:38px;padding:0 16px;border-radius:8px;border:1px solid #555;background:var(--panel2);color:var(--ink);font-family:var(--f-cond);font-weight:800;font-size:16px;text-transform:uppercase;letter-spacing:.8px}
+.undo:disabled{opacity:.35}.undo:active{transform:scale(.97)}
+/* bancada compacta ao alto: pontos mais pequenos, sem minutos */
+@media (max-width:1100px) and (orientation:portrait){body.fit .pl.bench .pts{font-size:0}body.fit .pl.bench .pts b{font-size:16px}body.fit .pl.bench .sm{display:flex!important}body.fit .pl.bench .mn{display:none}body.fit .pl.bench .pips i{width:6px;height:6px}
+ body.fit .plist.court5 .pl{grid-template-columns:34px minmax(0,1fr) auto}body.fit .plist.court5 .pts b{font-size:20px}body.fit .plist.court5 .mn{display:none}}
+@media (max-width:600px){.plist.court5 .pl .pts{display:none}}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 </style></head>
 <body>
 <header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
@@ -798,7 +841,7 @@ function zoneBlock(sh,opp,extra){const zs=zoneStats(sh);
    <p class="hint">Z1 garrafão · Z2–Z4 meia distância (esq./centro/dir.) · Z5 e Z9 cantos · Z6–Z8 triplos (lateral esq./frontal/lateral dir.)</p></div></div>`}
 function courtSVG(shots,live,zs){const m=shots.map(e=>{const ok=e.t.endsWith("+");return ok?`<circle cx="${e.x}" cy="${e.y}" r="26" class="mk-ok"/>`:`<path d="M${e.x-22} ${e.y-22}L${e.x+22} ${e.y+22}M${e.x+22} ${e.y-22}L${e.x-22} ${e.y+22}" class="mk-ko"/>`}).join("");
   return `<svg class="court${live?" live":""}" viewBox="0 0 1500 1400" ${live?'id="court"':""} role="img" aria-label="Campo de basquetebol">
-   <rect x="0" y="0" width="1500" height="1400" class="c-floor"/>${zs?zonesLayer(zs):""}
+   ${live?`<defs><pattern id="maple" width="120" height="1400" patternUnits="userSpaceOnUse"><rect width="120" height="1400" fill="#d6b07a"/><rect x="0" width="60" height="1400" fill="#d0a970"/><path d="M60 0V1400M120 0V1400" stroke="#b98f55" stroke-width="2" opacity=".55"/><path d="M0 310H60M60 760H120M0 1130H60" stroke="#b98f55" stroke-width="2" opacity=".5"/></pattern></defs>`:""}<rect x="0" y="0" width="1500" height="1400" class="c-floor"/>${zs?zonesLayer(zs):""}
    <path class="c-3p" d="M${C3} 0V${YC.toFixed(1)}A${R3} ${R3} 0 0 0 ${1500-C3} ${YC.toFixed(1)}V0"/>
    <rect x="505" y="0" width="490" height="580" class="c-paint"/>
    <circle cx="750" cy="580" r="180" class="c-line"/>
@@ -835,7 +878,7 @@ function act(type,extra){if(SIDE==="them")return actOpp(type,extra);if(!SEL){toa
    case "stl":s.stl++;break;case "blk":s.blk++;break;case "tov":s.tov++;break;
    case "fp":case "fu":case "ft":s[type]++;s.pf++;G.tfUs[tfKey()]=(G.tfUs[tfKey()]||0)+1;break;case "fd":s.fd++;break}
   if(pts){s.pts+=pts;G.us+=pts;G.oncourt.forEach(k=>G.st[k].pm+=pts)}
-  addLog({t:type,id,...(extra||{})});
+  addLog({t:type,id,...(extra||{})});if(FX[type]){FLASH={id,t:Date.now(),x:FX[type][0],c:FX[type][1]};setTimeout(()=>{if(FLASH&&Date.now()-FLASH.t>=1400){FLASH=null;document.querySelectorAll(".flash").forEach(e=>e.remove())}},1450)}
   if(["fp","fu","ft"].includes(type)&&dq(s))toast(pById(id).name+" — desqualificado/excluído ("+(s.pf>=5?"5 faltas":"2 faltas antidesportivas/técnicas")+")");
   else if(type==="fu"||type==="ft")toast(pById(id).name+": "+LBL[type].toLowerCase());
   store();render()}
@@ -847,7 +890,8 @@ function putOn(id){if(G.oncourt.length>=5||G.oncourt.includes(id))return;if(dq(G
   snap();G.oncourt=G.oncourt.concat([id]);if(started())addLog({t:"sub",id,out:""});if(G.oncourt.length===5){SEL=null;toast("Cinco inicial pronto. Podes iniciar o relógio")}store();render()}
 function takeOff(id){if(started()){toast("Durante o jogo, troca arrastando um atleta do banco para cima deste");return}snap();G.oncourt=G.oncourt.filter(x=>x!==id);if(SEL===id)SEL=null;store();render()}
 /* arrastar um atleta para cima de outro (rato, caneta ou dedo) */
-let DRAG_T=0;
+let DRAG_T=0,FLASH=null;
+const FX={"2+":["+2","ok"],"3+":["+3","ok"],"1+":["+1","ok"],"2-":["2 falhado","ko"],"3-":["3 falhado","ko"],"1-":["LL falhado","ko"],or:["Ressalto of.",""],dr:["Ressalto def.",""],ast:["Assistência",""],stl:["Roubo",""],blk:["Desarme",""],tov:["Perda","ko"],fp:["Falta","fo"],fu:["Antidesp.","ko"],ft:["Técnica","ko"],fd:["Falta recebida",""]};
 function bindDrag(){document.querySelectorAll(".live .pl[data-p]").forEach(el=>el.addEventListener("pointerdown",e=>{if(e.button>0||G.status==="fim")return;
   const id=el.dataset.p,from=G.oncourt.includes(id)?"court":"bench",sx=e.clientX,sy=e.clientY;let gh=null,tgt=null;
   const pick=(x,y)=>{const t=document.elementFromPoint(x,y);if(!t)return null;const pl=t.closest(".pl[data-p]");
@@ -905,7 +949,9 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim";document
   let body="";
   if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id)),need=5-G.oncourt.length;
     const av=p=>`<span class="av">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">`:""}<span class="nb">${esc(p.num||"–")}</span></span>`;
-    const plb=(p,b)=>{const s=G.st[p.id];return `<button class="pl${b?" bench":""}${SEL===p.id?" sel":""}${SUB&&b?" subpick":""}${dq(s)?" out5":""}" data-p="${esc(p.id)}">${av(p)}<span class="nm">${esc(p.name)}<span class="sm">${s.pts} pts · <span data-min="${esc(p.id)}">${fmtMin(s.sec)}</span></span></span><span class="fo f${Math.min(s.pf,5)}"><b>${s.pf}</b>${s.fu||s.ft?`<i>${s.fu?s.fu+"A":""}${s.ft?" "+s.ft+"T":""}</i>`:"faltas"}</span></button>`};
+    const pips=s=>`<span class="pips f${Math.min(s.pf,5)}" title="${s.pf} falta(s)">${[0,1,2,3,4].map(i=>`<i${i<s.pf?' class="on"':""}></i>`).join("")}${s.fu?`<em>${s.fu}A</em>`:""}${s.ft?`<em>${s.ft}T</em>`:""}</span>`;
+    const fl=FLASH&&Date.now()-FLASH.t<1400?FLASH:null;
+    const plb=(p,b)=>{const s=G.st[p.id];return `<button class="pl${b?" bench":""}${SEL===p.id?" sel":""}${SUB&&b?" subpick":""}${dq(s)?" out5":""}" data-p="${esc(p.id)}">${av(p)}<span class="nm">${esc(p.name)}<span class="sm">${pips(s)}<span class="mn" data-min="${esc(p.id)}">${fmtMin(s.sec)}</span></span></span><span class="pts"><b>${s.pts}</b>pts</span>${fl&&fl.id===p.id?`<span class="flash ${fl.c}">${esc(fl.x)}</span>`:""}</button>`};
     const opp=SIDE==="them";const sp=SEL?pById(SEL):null;const dis=!opp&&(need>0||!SEL||!G.oncourt.includes(SEL));const D=dis?" disabled":"";
     const shots=G.log.filter(e=>e.x!=null&&e.q===G.q&&(opp?e.side==="o":e.side!=="o"));
     const A=(a,t,sm,c)=>`<button class="act${c?" "+c:""}" data-a="${a}"${D}>${t}${sm?`<small>${sm}</small>`:""}</button>`;
@@ -915,14 +961,14 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim";document
       <div class="plist court5${need>0?" need":""}" data-zone="court">${on.map(p=>plb(p,false)).join("")}${Array.from({length:Math.max(0,need)},()=>`<div class="pl slot" data-slot>Cinco inicial</div>`).join("")}<button class="btn sm${SUB?" gold":""} subm" data-subbtn${need>0?" disabled":""}>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
       <div class="benchw" data-zone="bench"><h3>Banco</h3><div class="plist bench">${bench.map(p=>plb(p,true)).join("")}</div></div></div>
      <div class="ccol"><div class="sidebar"><div class="seg2" role="group" aria-label="Equipa"><button data-side="us" aria-pressed="${!opp}">FC Gaia</button><button data-side="them" aria-pressed="${opp}">${esc(G.opp)}</button></div>
-      <div class="selname${opp?" o":""}">${opp?"Adversário · ações de equipa":need>0?"Escolhe o cinco inicial":sp?"#"+esc(sp.num)+" "+esc(sp.name):"Toca num atleta em campo"}</div>
-      <div class="sb-r"><button class="btn sm" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button><button class="btn sm" id="b-xls">Excel</button></div></div>
+      <div class="selname${opp?" o":""}${sp&&!opp&&!need?" has":""}">${opp?`Ações da equipa adversária`:need>0?"Escolhe o cinco inicial":sp?`${av(sp)}<span>${esc(sp.name)}</span>`:"Toca num atleta em campo"}</div></div>
       <div class="cgrid">
        <div class="acts side al">${A("1+","L. livre","Convertido","mk")}${A("1-","L. livre","Falhado","ms")}${A("or","Ressalto","Ofensivo")}${A("dr","Ressalto","Defensivo")}${A("ast","Assist.")}${A("stl","Roubo")}</div>
        <div class="cwrap${opp?" o":""}"><div class="cin">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${need>0&&!opp?`<div class="cmask five"><b>Cinco inicial · ${G.oncourt.length}/5</b><span>Toca nos atletas do banco ou arrasta-os para “Em campo”.</span></div>`:dis?`<div class="cmask">Toca num atleta em campo para marcar lançamentos</div>`:""}</div></div>
        <div class="acts side ar">${A("tov","Perda")}${A("blk","Desarme")}${A("fp","Falta","Pessoal","fl")}${A("fu","Antidesp.","Falta","fx")}${A("ft","Técnica","Falta","fx")}${A("fd","✋ Falta","Recebida","fr")}</div>
       </div>
-      <ul class="pbp mini">${last.map(pbpLi).join("")||'<li><span></span><span></span><span class="q">Toca no campo onde foi o lançamento · arrasta um atleta do banco para cima de outro em campo para substituir.</span><span></span></li>'}</ul></div></div>`}
+      <div class="lastbar">${last[0]?`<span class="lq">${last[0].q>G.np?"P"+(last[0].q-G.np):last[0].q+"P"} ${fmtT(last[0].c)}</span><span class="lt">${esc(logText(last[0]))}</span>`:`<span class="lt hint">Toca no campo onde foi o lançamento. Para substituir, arrasta um atleta do banco para cima de quem sai.</span>`}
+       <button class="undo" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button></div></div></div>`}
   else if(VIEW==="pbp"){body=`<ul class="pbp">${G.log.slice().reverse().map(pbpLi).join("")}</ul><div class="bar"><button class="btn gold" id="b-xls">Exportar Excel</button></div>`}
   else{const t=totals();
     body=`${fin?`<p class="hint">Jogo terminado e guardado neste dispositivo. Podes exportar o Excel agora ou mais tarde em “Jogos guardados”.</p>`:""}<div class="tblw"><table class="bs"><thead><tr><th class="l">Nº</th><th class="l">Atleta</th><th>MIN</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>RO</th><th>RD</th><th>RT</th><th>AST</th><th>ROU</th><th>DL</th><th>PER</th><th>FP</th><th>FA</th><th>FT</th><th>F</th><th>FR</th><th>+/-</th><th>VAL</th></tr></thead><tbody>
