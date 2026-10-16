@@ -1,5 +1,5 @@
 {
- "atualizado": 1792188897002,
+ "atualizado": 1792188911117,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -58,6 +58,17 @@
    "ativo": true,
    "salt": "DmP9S/fa4LNcCzcMWThUTg==",
    "hash": "JWKA5H3ORqZX7cC1W1lxiZgRNmB0lcAiyFsGTleC9GE="
+  },
+  {
+   "utilizador": "davide",
+   "nome": "Davide",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-16 Masc B"
+   ],
+   "ativo": true,
+   "salt": "KnJRspBdp0kmcdsgPPKyvA==",
+   "hash": "JIHjLV13By4UV6TnGNLfsG+A/cUm4rCtJGvIk7ueD+M="
   }
  ]
 }
