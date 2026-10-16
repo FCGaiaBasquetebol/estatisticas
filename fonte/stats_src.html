@@ -682,6 +682,9 @@ body.fit .acts.panel .act{min-height:0}
 }
 .pl.dragghost{position:fixed!important;left:0;top:0;margin:0}
 @media (min-width:1101px),(orientation:landscape){body.fit .pl.bench{min-height:40px;padding:3px 6px}body.fit .plist.bench{gap:4px}}
+.gsel{margin-top:12px;max-width:520px}.ojogo{margin-top:10px}
+@media (orientation:landscape) and (max-width:1100px){body.fit .lcol>.secth h3{font-size:11px;letter-spacing:.5px}body.fit .lcol>.secth .btn{padding:4px 7px;font-size:11px}.acts.panel .act:not(.mk):not(.ms):not(.fx){font-size:13px!important;letter-spacing:0}}
+@media (min-width:1101px),(orientation:landscape){body.fit .lcol>.secth{gap:6px}body.fit .lcol>.secth h3{white-space:nowrap}}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1040,7 +1043,7 @@ function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW
   const today=new Date();today.setHours(0,0,0,0);const dd=g=>g.date?new Date(g.date+"T12:00"):null;
   const gs=S.team?teamGames(S.team).filter(g=>{const d=dd(g);if(!d)return !g.res;const days=(d-today)/864e5;return days>=-0.5||(!g.res&&days>=-4)}).sort((a,b)=>(a.date||"9")>(b.date||"9")?1:-1):[];
   const sug=gs.find(g=>{const d=dd(g);return d&&d>=today})||gs[gs.length-1]||null;
-  if(S.team&&S.game===undefined)S.game=sug?String(sug.num):"";
+  if(S.team&&S.game===undefined){S.game=sug?String(sug.num):"";S.np=4;S.per=10}
   const dayLab=d=>{if(!d)return "Sem data";const n=Math.round((d-today)/864e5);return n===0?"Hoje":n===1?"Amanhã":n===-1?"Ontem":["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][d.getDay()]+" "+d.getDate()+" "+MSH[d.getMonth()]};
   const gcard=(g,big)=>{const d=dd(g),home=g.home.startsWith("FC Gaia"),opp=home?g.away:g.home,on=String(S.game)===String(g.num);
     return `<button class="gc${big?" big":""}${on?" on":""}" data-g="${esc(g.num)}" aria-pressed="${on}"><span class="gd"><b>${dayLab(d)}</b>${g.time?`<span>${esc(g.time)}</span>`:""}</span>
@@ -1056,10 +1059,10 @@ function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW
   <section class="ns"><h3>Escalão</h3>${myTeams.length===1?`<p class="teamone">${esc(myTeams[0][1])}</p>`:`<div class="tchips">${myTeams.map(([id,n])=>`<button class="tchip${S.team===id?" on":""}" data-team="${esc(id)}" aria-pressed="${S.team===id}">${esc(n)}</button>`).join("")}</div>`}</section>
   ${S.team?`<section class="ns"><h3>Jogo</h3>
    ${sug?gcard(sug,true):`<p class="hint">Não há jogos marcados para este escalão. Usa “Outro jogo”.</p>`}
-   ${others.length?`<details class="moreg"${otherSel?" open":""}><summary>Outros jogos (${others.length})</summary><div class="glist">${others.map(g=>gcard(g,false)).join("")}</div></details>`:""}
-   <div class="gother${S.game===""?" on":""}"><button class="lnk" id="s-other">${S.game===""?"✓ ":""}Outro jogo (amigável, torneio…)</button>${S.game===""?`<label class="f">Adversário<input id="s-opp" value="${esc(S.opp)}" placeholder="Nome do adversário"></label>`:""}</div>
-   <p class="fmt">Formato: <b>${S.np} períodos × ${S.per} min</b> ${S.fmtEdit?"":`<button class="lnk" id="s-fmt">Alterar</button>`}</p>
-   ${S.fmtEdit?`<div class="row"><label class="f">Períodos<select id="s-np">${[2,4].map(n=>`<option${S.np==n?" selected":""}>${n}</option>`).join("")}</select></label><label class="f">Minutos por período<select id="s-per">${[5,6,8,10,12].map(n=>`<option${S.per==n?" selected":""}>${n}</option>`).join("")}</select></label></div>`:""}
+   <label class="f gsel">${sug?"Outro jogo":"Jogo"}<select id="s-gsel"><option value="">${sug?"— jogo de outra data —":"— escolher —"}</option>${others.map(g=>{const d=dd(g),home=g.home.startsWith("FC Gaia"),opp=home?g.away:g.home;return `<option value="${esc(g.num)}"${String(S.game)===String(g.num)?" selected":""}>${esc(dayLab(d))}${g.time?" "+esc(g.time):""} · ${esc(opp)} (${home?"casa":"fora"})</option>`}).join("")}<option value="__outro"${S.game===""?" selected":""}>Outro jogo (amigável, torneio…)</option></select></label>
+   ${S.game===""?`<div class="card ojogo"><div class="row"><label class="f grow">Adversário<input id="s-opp" value="${esc(S.opp)}" placeholder="Nome do adversário"></label>
+     <label class="f">Períodos<select id="s-np">${[2,4].map(n=>`<option${S.np==n?" selected":""}>${n}</option>`).join("")}</select></label>
+     <label class="f">Minutos por período<select id="s-per">${[5,6,8,10,12].map(n=>`<option${S.per==n?" selected":""}>${n}</option>`).join("")}</select></label></div></div>`:""}
   </section>`:""}
   ${S.team?`<div class="secth"><h3>Convocados <span class="cnt${nOn>=5?" ok":""}">${nOn}</span></h3><div class="bar" style="margin:0"><div class="seg2 sm" role="group" aria-label="Ordenar"><button data-sort="az" aria-pressed="${S.sort!=="num"}">A–Z</button><button data-sort="num" aria-pressed="${S.sort==="num"}">Nº</button></div><button class="btn sm" id="s-all">Todos</button><button class="btn sm" id="s-none">Nenhum</button></div></div>
   <p class="hint" style="margin-top:0">Toca nos atletas que vão a jogo. O cinco inicial escolhe-se no ecrã do jogo.</p>
@@ -1074,7 +1077,8 @@ function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW
 <p class="ver">Versão ${esc(VER||"local")}</p>`;
   bindNav();
   document.querySelectorAll("[data-team]").forEach(b=>b.onclick=()=>{if(S.team===b.dataset.team)return;S.team=b.dataset.team;S.game=undefined;S.picked={};renderSetup()});
-  document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{S.game=b.dataset.g;renderSetup()});
+  document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{S.game=b.dataset.g;S.np=4;S.per=10;renderSetup()});
+  const gsel=$("#s-gsel");if(gsel)gsel.onchange=()=>{const v=gsel.value;if(!v)return;if(v==="__outro"){S.game="";renderSetup();const i=$("#s-opp");if(i)i.focus();return}S.game=v;S.np=4;S.per=10;renderSetup()};
   const sot=$("#s-other");if(sot)sot.onclick=()=>{S.game="";renderSetup();const i=$("#s-opp");if(i)i.focus()};
   const sf=$("#s-fmt");if(sf)sf.onclick=()=>{S.fmtEdit=true;renderSetup()};
   document.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{S.sort=b.dataset.sort;const y=scrollY;renderSetup();scrollTo(0,y)});
