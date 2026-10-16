@@ -576,6 +576,9 @@ main:has(.uhead){max-width:1320px}
 body.fit .pl.bench .av.nbonly .nb{font-size:20px!important}
 .selname .av.nbonly{width:auto;min-width:34px;height:auto}.selname .av.nbonly .nb{font-size:26px!important}
 :root[data-theme=light] .av.nbonly .nb{color:var(--gold-ink)}:root[data-theme=light] .pl.bench .av.nbonly .nb{color:var(--muted)}
+
+.shv{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}.shv-l{font-size:12px;font-weight:700;color:var(--muted)}
+.shv .seg2{flex-wrap:wrap;border-radius:10px}.shv .seg2 button{max-width:none}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -900,6 +903,8 @@ function installBanner(){if(standalone()||!matchMedia("(pointer:coarse)").matche
   return `<div class="inst"><div><b>Instala a app neste tablet</b><span>${installHint()}</span></div>${INSTP?`<button class="btn gold sm" id="in-go">Instalar</button>`:""}<button class="btn sm" id="in-x">Agora não</button></div>`}
 function bindInstall(){const g=$("#in-go");if(g)g.onclick=async()=>{INSTP.prompt();try{await INSTP.userChoice}catch(e){}INSTP=null;renderSetup()};
   const x=$("#in-x");if(x)x.onclick=()=>{lsSet("fcgaia-stats-inst",String(Date.now()));renderSetup()}}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-shv]");if(!b)return;SHOTV=b.dataset.shv;lsSet("fcgaia-stats-mapa",SHOTV);
+  const y=scrollY;if(G)render();else renderSetup();scrollTo(0,y)});
 async function boot(){$("#help").onclick=helpBox;$("#brand").onclick=e=>{e.preventDefault();goLogin()};$("#thm").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";lsSet(TK,t);applyTheme(t);toast(t==="light"?"Tema claro":"Tema escuro")};applyTheme(document.documentElement.dataset.theme);$("#crest").src=CREST;
   if(!DATA){try{const r=await fetch("data/jogos.json?t="+Date.now(),{cache:"no-store"});if(r.ok)DATA=await r.json()}catch(e){}}
   if(!DATA)DATA={plantel:{},games:[]};
@@ -1044,7 +1049,7 @@ function athSeason(a){if(!a)return "";const shots=a.games.flatMap(({g})=>g.log.f
    <tr class="tot"><td></td><td class="l">Total (${a.gp} jogos)</td><td>${fmtMin(a.sec)}</td><td>${a.pts}</td><td>${a.m2}/${a.a2}</td><td>${a.m3}/${a.a3}</td><td>${a.mf}/${a.af}</td><td>${a.or+a.dr}</td><td>${a.ast}</td><td>${a.stl}</td><td>${a.tov}</td><td>${a.pf}</td><td>${a.pm>0?"+":""}${a.pm}</td><td>${eff(a)}</td></tr>
    <tr class="avgr"><td></td><td class="l">Média por jogo</td><td>${fmtMin(a.sec/n)}</td><td><b>${av(a.pts)}</b></td><td>${av(a.m2)}/${av(a.a2)} <small>${pct(a.m2,a.a2)}</small></td><td>${av(a.m3)}/${av(a.a3)} <small>${pct(a.m3,a.a3)}</small></td><td>${av(a.mf)}/${av(a.af)} <small>${pct(a.mf,a.af)}</small></td><td>${av(a.or+a.dr)}</td><td>${av(a.ast)}</td><td>${av(a.stl)}</td><td>${av(a.tov)}</td><td>${av(a.pf)}</td><td>${a.pm>0?"+":""}${av(a.pm)}</td><td>${av(eff(a))}</td></tr></tbody></table></div>
    <div class="kpis"><div><b>${av(a.pts)}</b><span>pontos/jogo</span></div><div><b>${fmtMin(a.sec/n)}</b><span>minutos/jogo</span></div><div><b>${pct(a.m2+a.m3,a.a2+a.a3)}</b><span>lançamentos de campo</span></div><div><b>${pct(a.m3,a.a3)}</b><span>triplos</span></div><div><b>${pct(a.mf,a.af)}</b><span>lances livres</span></div><div><b>${av(a.or+a.dr)}</b><span>ressaltos/jogo</span></div></div>
-   <h3>Mapa de lançamentos acumulado por zona</h3>${zoneBlock(shots,false)}</div>`}
+   <h3>Mapa de lançamentos da época</h3>${zoneBlock(shots,false)}</div>`}
 function bindSeason(){
   const t=$("#ep-team");if(t)t.onchange=e=>{EP.team=e.target.value;EP.ath=null;renderSetup()};
   document.querySelectorAll("[data-epm]").forEach(b=>b.onclick=()=>{EP.mode=b.dataset.epm;renderSetup()});
@@ -1095,20 +1100,36 @@ function zonesLayer(zs){const L=2200,dx=Math.sin(ANG)*L,dy=Math.cos(ANG)*L,f=n=>
    <rect x="505" y="0" width="490" height="580" fill="#111"/><rect x="505" y="0" width="490" height="580" ${f(1)}/>
 `}
 function zonesLabels(zs){return Object.entries(ZLAB).map(([n,[x,y]])=>{const v=zs[n];return `<g class="zl"><text x="${x}" y="${y}" class="zl-n">Z${n}</text>${v[1]?`<text x="${x}" y="${y+58}" class="zl-v">${v[0]}/${v[1]} · ${Math.round(100*v[0]/v[1])}%</text>`:""}</g>`}).join("")}
-function zoneBlock(sh,opp,extra){const zs=zoneStats(sh);
-  return `<div class="sc-wrap"><div class="sc-court${opp?" o":""}">${courtSVG(sh,false,zs)}</div>
-   <div class="sc-side">${extra||""}<table class="bs zt"><thead><tr><th class="l">Zona</th><th>C/T</th><th>%</th></tr></thead><tbody>${Object.entries(zs).map(([k,v])=>`<tr title="${esc(ZDESC[k])}"><td class="l"><i class="zsw" style="background:${ZCOL[k]}"></i>Zona ${k}</td><td>${v[0]}/${v[1]}</td><td>${pct(v[0],v[1])}</td></tr>`).join("")}</tbody></table>
-   <p class="hint">Z1 garrafão · Z2–Z4 meia distância (esq./centro/dir.) · Z5 e Z9 cantos · Z6–Z8 triplos (lateral esq./frontal/lateral dir.)</p></div></div>`}
-function courtSVG(shots,live,zs){const m=shots.map(e=>{const ok=e.t.endsWith("+");return ok?`<circle cx="${e.x}" cy="${e.y}" r="26" class="mk-ok"/>`:`<path d="M${e.x-22} ${e.y-22}L${e.x+22} ${e.y+22}M${e.x+22} ${e.y-22}L${e.x-22} ${e.y+22}" class="mk-ko"/>`}).join("");
+/* mapa de lançamentos: ver por zonas, por 2/3 pontos ou só os lançamentos */
+let SHOTV=(()=>{try{return localStorage.getItem("fcgaia-stats-mapa")||"zonas"}catch(e){return "zonas"}})();
+const SHV=[["zonas","Zonas","As 9 zonas do campo, com convertidos/tentados e % de cada uma."],["pts","2 e 3 pontos","Dentro e fora da linha de 3: quantos, de quantos, e %."],["pontos","Só lançamentos","O campo limpo, só com os lançamentos: ● convertido, ✕ falhado."]];
+function ptsStats(sh){const r={2:[0,0],3:[0,0]};sh.forEach(e=>{const v=e.t[0]==="3"?3:2;r[v][1]++;if(e.t.endsWith("+"))r[v][0]++});return r}
+function ptsLayer(ps){const op=v=>ps[v][1]?0.30:0.14;
+  return `<defs><clipPath id="arcp"><path d="M${C3} 0V${YC.toFixed(1)}A${R3} ${R3} 0 0 0 ${1500-C3} ${YC.toFixed(1)}V0Z"/></clipPath></defs>
+   <rect x="0" y="0" width="1500" height="1400" fill="#5aa0ff" fill-opacity="${op(3)}"/>
+   <g clip-path="url(#arcp)"><rect x="0" y="0" width="1500" height="1400" fill="#111"/><rect x="0" y="0" width="1500" height="1400" fill="#e2b812" fill-opacity="${op(2)}"/></g>`}
+function ptsLabels(ps){const L=(x,y,t,v)=>`<g class="zl"><text x="${x}" y="${y}" class="zl-n">${t}</text>${v[1]?`<text x="${x}" y="${y+62}" class="zl-v">${v[0]}/${v[1]} · ${Math.round(100*v[0]/v[1])}%</text>`:`<text x="${x}" y="${y+62}" class="zl-v">sem lançamentos</text>`}</g>`;
+  return L(750,700,"2 PONTOS",ps[2])+L(750,1010,"3 PONTOS",ps[3])}
+function zoneBlock(sh,opp,extra){const zs=zoneStats(sh),ps=ptsStats(sh),mode=SHOTV,tm=[ps[2][0]+ps[3][0],ps[2][1]+ps[3][1]];
+  const seg=`<div class="shv"><span class="shv-l">Ver no mapa</span><div class="seg2 sm" role="group" aria-label="Ver no mapa">${SHV.map(([k,l,d])=>`<button type="button" data-shv="${k}" aria-pressed="${mode===k}" title="${esc(d)}">${l}</button>`).join("")}</div></div>`;
+  const table=mode==="zonas"?`<table class="bs zt"><thead><tr><th class="l">Zona</th><th>C/T</th><th>%</th></tr></thead><tbody>${Object.entries(zs).map(([k,v])=>`<tr title="${esc(ZDESC[k])}"><td class="l"><i class="zsw" style="background:${ZCOL[k]}"></i>Zona ${k}</td><td>${v[0]}/${v[1]}</td><td>${pct(v[0],v[1])}</td></tr>`).join("")}</tbody></table>`
+    :`<table class="bs zt"><thead><tr><th class="l">Lançamentos</th><th>C/T</th><th>%</th></tr></thead><tbody>
+      <tr><td class="l">${mode==="pts"?'<i class="zsw" style="background:#e2b812"></i>':""}2 pontos</td><td>${ps[2][0]}/${ps[2][1]}</td><td>${pct(ps[2][0],ps[2][1])}</td></tr>
+      <tr><td class="l">${mode==="pts"?'<i class="zsw" style="background:#5aa0ff"></i>':""}3 pontos</td><td>${ps[3][0]}/${ps[3][1]}</td><td>${pct(ps[3][0],ps[3][1])}</td></tr>
+      <tr class="tot"><td class="l">Total de campo</td><td>${tm[0]}/${tm[1]}</td><td>${pct(tm[0],tm[1])}</td></tr></tbody></table>`;
+  const hint={zonas:"Z1 garrafão · Z2–Z4 meia distância (esq./centro/dir.) · Z5 e Z9 cantos · Z6–Z8 triplos (lateral esq./frontal/lateral dir.)",pts:"Amarelo: dentro da linha de 3 (2 pontos). Azul: fora da linha (3 pontos). Os lances livres não entram no mapa.",pontos:"● convertido · ✕ falhado. Os lances livres não entram no mapa."}[mode];
+  return `<div class="sc-wrap"><div class="sc-court${opp?" o":""}">${courtSVG(sh,false,mode==="zonas"?zs:null,mode==="pts"?ps:null)}</div>
+   <div class="sc-side">${seg}${extra||""}${table}<p class="hint">${hint}</p></div></div>`}
+function courtSVG(shots,live,zs,ps){const m=shots.map(e=>{const ok=e.t.endsWith("+");return ok?`<circle cx="${e.x}" cy="${e.y}" r="26" class="mk-ok"/>`:`<path d="M${e.x-22} ${e.y-22}L${e.x+22} ${e.y+22}M${e.x+22} ${e.y-22}L${e.x-22} ${e.y+22}" class="mk-ko"/>`}).join("");
   return `<svg class="court${live?" live":""}" viewBox="0 0 1500 1400" ${live?'id="court"':""} role="img" aria-label="Campo de basquetebol">
-   ${live?`<defs><pattern id="maple" width="120" height="1400" patternUnits="userSpaceOnUse"><rect width="120" height="1400" fill="#d6b07a"/><rect x="0" width="60" height="1400" fill="#d0a970"/><path d="M60 0V1400M120 0V1400" stroke="#b98f55" stroke-width="2" opacity=".55"/><path d="M0 310H60M60 760H120M0 1130H60" stroke="#b98f55" stroke-width="2" opacity=".5"/></pattern></defs>`:""}<rect x="0" y="0" width="1500" height="1400" class="c-floor"/>${zs?zonesLayer(zs):""}
+   ${live?`<defs><pattern id="maple" width="120" height="1400" patternUnits="userSpaceOnUse"><rect width="120" height="1400" fill="#d6b07a"/><rect x="0" width="60" height="1400" fill="#d0a970"/><path d="M60 0V1400M120 0V1400" stroke="#b98f55" stroke-width="2" opacity=".55"/><path d="M0 310H60M60 760H120M0 1130H60" stroke="#b98f55" stroke-width="2" opacity=".5"/></pattern></defs>`:""}<rect x="0" y="0" width="1500" height="1400" class="c-floor"/>${zs?zonesLayer(zs):ps?ptsLayer(ps):""}
    <path class="c-3p" d="M${C3} 0V${YC.toFixed(1)}A${R3} ${R3} 0 0 0 ${1500-C3} ${YC.toFixed(1)}V0"/>
    <rect x="505" y="0" width="490" height="580" class="c-paint"/>
    <circle cx="750" cy="580" r="180" class="c-line"/>
    <path class="c-line" d="M625 ${BY}A125 125 0 0 0 875 ${BY}"/>
    <line x1="660" y1="120" x2="840" y2="120" class="c-board"/><circle cx="${BX}" cy="${BY}" r="23" class="c-rim"/>
    <path class="c-line" d="M570 1400A180 180 0 0 1 930 1400"/>
-   <rect x="0" y="0" width="1500" height="1400" class="c-out"/>${zs?zonesLabels(zs):""}${m}<g id="tmpmk"></g></svg>`}
+   <rect x="0" y="0" width="1500" height="1400" class="c-out"/>${zs?zonesLabels(zs):ps?ptsLabels(ps):""}${m}<g id="tmpmk"></g></svg>`}
 function newGame(o){const now=Date.now();G={...o,id:"j"+now,status:"jogo",q:1,clock:o.per*60,running:false,us:0,them:0,tfUs:{},tfThem:{},st:Object.fromEntries(o.roster.map(p=>[p.id,STAT0()])),ost:STAT0(),log:[],undo:[],created:now};
   SEL=null;SUB=null;SIDE="us";VIEW="live";store();render();startTick()}
 function qLabel(q){return q<=G.np?(G.np===2?q+".ª parte":q+".º período"):"Prol. "+(q-G.np)}
@@ -1260,7 +1281,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||isRO();
   $("#app").innerHTML=board+tabs+body;bind();fitCourt()}
 function shotChart(){const all=G.log.filter(e=>e.x!=null&&e.side!=="o"),oppS=G.log.filter(e=>e.x!=null&&e.side==="o"),sh=SHOTF==="_o"?oppS:SHOTF?all.filter(e=>e.id===SHOTF):all;
   const opts=G.roster.filter(p=>all.some(e=>e.id===p.id)).map(p=>`<option value="${esc(p.id)}"${SHOTF===p.id?" selected":""}>#${esc(p.num)} ${esc(p.name)}</option>`).join("");
-  return `<h3>Mapa de lançamentos por zona</h3>`+zoneBlock(sh,SHOTF==="_o",`<label class="f">Mostrar<select id="shotf"><option value="">FC Gaia (equipa)</option>${opts}<option value="_o"${SHOTF==="_o"?" selected":""}>Adversário: ${esc(G.opp)}</option></select></label>`)}
+  return `<h3>Mapa de lançamentos</h3>`+zoneBlock(sh,SHOTF==="_o",`<label class="f">Mostrar<select id="shotf"><option value="">FC Gaia (equipa)</option>${opts}<option value="_o"${SHOTF==="_o"?" selected":""}>Adversário: ${esc(G.opp)}</option></select></label>`)}
 function courtPoint(ev){const sv=$("#court");const pt=sv.createSVGPoint();const t=ev.touches?ev.touches[0]:ev;pt.x=t.clientX;pt.y=t.clientY;const q=pt.matrixTransform(sv.getScreenCTM().inverse());return {x:Math.max(0,Math.min(1500,q.x)),y:Math.max(0,Math.min(1400,q.y))}}
 function openShot(x,y){if(SIDE!=="them"&&(!SEL||!G.oncourt.includes(SEL))){toast("Escolhe primeiro um atleta em campo");return}
   PEND={x:Math.round(x),y:Math.round(y),v:shotVal(x,y)};
