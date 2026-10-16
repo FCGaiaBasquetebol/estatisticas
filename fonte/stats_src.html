@@ -625,7 +625,7 @@ body.fit .pl.bench .av.nbonly .nb{font-size:20px!important}
 
 /* ===== v14: painel de ações à direita, pares lado a lado ===== */
 .cgrid{grid-template-columns:minmax(0,var(--cw,620px)) 228px!important;justify-content:center}
-.acts.panel{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto 1fr auto 1fr auto 1fr auto 1fr .62fr;gap:4px 6px;min-height:0;align-content:stretch}
+.acts.panel{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto 1fr auto 1fr 1fr auto 1fr .62fr;gap:4px 6px;min-height:0;align-content:stretch}
 .acts.panel .pg{grid-column:1/-1;font-family:var(--f-cond);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-top:3px;line-height:1}
 .acts.panel .pg:first-child{margin-top:0}
 .acts.panel .act{min-height:44px;padding:2px;font-size:17px}
@@ -652,6 +652,8 @@ body.fit .acts.panel .act{min-height:0}
 @media (max-width:1100px) and (orientation:portrait){.astp{width:max-content;max-width:98%}.astp button{min-width:82px;padding:5px 6px}.astp button.no{min-width:50px}.astp button span{max-width:80px;font-size:13px}}
 .acts.panel .act:not(.mk):not(.ms):not(.fx){font-size:15px!important}
 @media (max-width:1100px) and (orientation:portrait){.acts.panel .act:not(.mk):not(.ms):not(.fx){font-size:13.5px!important;letter-spacing:0}}
+.acts.panel .pg{font-size:15px!important;letter-spacing:1.2px;color:var(--muted)!important;margin-top:6px;padding-left:2px}
+.acts.panel .pg:first-child{margin-top:0}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1363,8 +1365,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||isRO();
        <div class="acts panel" aria-label="Ações">
         <span class="pg">Lance livre</span>${A("1+","✓","Convertido","mk")}${A("1-","✕","Falhado","ms")}
         <span class="pg">Ressalto</span>${A("or","Ofensivo","","")}${A("dr","Defensivo","","")}
-        <span class="pg">Bola</span>${A("stl","Roubo","","")}${A("tov","Perda","","")}
-        <span class="pg">Passe e defesa</span>${A("ast","Assistência","","")}${A("blk","Desarme","","")}
+        <span class="pg">Ação</span>${A("stl","Roubo","","")}${A("tov","Perda","","")}${A("ast","Assistência","","")}${A("blk","Desarme","","")}
         <span class="pg">Faltas</span>${A("fp","Pessoal","Cometida","fl")}${A("fd","Recebida","Sofrida","fr")}
         ${A("fu","Antidesp.","","fx")}${A("ft","Técnica","","fx")}</div>
       </div>
