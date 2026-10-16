@@ -604,6 +604,24 @@ body.fit .pl.bench .av.nbonly .nb{font-size:20px!important}
  table.bs th{background:#eee!important}.tblw{overflow:visible}table.bs{font-size:11px}
  .sc-wrap{break-inside:avoid}.tv{grid-template-columns:1fr 1fr}
 }
+
+/* ===== v13: pares de ações, faltas, assistência rápida, técnicas do banco, zonas ===== */
+.acts.side{grid-template-rows:repeat(5,minmax(0,1fr)) minmax(0,.62fr)!important}
+.act.fl{background:#e2b812!important;border-color:#e2b812!important;color:#111!important}.act.fl small{color:#3a2f00!important}
+.act.fr{background:#2f6fd6!important;border:1px solid #2f6fd6!important;color:#fff!important}.act.fr small{color:#dbe7ff!important}
+.act.fx{background:transparent!important;border:1px solid #7a2a24!important;color:#ff9b91!important;font-size:14px!important;min-height:0!important;padding:2px!important}
+:root[data-theme=light] .act.fx{color:#b0352b!important;border-color:#e0a39d!important}
+.act.fl:disabled,.act.fr:disabled{opacity:.35}
+.astp{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.86);border:2px solid var(--gold);border-radius:999px;padding:6px 8px 6px 14px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:astin .18s ease-out}
+.astp span{color:#fff;font-weight:800;font-family:var(--f-cond);font-size:16px;margin-right:4px;white-space:nowrap}
+.astp button{min-width:46px;height:42px;border-radius:999px;border:1px solid #555;background:#1d1d1d;color:var(--gold);font-family:var(--f-disp);font-size:22px;cursor:pointer}
+.astp button.no{font-family:var(--f-cond);font-weight:800;font-size:14px;color:#ccc;padding:0 12px}
+@keyframes astin{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.astp{animation:none}}
+.tbtn{margin-left:auto;flex:none;background:transparent;border:1px dashed #555;border-radius:999px;color:var(--dim);font-size:12px;font-weight:700;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.tbtn b{color:var(--ko)}
+.tbm{max-width:480px!important}.tbk{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}.tbk h4{margin:0 0 2px}.tbk .hint{margin:0}
+.zsep2 path{fill:none;stroke:rgba(255,255,255,.55);stroke-width:5}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -909,7 +927,7 @@ function goLogin(){const go=async()=>{if(G){if(G.running)G.running=false;store()
 const HELP=[["Escolhe o jogo","Em Novo jogo, o escalão e o jogo de hoje (ou o próximo) já vêm escolhidos. Se for outro, abre “Outros jogos” ou “Outro jogo”.","1"],
  ["Convoca os atletas","Toca nos atletas que vão a jogo. Confirma os números e carrega em Começar jogo.","2"],
  ["Escolhe o cinco inicial","Toca em 5 atletas do banco (ou arrasta-os para Em campo). O relógio só arranca com cinco em campo.","3"],
- ["Regista as jogadas","Toca no atleta e depois na ação dos lados do campo. Para um lançamento, toca no sítio do campo e escolhe Convertido ou Falhado. Errado? ↶ Anular, em baixo.","4"],
+ ["Regista as jogadas","Toca no atleta e depois na ação dos lados do campo. Para um lançamento, toca no sítio do campo e escolhe Convertido ou Falhado. Depois de um cesto aparece “Assistência?” com os números dos colegas. Técnicas ao treinador ou ao banco: botão “T. banco”. Errado? ↶ Anular, em baixo.","4"],
  ["Adversário","Usa +1, +2, +3 e Falta no marcador, ou escolhe o adversário por cima do campo para marcar lançamentos e ações dele (o campo fica azul).","5"],
  ["Substitui a arrastar","Arrasta um atleta do banco para cima de quem sai. Se alguém for excluído, o relógio pára e a app pede logo quem entra.","6"],
  ["Relógio e períodos","▶ Iniciar e Parar ao lado do tempo. Toca no tempo para o corrigir. Período › mostra todos os períodos, com o seguinte em destaque.","7"],
@@ -1115,6 +1133,10 @@ function zoneN(x,y){if(Math.abs(x-BX)<=245&&y<=580)return 1;
   return Math.abs(Math.atan2(x-BX,y-BY))<=ANG?7:(x<BX?6:8)}
 function shotZone(x,y){return "Zona "+zoneN(x,y)}
 function zoneStats(sh){const z={};for(let i=1;i<=9;i++)z[i]=[0,0];sh.forEach(e=>{const k=zoneN(e.x,e.y);z[k][1]++;if(e.t.endsWith("+"))z[k][0]++});return z}
+function zoneSeps(){const a=Math.sin(ANG),b=Math.cos(ANG),yx=x=>(BY+Math.sqrt(R3*R3-(x-BX)*(x-BX))).toFixed(1),L=2200;
+  return `<g class="zsep2"><path d="M505 580V${yx(505)}M995 580V${yx(995)}M505 0V580M995 0V580M505 580H995"/>
+   <path d="M0 ${YC.toFixed(1)}H${C3}M1500 ${YC.toFixed(1)}H${1500-C3}"/>
+   <path d="M${(BX-R3*a).toFixed(1)} ${(BY+R3*b).toFixed(1)}L${(BX-L*a).toFixed(0)} ${(BY+L*b).toFixed(0)}M${(BX+R3*a).toFixed(1)} ${(BY+R3*b).toFixed(1)}L${(BX+L*a).toFixed(0)} ${(BY+L*b).toFixed(0)}"/></g>`}
 function zonesLayer(zs){const L=2200,dx=Math.sin(ANG)*L,dy=Math.cos(ANG)*L,f=n=>`fill="${ZCOL[n]}" fill-opacity="${zs&&zs[n][1]?0.30:0.16}"`;
   return `<defs><clipPath id="arc2"><path d="M${C3} 0V${YC.toFixed(1)}A${R3} ${R3} 0 0 0 ${1500-C3} ${YC.toFixed(1)}V0Z"/></clipPath></defs>
    <rect x="0" y="0" width="750" height="1400" ${f(6)}/><rect x="750" y="0" width="750" height="1400" ${f(8)}/>
@@ -1154,7 +1176,7 @@ function courtSVG(shots,live,zs,ps){const m=shots.map(e=>{const ok=e.t.endsWith(
    <path class="c-line" d="M625 ${BY}A125 125 0 0 0 875 ${BY}"/>
    <line x1="660" y1="120" x2="840" y2="120" class="c-board"/><circle cx="${BX}" cy="${BY}" r="23" class="c-rim"/>
    <path class="c-line" d="M570 1400A180 180 0 0 1 930 1400"/>
-   <rect x="0" y="0" width="1500" height="1400" class="c-out"/>${zs?zonesLabels(zs):ps?ptsLabels(ps):""}${m}<g id="tmpmk"></g></svg>`}
+   <rect x="0" y="0" width="1500" height="1400" class="c-out"/>${zs?zoneSeps()+zonesLabels(zs):ps?ptsLabels(ps):""}${m}<g id="tmpmk"></g></svg>`}
 function newGame(o){const now=Date.now();G={...o,id:"j"+now,status:"jogo",q:1,clock:o.per*60,running:false,us:0,them:0,tfUs:{},tfThem:{},st:Object.fromEntries(o.roster.map(p=>[p.id,STAT0()])),ost:STAT0(),log:[],undo:[],created:now};
   SEL=null;SUB=null;SIDE="us";VIEW="live";store();render();startTick()}
 function qLabel(q){return q<=G.np?(G.np===2?q+".ª parte":q+".º período"):"Prol. "+(q-G.np)}
@@ -1165,9 +1187,18 @@ function startTick(){stopTick();let last=Date.now();tick=setInterval(()=>{const 
 function stopTick(){if(tick)clearInterval(tick);tick=null}
 function paintClock(){const t=$("#clk");if(t){t.textContent=fmtT(G.clock);t.classList.toggle("run",G.running)}
   document.querySelectorAll("[data-min]").forEach(e=>e.textContent=fmtMin(G.st[e.dataset.min].sec))}
-function snap(){G.undo.push(JSON.stringify({us:G.us,them:G.them,tfUs:G.tfUs,tfThem:G.tfThem,ost:G.ost,st:Object.fromEntries(Object.entries(G.st).map(([k,v])=>[k,{...v,sec:undefined}])),log:G.log.length,oncourt:G.oncourt}));if(G.undo.length>80)G.undo.shift()}
+const coachF=()=>{G.coach=G.coach||{us:{c:0,b:0},them:{c:0,b:0}};return G.coach};
+function benchTech(){const c=coachF();const m=document.createElement("div");m.className="modal";
+  const blk=(k,nm)=>`<div class="tbk"><h4>${esc(nm)}</h4><p class="hint">Treinador: <b>${c[k].c}</b> · Banco: <b>${c[k].b}</b></p><div class="bar"><button class="btn" data-tc="${k}|c">Técnica ao treinador</button><button class="btn" data-tc="${k}|b">Técnica ao banco</button></div></div>`;
+  m.innerHTML=`<div class="card tbm"><h3 style="margin-top:0">Faltas técnicas do banco</h3>${blk("us","FC Gaia")}${blk("them",G.opp)}
+   <p class="hint">Não contam para as faltas de equipa. O treinador é desqualificado com 2 técnicas suas, ou 3 no total contando as do banco.</p><div class="bar"><button class="btn" id="tb-x">Fechar</button></div></div>`;
+  document.body.appendChild(m);m.querySelector("#tb-x").onclick=()=>m.remove();
+  m.querySelectorAll("[data-tc]").forEach(b=>b.onclick=()=>{const [k,w]=b.dataset.tc.split("|");m.remove();snap();const cc=coachF()[k];cc[w]++;
+    addLog({t:w==="c"?"tc":"tb",...(k==="them"?{side:"o"}:{})});store();render();
+    const nm=k==="us"?"Treinador FC Gaia":"Treinador "+G.opp;if(cc.c>=2||cc.c+cc.b>=3)toast(nm+" desqualificado");else toast((w==="c"?"Técnica ao treinador":"Técnica ao banco")+" · "+(k==="us"?"FC Gaia":G.opp))})}
+function snap(){G.undo.push(JSON.stringify({coach:G.coach?JSON.parse(JSON.stringify(G.coach)):null,us:G.us,them:G.them,tfUs:G.tfUs,tfThem:G.tfThem,ost:G.ost,st:Object.fromEntries(Object.entries(G.st).map(([k,v])=>[k,{...v,sec:undefined}])),log:G.log.length,oncourt:G.oncourt}));if(G.undo.length>80)G.undo.shift()}
 function undo(){const s=G.undo.pop();if(!s){toast("Nada para anular");return}const o=JSON.parse(s);
-  ["us","them","tfUs","tfThem","oncourt"].forEach(k=>G[k]=o[k]);if(o.ost)G.ost=o.ost;Object.entries(o.st).forEach(([k,v])=>{const sec=G.st[k].sec;G.st[k]={...v,sec}});G.log.length=o.log;store();render();toast("Última ação anulada")}
+  ["us","them","tfUs","tfThem","oncourt"].forEach(k=>G[k]=o[k]);G.coach=o.coach||G.coach;if(o.ost)G.ost=o.ost;Object.entries(o.st).forEach(([k,v])=>{const sec=G.st[k].sec;G.st[k]={...v,sec}});G.log.length=o.log;store();render();toast("Última ação anulada")}
 function addLog(e){G.log.push({q:G.q,c:Math.round(G.clock),us:G.us,them:G.them,...e})}
 const pById=id=>G.roster.find(p=>p.id===id);
 const tfKey=()=>G.q>G.np?G.np:G.q;
@@ -1177,14 +1208,20 @@ function actOpp(type,extra){const s=G.ost;snap();let pts=0;
    case "fp":case "fu":case "ft":s[type]++;s.pf++;G.tfThem[tfKey()]=(G.tfThem[tfKey()]||0)+1;break}
   if(pts){s.pts+=pts;G.them+=pts;G.oncourt.forEach(k=>G.st[k].pm-=pts)}
   addLog({t:type,side:"o",...(extra||{})});store();render()}
-function act(type,extra){if(SIDE==="them")return actOpp(type,extra);if(!SEL){toast("Escolhe primeiro um atleta");return}const id=SEL,s=G.st[id];snap();
+/* depois de um cesto: quem fez a assistência? (opcional, desaparece sozinho) */
+let ASTP=null;
+function astBar(){if(!ASTP||SIDE==="them"||Date.now()-ASTP.t>9000||!G.oncourt.includes(ASTP.id))return "";
+  const mates=G.oncourt.filter(x=>x!==ASTP.id).map(pById);
+  return `<div class="astp" role="group" aria-label="Assistência"><span>Assistência?</span>${mates.map(p=>`<button data-ast="${esc(p.id)}" title="${esc(p.name)}">${esc(p.num||"–")}</button>`).join("")}<button data-ast="" class="no">Não</button></div>`}
+function giveAst(id){ASTP=null;if(!id){render();return}snap();G.st[id].ast++;addLog({t:"ast",id});FLASH={id,t:Date.now(),x:"Assistência",c:""};store();render()}
+function act(type,extra){if(SIDE==="them")return actOpp(type,extra);ASTP=null;if(!SEL){toast("Escolhe primeiro um atleta");return}const id=SEL,s=G.st[id];snap();
   let pts=0;
   switch(type){case "2+":s.m2++;s.a2++;pts=2;break;case "2-":s.a2++;break;case "3+":s.m3++;s.a3++;pts=3;break;case "3-":s.a3++;break;
    case "1+":s.mf++;s.af++;pts=1;break;case "1-":s.af++;break;case "or":s.or++;break;case "dr":s.dr++;break;case "ast":s.ast++;break;
    case "stl":s.stl++;break;case "blk":s.blk++;break;case "tov":s.tov++;break;
    case "fp":case "fu":case "ft":s[type]++;s.pf++;G.tfUs[tfKey()]=(G.tfUs[tfKey()]||0)+1;break;case "fd":s.fd++;break}
   if(pts){s.pts+=pts;G.us+=pts;G.oncourt.forEach(k=>G.st[k].pm+=pts)}
-  addLog({t:type,id,...(extra||{})});if(FX[type]){FLASH={id,t:Date.now(),x:FX[type][0],c:FX[type][1]};setTimeout(()=>{if(FLASH&&Date.now()-FLASH.t>=1400){FLASH=null;document.querySelectorAll(".flash").forEach(e=>e.remove())}},1450)}
+  addLog({t:type,id,...(extra||{})});if(type==="2+"||type==="3+"){const a={id,t:Date.now()};ASTP=a;setTimeout(()=>{if(ASTP===a){ASTP=null;if(G&&VIEW==="live")render()}},9000)}if(FX[type]){FLASH={id,t:Date.now(),x:FX[type][0],c:FX[type][1]};setTimeout(()=>{if(FLASH&&Date.now()-FLASH.t>=1400){FLASH=null;document.querySelectorAll(".flash").forEach(e=>e.remove())}},1450)}
   const out=["fp","fu","ft"].includes(type)&&dq(s)&&s.pf-(type?1:0)>=0&&!s._dq;
   if(out){s._dq=1;if(G.running){G.running=false;addLog({t:"pausa"})}}
   else if(type==="fu"||type==="ft")toast(pById(id).name+": "+LBL[type].toLowerCase());
@@ -1245,7 +1282,7 @@ function endBox(){if(G.running){G.running=false;store();render()}const m=documen
 function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
   if(G.q>=G.np&&G.us!==G.them){confirmBox("Terminar o jogo?",()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render()});return}
   const ot=G.q>=G.np;confirmBox(ot?"Jogo empatado: começar prolongamento (5 min)?":"Passar ao "+qLabel(G.q+1)+"?",()=>{G.undo=[];G.q++;G.clock=(ot?5:G.per)*60;addLog({t:"iniq"});store();render()})}
-const LBL={pausa:"Jogo gravado (relógio parado)","2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3+":"Triplo convertido","3-":"Triplo falhado","1+":"Lance livre convertido","1-":"Lance livre falhado",
+const LBL={pausa:"Jogo gravado (relógio parado)",tc:"Falta técnica ao treinador",tb:"Falta técnica ao banco","2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3+":"Triplo convertido","3-":"Triplo falhado","1+":"Lance livre convertido","1-":"Lance livre falhado",
  or:"Ressalto ofensivo",dr:"Ressalto defensivo",ast:"Assistência",stl:"Roubo de bola",blk:"Desarme de lançamento",tov:"Perda de bola",fp:"Falta pessoal",fu:"Falta antidesportiva",ft:"Falta técnica",fd:"Falta recebida",
  o1:"Adversário: lance livre",o2:"Adversário: 2 pontos",o3:"Adversário: 3 pontos",opf:"Adversário: falta",sub:"Substituição",fimq:"Fim do período",iniq:"Início do período",fim:"Fim do jogo"};
 function logText(e){if(e.side==="o")return "Adversário — "+(LBL[e.t]||e.t);const p=e.id?pById(e.id):null;
@@ -1288,11 +1325,12 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||isRO();
       <div class="plist court5${need>0?" need":""}" data-zone="court">${on.map(p=>plb(p,false)).join("")}${Array.from({length:Math.max(0,need)},()=>`<div class="pl slot" data-slot>Cinco inicial</div>`).join("")}<button class="btn sm${SUB?" gold":""} subm" data-subbtn${need>0?" disabled":""}>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
       <div class="benchw" data-zone="bench"><h3>Banco</h3><div class="plist bench">${bench.map(p=>plb(p,true)).join("")}</div></div></div>
      <div class="ccol"><div class="sidebar"><div class="seg2" role="group" aria-label="Equipa"><button data-side="us" aria-pressed="${!opp}">FC Gaia</button><button data-side="them" aria-pressed="${opp}">${esc(G.opp)}</button></div>
-      <div class="selname${opp?" o":""}${sp&&!opp&&!need?" has":""}">${opp?`Ações da equipa adversária`:need>0?"Escolhe o cinco inicial":sp?`${av(sp)}<span>${esc(sp.name)}</span>`:"Toca num atleta em campo"}</div></div>
+      <div class="selname${opp?" o":""}${sp&&!opp&&!need?" has":""}">${opp?`Ações da equipa adversária`:need>0?"Escolhe o cinco inicial":sp?`${av(sp)}<span>${esc(sp.name)}</span>`:"Toca num atleta em campo"}</div>
+      <button class="tbtn" id="b-tb" title="Falta técnica ao treinador ou ao banco">T. banco${(()=>{const c=coachF();const n=c.us.c+c.us.b+c.them.c+c.them.b;return n?` <b>${n}</b>`:""})()}</button></div>
       <div class="cgrid">
-       <div class="acts side al">${A("1+","L. livre","Convertido","mk")}${A("1-","L. livre","Falhado","ms")}${A("or","Ressalto","Ofensivo")}${A("dr","Ressalto","Defensivo")}${A("ast","Assist.")}${A("stl","Roubo")}</div>
-       <div class="cwrap${opp?" o":""}"><div class="cin">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${need>0&&!opp?`<div class="cmask five"><b>Cinco inicial · ${G.oncourt.length}/5</b><span>Toca nos atletas do banco ou arrasta-os para “Em campo”.</span></div>`:dis?`<div class="cmask">Toca num atleta em campo para marcar lançamentos</div>`:""}</div></div>
-       <div class="acts side ar">${A("tov","Perda")}${A("blk","Desarme")}${A("fp","Falta","Pessoal","fl")}${A("fu","Antidesp.","Falta","fx")}${A("ft","Técnica","Falta","fx")}${A("fd","✋ Falta","Recebida","fr")}</div>
+       <div class="acts side al">${A("1+","L. livre","Convertido","mk")}${A("or","Ressalto","Ofensivo")}${A("stl","Roubo")}${A("ast","Assist.")}${A("fp","Falta","Pessoal","fl")}${A("fu","Antidesp.","","fx")}</div>
+       <div class="cwrap${opp?" o":""}"><div class="cin">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${astBar()}${need>0&&!opp?`<div class="cmask five"><b>Cinco inicial · ${G.oncourt.length}/5</b><span>Toca nos atletas do banco ou arrasta-os para “Em campo”.</span></div>`:dis?`<div class="cmask">Toca num atleta em campo para marcar lançamentos</div>`:""}</div></div>
+       <div class="acts side ar">${A("1-","L. livre","Falhado","ms")}${A("dr","Ressalto","Defensivo")}${A("tov","Perda")}${A("blk","Desarme")}${A("fd","Falta","Recebida","fr")}${A("ft","Técnica","","fx")}</div>
       </div>
       <div class="lastbar">${last[0]?`<span class="lq">${last[0].q>G.np?"P"+(last[0].q-G.np):last[0].q+"P"} ${fmtT(last[0].c)}</span><span class="lt">${esc(logText(last[0]))}</span>`:`<span class="lt hint">Toca no campo onde foi o lançamento. Para substituir, arrasta um atleta do banco para cima de quem sai.</span>`}
        <button class="undo" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button></div></div></div>`}
@@ -1318,7 +1356,7 @@ function teamView(){const t=totals(),o=G.ost,fg=x=>[x.m2+x.m3,x.a2+x.a3];
   return `<div class="tv"><table class="tvt"><thead><tr><th class="tv-a">FC Gaia</th><th></th><th></th><th></th><th class="tv-b">${esc(G.opp)}</th></tr></thead><tbody>
     ${row("Pontos",t.pts,o.pts)}${pr("Lançamentos de campo","fg")}${pr("2 pontos","2")}${pr("3 pontos","3")}${pr("Lances livres","ll")}
     ${row("Ressaltos ofensivos",t.or,o.or)}${row("Ressaltos defensivos",t.dr,o.dr)}${row("Ressaltos (total)",t.or+t.dr,o.or+o.dr)}
-    ${row("Assistências",t.ast,o.ast)}${row("Roubos de bola",t.stl,o.stl)}${row("Desarmes",t.blk,o.blk)}${row("Perdas de bola",t.tov,o.tov,null,false)}${row("Faltas",t.pf,o.pf,null,false)}
+    ${row("Assistências",t.ast,o.ast)}${row("Roubos de bola",t.stl,o.stl)}${row("Desarmes",t.blk,o.blk)}${row("Perdas de bola",t.tov,o.tov,null,false)}${row("Faltas",t.pf,o.pf,null,false)}${(c=>c.us.c+c.us.b+c.them.c+c.them.b?row("Técnicas treinador/banco",c.us.c+c.us.b,c.them.c+c.them.b,null,false):"")(coachF())}
    </tbody></table>
    <div class="tvp"><h3>Parciais</h3><table class="bs"><thead><tr><th class="l"></th>${qs.map(q=>`<th>${q>G.np?"P"+(q-G.np):q+"º"}</th>`).join("")}<th>Total</th></tr></thead><tbody>
     <tr><td class="l"><b>FC Gaia</b></td>${qs.map(q=>`<td>${(per[q]||[0,0])[0]}</td>`).join("")}<td><b>${G.us}</b></td></tr>
@@ -1347,7 +1385,8 @@ function bind(){
   const sf=$("#shotf");if(sf)sf.onchange=e=>{SHOTF=e.target.value;render()};
   document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;render()});
   document.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>{SIDE=b.dataset.side;render()});
-  document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>act(b.dataset.a));
+  document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>act(b.dataset.a));document.querySelectorAll("[data-ast]").forEach(b=>b.onclick=e=>{e.stopPropagation();giveAst(b.dataset.ast)});
+  const tb=$("#b-tb");if(tb)tb.onclick=benchTech;
   document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>oppAct(b.dataset.o));
   document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{if(Date.now()-DRAG_T<400)return;const id=b.dataset.p,onC=G.oncourt.includes(id);
     if(G.oncourt.length<5&&!SUB){if(onC)takeOff(id);else putOn(id);return}
