@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="pt"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Estatísticas FC Gaia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#e2b812;--gold-lo:#9c7e08;--bg:#111;--panel:#1d1d1d;--panel2:#262626;--line:#383838;--ink:#f2f2ee;--muted:#a8a8a0;--dim:#6f6f68;--ok:#5fd27a;--ko:#ff7a6e;
+ --f-disp:"Anton",Impact,"Arial Narrow",sans-serif;--f-cond:"Barlow Condensed","Arial Narrow",Arial,sans-serif;--f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);-webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+.top{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#000;border-bottom:3px solid var(--gold)}
+.top img{width:34px;height:auto}
+.top h1{margin:0;font-family:var(--f-disp);font-weight:400;font-size:20px;text-transform:uppercase;letter-spacing:.5px;line-height:1}
+.top h1 small{display:block;font-family:var(--f-cond);font-size:13px;color:var(--gold);letter-spacing:2px}
+.top .sp{flex:1}
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-weight:700;font-family:var(--f-cond);text-transform:uppercase;letter-spacing:.8px;font-size:15px}
+.btn:hover{border-color:var(--gold)}
+.btn.gold{background:var(--gold);color:#000;border-color:var(--gold)}
+.btn.ghost{background:transparent}
+.btn.danger{border-color:#7a2a24;color:var(--ko)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+main{max-width:1200px;margin:0 auto;padding:14px}
+h2{font-family:var(--f-disp);font-weight:400;text-transform:uppercase;color:var(--gold);font-size:28px;margin:6px 0 12px}
+h3{font-family:var(--f-cond);text-transform:uppercase;letter-spacing:1.5px;font-size:14px;color:var(--muted);margin:16px 0 8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;min-width:0}
+label.f select,label.f input{background:#0b0b0b;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:16px;min-width:0;text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink)}
+.grow{flex:1 1 240px}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.ritem{display:grid;grid-template-columns:28px 58px 1fr 44px;align-items:center;gap:8px;background:#0b0b0b;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.ritem.on{border-color:var(--gold-lo)}
+.ritem input[type=checkbox]{width:20px;height:20px;accent-color:var(--gold)}
+.ritem input.num{width:58px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px;text-align:center;font-weight:700}
+.ritem .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ritem .st{border:1px solid var(--line);border-radius:6px;background:transparent;font-size:11px;font-weight:800;padding:6px 0;color:var(--dim)}
+.ritem .st.on{background:var(--gold);color:#000;border-color:var(--gold)}
+.hint{color:var(--dim);font-size:13px;margin:6px 0 0}
+.err{color:var(--ko);font-weight:700;margin:8px 0 0;min-height:1em}
+/* ---- jogo ---- */
+.board{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;background:#000;border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.tm{display:flex;flex-direction:column;min-width:0}
+.tm.r{align-items:flex-end;text-align:right}
+.tm .n{font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.tm .s{font-family:var(--f-disp);font-size:54px;line-height:1;color:var(--gold)}
+.tm.r .s{color:var(--ink)}
+.tm .tf{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.tm .tf b{color:var(--ink)}.tm .tf b.bonus{color:var(--ko)}
+.clock{display:flex;flex-direction:column;align-items:center;gap:4px}
+.clock .t{font-family:var(--f-disp);font-size:44px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.clock .t.run{color:var(--ok)}
+.clock .p{font-family:var(--f-cond);font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;font-size:13px}
+.clock .cb{display:flex;gap:6px}
+.clock .cb .btn{padding:7px 10px;font-size:13px}
+.opp{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px}
+.opp .btn{padding:6px 10px;font-size:13px}
+.live{display:grid;grid-template-columns:250px minmax(0,1fr) 300px;gap:14px;margin-top:10px;align-items:start}
+.plist{display:grid;gap:6px}
+.pl{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:8px;background:var(--panel);border:2px solid transparent;border-radius:10px;padding:8px 10px;text-align:left;width:100%;min-height:58px}
+.pl .nb{font-family:var(--f-disp);font-size:26px;color:var(--gold);text-align:center}
+.pl .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.pl .sm{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.pl .fo{font-family:var(--f-cond);font-weight:700;font-size:12px;color:var(--muted);text-align:right;white-space:nowrap}
+.pl .fo b{display:block;font-family:var(--f-disp);font-weight:400;font-size:22px;color:var(--ink)}
+.pl .fo i{font-style:normal;color:var(--ko)}
+.pl .fo.f4 b{color:var(--gold)}.pl .fo.f5 b{color:var(--ko)}
+.pl.sel{border-color:var(--gold);background:#2a2610}
+.pl.bench{background:#141414;min-height:48px;padding:6px 10px}
+.pl.bench .nb{color:var(--dim);font-size:20px}
+.pl.subpick{border-color:#5aa0ff}
+.pl.out5{opacity:.45}
+.benchw{margin-top:8px}
+.ccol{min-width:0}
+.cwrap{position:relative}
+svg.court{display:block;width:100%;height:auto;max-height:calc(100vh - 290px);border-radius:10px;touch-action:manipulation}
+svg.court.live{cursor:crosshair}
+.c-floor{fill:#1e1a12}.c-paint{fill:rgba(226,184,18,.09);stroke:#8a7a4a;stroke-width:5}
+.c-line,.c-3p{fill:none;stroke:#8a7a4a;stroke-width:5}.c-3p{stroke:#c9a64a}
+.c-board{stroke:#ddd;stroke-width:8}.c-rim{fill:none;stroke:#ff8a3d;stroke-width:6}
+.c-out{fill:none;stroke:#8a7a4a;stroke-width:10}
+.mk-ok{fill:var(--ok);stroke:#0b2a12;stroke-width:5;opacity:.9}.mk-ko{stroke:var(--ko);stroke-width:9;stroke-linecap:round;fill:none}
+.mk-tmp{fill:none;stroke:#fff;stroke-width:6;stroke-dasharray:10 8}
+.cmask{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.45);color:var(--muted);font-weight:700;border-radius:10px;pointer-events:none;text-align:center;padding:20px}
+.chint{font-size:12px;color:var(--dim);margin:6px 0 0;text-align:center}
+.shotpop{position:absolute;z-index:4;width:270px;background:#000;border:2px solid var(--gold);border-radius:12px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.7)}
+.shotpop p{margin:0 0 8px;font-size:14px;text-align:center}
+.sp-b{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sp-b .act{padding:16px 4px;font-size:18px}
+.sp-l{display:flex;justify-content:space-between;gap:6px;margin-top:8px}
+.btn.sm{padding:6px 10px;font-size:13px}
+.zsep path{stroke:#000;stroke-opacity:.25;stroke-width:4;fill:none}
+.zl text{text-anchor:middle;paint-order:stroke;stroke:#000;stroke-width:10px;stroke-linejoin:round}
+.zl-n{font-family:var(--f-disp);font-size:64px;fill:#fff}
+.zl-v{font-family:var(--f-cond);font-weight:700;font-size:44px;fill:#fff}
+.zsw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+table.bs tr.avgr td{background:#121a12;font-weight:700;color:#cfe8cf}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.kpis div{background:#0b0b0b;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpis b{display:block;font-family:var(--f-disp);font-weight:400;font-size:30px;color:var(--gold);line-height:1}
+.kpis span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700}
+.who{display:flex;align-items:center;gap:10px}.wn{display:flex;flex-direction:column;line-height:1.15;text-align:right}.wn b{font-size:14px}.wn small{font-size:11px;color:var(--muted)}
+.net{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#ffb35c;display:inline-flex;align-items:center;gap:5px}.net::before{content:"";width:8px;height:8px;border-radius:50%;background:#ffb35c}
+.net.on{color:var(--ok)}.net.on::before{background:var(--ok)}
+.login{display:grid;place-items:center;min-height:calc(100vh - 120px)}
+.lcard{width:min(420px,100%);text-align:center;padding:26px}.lcard img{width:84px;height:auto}.lcard h2{margin:8px 0 10px}
+.lcard form{display:grid;gap:10px;text-align:left}.pub.on{border-color:var(--gold,#d4a017)}.ghh{margin:6px 0 10px}.ghh summary{cursor:pointer;color:var(--gold);font-weight:700}.ghh ol{margin:8px 0 0;padding-left:20px;line-height:1.5}.demo{margin-top:16px;font-size:13px;color:var(--muted);background:#0b0b0b;border:1px dashed var(--line);border-radius:8px;padding:10px;text-align:left}
+.chks{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:12px}.chk{display:inline-flex;align-items:center;gap:6px;background:#0b0b0b;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-weight:600}.chk input{width:18px;height:18px;accent-color:var(--gold)}
+.tag{display:inline-block;background:#2a2610;border:1px solid var(--gold-lo);color:var(--gold);border-radius:6px;padding:1px 7px;font-size:12px;font-weight:700;margin:1px}
+table.bs.ul td{white-space:normal}table.bs.ul tr.off td{opacity:.5}.acts-u{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+@media (max-width:760px){.wn{display:none}}
+.snav{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px;border-bottom:1px solid var(--line)}
+.snav button{background:transparent;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-size:16px}
+.snav button[aria-pressed=true]{color:var(--gold);border-color:var(--gold)}
+.seg2.big button{padding:10px 16px;font-size:15px}
+.eps{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;color:var(--muted);font-size:14px}.eps b{color:var(--ink);font-size:18px}
+.epg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:6px}
+.epgi{display:flex;align-items:center;gap:8px;background:#0b0b0b;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:14px;opacity:.55}
+.epgi.on{opacity:1;border-color:var(--gold-lo)}.epgi input{width:18px;height:18px;accent-color:var(--gold)}.epgi span{flex:1;min-width:0}
+.epgi b.w{color:var(--ok)}.epgi b.l{color:var(--ko)}
+.lnk{background:none;border:0;color:var(--gold);font-weight:700;font-size:12px;text-transform:uppercase;white-space:nowrap}
+table.bs.ep th{cursor:pointer}table.bs.ep th.srt{color:var(--gold)}table.bs.ep tbody tr{cursor:pointer}table.bs.ep tbody tr:hover td{background:#1a1709}
+table.bs td small{color:var(--muted);font-weight:500}
+.athp{margin-top:16px;border-color:var(--gold-lo)}.athh{display:flex;justify-content:space-between;align-items:center}
+.saved{display:grid;gap:8px}
+.sv{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.sv-i{display:flex;flex-direction:column;gap:2px;min-width:0}.sv-i span{font-size:13px;color:var(--muted)}.sv-i em{color:var(--ok);font-style:normal;font-weight:700}
+.sv-b{display:flex;gap:6px}
+label.btn{display:inline-flex;align-items:center}
+.sidebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.seg2{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg2 button{background:transparent;border:0;padding:8px 14px;font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:.8px;font-size:14px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg2 button[aria-pressed=true]{background:var(--gold);color:#000}
+.seg2 button[data-side=them][aria-pressed=true]{background:#5aa0ff;color:#000}
+.selname.o{color:#8cbcff}
+.cwrap.o svg.court .c-floor,.sc-court.o svg.court .c-floor{fill:#121a26}
+.cwrap.o .mk-ok,.sc-court.o .mk-ok{fill:#5aa0ff;stroke:#0a1a33}
+.agrp{grid-column:1/-1;margin:6px 0 -2px;font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;color:var(--dim)}
+.act.wide{grid-column:1/-1}
+.act.fr{border:2px dashed #3d7fd6;background:#101c2e;color:#cfe2ff}
+table.bs tr.oppr td{color:#8cbcff;border-top:1px dashed #3d5a80}
+.plist.court5 .subm{display:none}
+@media (max-width:1100px){.plist.court5 .subm{display:block}}
+.secth{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px}
+.secth h3{margin:0}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.act{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 4px;min-height:62px;font-family:var(--f-cond);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.5px;line-height:1.05}
+.act small{display:block;font-size:12px;color:var(--muted);letter-spacing:1px}
+.act.mk{border-color:#2d5a36;background:#15281a}.act.mk small{color:var(--ok)}
+.act.ms{border-color:#5a2d2d;background:#2a1616}.act.ms small{color:var(--ko)}
+.act.fl{border-color:#6b5a14;background:#2a2410}.act.fx{border-color:#7a2a24;background:#2a1412}.act.fx small{color:var(--ko)}
+.act:disabled{opacity:.35}
+.act:active{transform:scale(.97)}
+.selname{font-family:var(--f-disp);font-size:22px;text-transform:uppercase;color:var(--gold);margin:2px 0 8px;min-height:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tabs{display:flex;gap:6px;margin:16px 0 8px;border-bottom:1px solid var(--line)}
+.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 12px;font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-size:15px}
+.tabs button[aria-selected=true]{color:var(--gold);border-color:var(--gold)}
+.tblw{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table.bs{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+table.bs th,table.bs td{padding:7px 8px;text-align:center;white-space:nowrap;border-bottom:1px solid #2a2a2a}
+table.bs th{font-family:var(--f-cond);font-size:12px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;background:#0b0b0b;position:sticky;top:0}
+table.bs td.l,table.bs th.l{text-align:left}
+table.bs tr.tot td{font-weight:800;border-top:2px solid var(--gold);background:#17150a}
+table.bs tr.oncourt td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
+.pbp{list-style:none;margin:0;padding:0;max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.pbp li{display:grid;grid-template-columns:62px 58px 1fr 64px;gap:8px;padding:7px 10px;border-bottom:1px solid #262626;font-size:14px;align-items:center}
+.pbp li .q{color:var(--muted);font-family:var(--f-cond);font-weight:700}
+.pbp.mini{max-height:190px;margin-top:10px}.pbp.mini li{grid-template-columns:30px 44px 1fr 46px;font-size:12.5px;padding:6px 8px}
+.sc-wrap{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start}.sc-court{max-width:560px}.sc-court svg.court{max-height:none}.sc-side{display:grid;gap:10px}
+.pbp li .sc{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.pbp li.opp{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#000;border:1px solid var(--gold);color:var(--ink);padding:10px 16px;border-radius:999px;font-weight:700;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:grid;place-items:center;z-index:30;padding:16px}
+.modal .card{max-width:420px;width:100%}
+.lock{display:grid;place-items:center;min-height:70vh}
+@media (max-width:1100px){
+ /* ecrãs médios (tablet ao alto, janela estreita): atletas em fila em cima, campo e ações lado a lado, banco por baixo */
+ .live{display:grid;grid-template-columns:minmax(0,1fr) 230px;grid-template-areas:"s s" "c a" "b b";gap:10px}
+ .lcol{display:contents}.lcol .secth{display:none}.plist.court5{grid-area:s;grid-template-columns:repeat(5,minmax(0,1fr)) auto}
+ .ccol{grid-area:c}.acol{grid-area:a}.benchw{grid-area:b;margin-top:0}
+ .plist.court5 .pl{grid-template-columns:26px minmax(0,1fr) auto;min-height:0;padding:6px 8px;gap:6px}.plist.court5 .pl .nb{font-size:22px}.plist.court5 .pl .fo{font-size:0}.plist.court5 .pl .fo b{font-size:20px}.plist.court5 .pl .fo i{font-size:11px;display:block}
+ .plist.court5 .subm{align-self:stretch;writing-mode:vertical-rl;transform:rotate(180deg);padding:6px 4px}
+ .plist.bench{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+ .acts{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.act{min-height:52px;padding:8px 2px;font-size:16px}.act small{font-size:10px;letter-spacing:.3px}
+ svg.court{max-height:max(300px,calc(100vh - 400px))}.cwrap{max-width:calc(max(300px,calc(100vh - 400px))*1.0714);margin:0 auto}
+ .pbp.mini li{grid-template-columns:28px 1fr 40px}.pbp.mini li span:nth-child(2){display:none}}
+@media (max-width:600px){.live{display:flex;flex-direction:column}.plist.court5{order:2;grid-template-columns:repeat(5,minmax(0,1fr))}.plist.court5 .subm{grid-column:1/-1;writing-mode:horizontal-tb;transform:none}.ccol{order:3}.acol{order:4}.benchw{order:5}.acts{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .plist.court5 .pl{grid-template-columns:1fr;text-align:center;padding:6px 2px;gap:0;min-height:0}.plist.court5 .pl .nm{font-size:11px}.plist.court5 .pl .sm{display:none}.plist.court5 .pl .fo{text-align:center;font-size:10px}.plist.court5 .pl .fo b{display:inline;font-size:14px;margin-right:2px}
+ .plist.bench{grid-template-columns:repeat(2,minmax(0,1fr))}.tm .s{font-size:42px}.clock .t{font-size:36px}.sc-wrap{grid-template-columns:1fr}svg.court{max-height:none}}
+@media (max-width:520px){.board{grid-template-columns:1fr 1fr;grid-template-areas:"a b" "c c"}.board .tm:first-child{grid-area:a}.board .tm.r{grid-area:b}.board .clock{grid-area:c;flex-direction:row;justify-content:center;flex-wrap:wrap}
+ .act{font-size:15px;padding:12px 2px}.act small{font-size:9.5px;letter-spacing:0}.top h1 small{letter-spacing:1px}.top .btn{padding:7px 10px;font-size:13px}.pbp li{grid-template-columns:52px 46px 1fr 56px;font-size:13px}.shotpop{width:240px}}
+/* tablet: tudo à vista, sem scroll durante o jogo */
+@media (min-width:1101px) and (min-height:600px){main{max-width:none;padding:8px 14px}.top{padding:6px 14px}.top img{width:28px}
+ .board{padding:4px 14px}.tm .s{font-size:40px}.clock{gap:2px}.clock .t{font-size:34px}.tm .tf{font-size:11px}.tabs{margin:6px 0 2px}.tabs button{padding:6px 12px}
+ .live{margin-top:6px;height:calc(100vh - 230px)}.lcol,.acol{max-height:calc(100vh - 230px);overflow:auto}
+ .selname{font-size:18px;min-height:22px;margin:0 0 4px}svg.court{max-height:calc(100vh - 300px)}.cwrap{max-width:calc((100vh - 300px)*1.0714);margin:0 auto}
+ .act{min-height:54px;padding:10px 4px}.pl{min-height:52px;padding:6px 10px}}
+</style></head>
+<body>
+<header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
+ <button class="btn ghost" id="b-new" hidden>Jogos</button></header>
+<main id="app"></main>
+<div class="toast" id="toast" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const CREST=/*CREST*/"";
+let DATA=/*DATA*/null;
+const TEAMS=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"],["Sub-12","Sub 12"],["Sub-10","Sub 10"],["Sub-8","Sub 8"]];
+const TN=Object.fromEntries(TEAMS);
+const KEY="fcgaia-stats-v1";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const p2=n=>String(n).padStart(2,"0");
+const fmtT=s=>{s=Math.max(0,Math.ceil(s));return p2(Math.floor(s/60))+":"+p2(s%60)};
+const fmtMin=s=>{s=Math.round(s);return Math.floor(s/60)+":"+p2(s%60)};
+const MSH=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+function toast(t){const e=$("#toast");e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,1600)}
+const KJ="fcgaia-stats-jogos",KC="fcgaia-stats-atual";
+function readAll(){try{return JSON.parse(localStorage.getItem(KJ)||"{}")}catch(e){return {}}}
+function writeAll(m){try{localStorage.setItem(KJ,JSON.stringify(m));return true}catch(e){toast("Sem espaço para guardar! Exporta e apaga jogos antigos.");return false}}
+function store(){if(!G)return;if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);
+  
+  try{if(G.status==="fim")localStorage.removeItem(KC);else localStorage.setItem(KC,G.id)}catch(e){}}
+function load(){try{const old=localStorage.getItem(KEY);if(old){const g=JSON.parse(old);if(g){g.id=g.id||"j"+(g.created||Date.now());const m=readAll();m[g.id]=g;writeAll(m);localStorage.setItem(KC,g.id)}localStorage.removeItem(KEY)}}catch(e){}
+  try{const id=localStorage.getItem(KC);return id?readAll()[id]||null:null}catch(e){return null}}
+function fixGame(g){if(!g)return g;g.ost=g.ost||STAT0();Object.values(g.st).forEach(x=>["fp","fu","ft","fd"].forEach(k=>{if(x[k]==null)x[k]=0}));return g}
+const pname=n=>n&&n===n.toUpperCase()?n.toLowerCase().replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase()):n;
+
+let G=null;            // jogo em curso
+let SEL=null;          // atleta selecionado
+let SUB=null;          // modo substituição: id de quem sai
+let VIEW="live";       // live | bs | pbp
+let SETUP={team:"",game:"",per:10,np:4,opp:"",picked:{},nums:{},start:{}};
+let tick=null;
+let SHOTF="";           // filtro do mapa de lançamentos (id do atleta ou "")
+let PEND=null;          // lançamento à espera de confirmação {x,y,v}
+let SIDE="us";          // us | them — a quem se atribuem as ações
+/* ---------- contas (utilizadores definidos no código: utilizadores.json) ---------- */
+const USERS_EMB=/*USERS*/null;      // cópia de utilizadores.json embutida quando a app é gerada
+const UK="fcgaia-stats-utilizadores-local",US="fcgaia-stats-sessao";
+const validUser=u=>/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u);
+const ESC=[["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"]];
+const PBK=150000,PWMIN=8;
+const GH={owner:"andreferraz12",repo:"fcgaia-estatisticas",branch:"main",path:"utilizadores.json"},GK="fcgaia-stats-github-token";
+let USER=null,USERS=[],UFILE=null,UPUB=null,PUBST="";
+function refreshPub(){if(SETVIEW==="users"&&isCoord()&&!G&&document.querySelector(".pub")){const y=scrollY;renderSetup();scrollTo(0,y)}}
+const isCoord=()=>USER&&USER.perfil==="coordenador";
+const allowed=()=>isCoord()?TEAMS.map(t=>t[0]):(USER&&USER.escaloes)||[];
+const canSee=g=>!!g&&allowed().includes(g.team);
+const visGames=()=>Object.values(readAll()).filter(canSee);
+const clean=o=>JSON.parse(JSON.stringify(o));
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
+const b64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+/* a palavra-passe nunca é guardada: só o resultado PBKDF2-SHA256 com sal próprio */
+async function pwHash(pw,salt){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveBits"]);
+  return b64(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:unb64(salt),iterations:PBK},k,256))}
+async function newCred(pw){if(String(pw).length<PWMIN)throw new Error("A palavra-passe tem de ter pelo menos "+PWMIN+" caracteres.");
+  const salt=b64(crypto.getRandomValues(new Uint8Array(16)));return {salt,hash:await pwHash(pw,salt)}}
+const okFile=f=>!!f&&Array.isArray(f.utilizadores);
+const sessKey=u=>u.utilizador+"|"+String(u.hash).slice(0,12);   // mudar a palavra-passe termina as sessões abertas
+const Acc={
+  async init(cb){let pub=okFile(USERS_EMB)?USERS_EMB:null;
+    try{const r=await fetch("utilizadores.json?t="+Date.now(),{cache:"no-store"});if(r.ok){const j=await r.json();if(okFile(j)&&(!pub||(j.atualizado||0)>=(pub.atualizado||0)))pub=j}}catch(e){}
+    UPUB=pub||{atualizado:0,utilizadores:[]};
+    let loc=null;try{loc=JSON.parse(lsGet(UK)||"null")}catch(e){}
+    if(okFile(loc)&&(loc.atualizado||0)>(UPUB.atualizado||0))UFILE=loc;else{UFILE=UPUB;lsSet(UK,null)}
+    USERS=UFILE.utilizadores;
+    if(!USERS.some(u=>u.perfil==="coordenador"&&u.hash&&u.ativo!==false)){renderFirst();return}
+    const s=lsGet(US);const u=s&&USERS.find(x=>x.hash&&sessKey(x)===s);cb(u&&u.ativo!==false?{...u}:null)},
+  pending(){return UFILE!==UPUB},
+  save(list){UFILE={atualizado:Date.now(),utilizadores:list};USERS=list;lsSet(UK,JSON.stringify(UFILE));if(lsGet(GK))this.publish().catch(()=>{})},
+  /* envia utilizadores.json diretamente para o repositório (token só guardado neste dispositivo) */
+  async publish(){const tk=lsGet(GK);if(!tk)throw new Error("Falta ligar ao GitHub.");const f=UFILE;
+    const url=`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`,h={Authorization:"Bearer "+tk,Accept:"application/vnd.github+json"};
+    PUBST="a publicar";refreshPub();
+    try{let sha;const g=await fetch(url+"?ref="+GH.branch+"&t="+Date.now(),{headers:h,cache:"no-store"});
+      if(g.status===401||g.status===403)throw new Error("O token não é válido ou não tem permissão de escrita.");
+      if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)throw new Error("GitHub respondeu "+g.status+".");
+      const txt=JSON.stringify(f,null,1)+"\n",bytes=new TextEncoder().encode(txt);let bin="";bytes.forEach(c=>bin+=String.fromCharCode(c));
+      const r=await fetch(url,{method:"PUT",headers:{...h,"Content-Type":"application/json"},body:JSON.stringify({message:"Utilizadores: atualização pela área privada ("+(USER?USER.utilizador:"admin")+")",content:btoa(bin),branch:GH.branch,...(sha?{sha}:{})})});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(r.status===409?"Conflito com outra alteração. Tenta outra vez.":"Não foi possível publicar ("+r.status+(e.message?": "+e.message:"")+").")}
+      if(UFILE===f)UPUB=f;PUBST="ok";refreshPub();return true}
+    catch(e){PUBST=navigator.onLine?e.message:"Sem internet. Fica por publicar; carrega em Publicar quando houver ligação.";refreshPub();throw e}},
+  async login(user,pw){user=String(user).trim().toLowerCase();const u=USERS.find(x=>x.utilizador===user);
+    if(!u||!u.hash||await pwHash(pw,u.salt)!==u.hash)throw new Error("Utilizador ou palavra-passe errados.");
+    if(u.ativo===false)throw new Error("Conta desativada. Fala com o administrador.");lsSet(US,sessKey(u));return {...u}},
+  async logout(){lsSet(US,null)},
+  async createUser(o){if(USERS.some(u=>u.utilizador===o.utilizador))throw new Error("Já existe esse nome de utilizador.");
+    const c=await newCred(o.pw);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",escaloes:o.escaloes||[],ativo:true,...c}]))},
+  async updateUser(un,patch){patch={...patch};if("pw" in patch){Object.assign(patch,await newCred(patch.pw));delete patch.pw}
+    this.save(USERS.map(u=>u.utilizador===un?{...u,...patch}:u));
+    if(USER&&USER.utilizador===un){USER={...USER,...patch};if(patch.hash)lsSet(US,sessKey(USER))}},
+  removeUser(un){this.save(USERS.filter(u=>u.utilizador!==un))},
+  discard(){lsSet(UK,null);UFILE=UPUB;USERS=UPUB.utilizadores},
+  download(){const blob=new Blob([JSON.stringify(UFILE,null,1)+"\n"],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="utilizadores.json";document.body.appendChild(a);a.click();a.remove()},
+  /* sem servidor: os jogos ficam no dispositivo (passam-se entre tablets com a cópia de segurança) */
+  push(){},remove(){},listen(){}
+};
+function renderFirst(){$("#b-new").hidden=true;$("#who").innerHTML="";
+  $("#app").innerHTML=`<div class="login"><div class="card lcard"><img src="${CREST}" alt=""><h2>Configuração inicial</h2>
+   <p class="hint" style="margin:-6px 0 14px">Ainda não há administrador em <b>utilizadores.json</b>. Cria-o aqui. A palavra-passe fica guardada apenas de forma cifrada.</p>
+   <form id="ff"><label class="f">Nome<input id="f-n" value="Administrador" required></label>
+   <label class="f">Utilizador<input id="f-u" value="admin" autocapitalize="none" spellcheck="false" required></label>
+   <label class="f">Palavra-passe<input id="f-p" type="password" autocomplete="new-password" required></label>
+   <label class="f">Repetir a palavra-passe<input id="f-r" type="password" autocomplete="new-password" required></label>
+   <p class="err" id="f-err"></p><button class="btn gold" style="width:100%;padding:13px" type="submit">Criar administrador</button></form>
+   <p class="hint" style="margin-top:12px">Depois, em Utilizadores, liga a área privada ao GitHub. A conta passa então a valer em todos os dispositivos.</p></div></div>`;
+  $("#ff").onsubmit=async e=>{e.preventDefault();const err=$("#f-err");err.textContent="";const un=$("#f-u").value.trim().toLowerCase(),pw=$("#f-p").value;
+    if(!validUser(un)){err.textContent="Utilizador: 3 a 30 caracteres, só letras minúsculas, números, ponto, hífen ou _.";return}
+    if(pw!==$("#f-r").value){err.textContent="As palavras-passe não coincidem.";return}
+    try{await Acc.createUser({nome:$("#f-n").value.trim()||"Administrador",utilizador:un,pw,perfil:"coordenador",escaloes:[]});const u=await Acc.login(un,pw);SETVIEW="users";onUser(u)}catch(x){err.textContent=x.message}}}
+function renderLogin(msg){$("#b-new").hidden=true;$("#who").innerHTML="";
+  $("#app").innerHTML=`<div class="login"><div class="card lcard"><img src="${CREST}" alt=""><h2>Estatísticas</h2><p class="hint" style="margin:-6px 0 14px">FC Gaia Basquetebol · área privada</p>
+   <form id="lf"><label class="f">Utilizador<input id="l-e" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+   <label class="f">Palavra-passe<input id="l-p" type="password" autocomplete="current-password" required></label>
+   <p class="err" id="l-err">${esc(msg||"")}</p>
+   <button class="btn gold" style="width:100%;padding:13px" type="submit">Entrar</button></form>
+   <p class="hint" style="margin-top:12px">Esqueceste-te da palavra-passe? Fala com o administrador.</p>
+   <p class="hint" style="margin-top:14px">Funciona sem internet. Os jogos ficam guardados neste dispositivo.</p></div></div>`;
+  $("#lf").onsubmit=async e=>{e.preventDefault();$("#l-err").textContent="";try{onUser(await Acc.login($("#l-e").value,$("#l-p").value))}catch(x){$("#l-err").textContent=x.message}};
+}
+function whoBar(){$("#who").innerHTML=USER?`<span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":"Treinador · "+esc((USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
+  const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Termina ou sai do jogo antes de sair da conta");return}confirmBox("Sair da conta neste dispositivo?",async()=>{await Acc.logout();USER=null;G=null;renderLogin()})}}
+function netState(){}
+function onUser(u){USER=u;stopTick();
+  if(!u){renderLogin();return}
+  if(u.ativo===false){USER=null;renderLogin("Conta desativada. Fala com o administrador.");Acc.logout();return}
+  whoBar();
+  G=load();if(G&&!canSee(G))G=null;
+  if(G&&G.status!=="fim"){fixGame(G);render();startTick()}else{G=null;renderSetup()}}
+function pwPrompt(title,cb){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><h3 style="margin-top:0">${esc(title)}</h3><div style="display:grid;gap:10px"><label class="f">Nova palavra-passe<input type="text" id="pw-n" autocomplete="off" spellcheck="false"></label><label class="f">Repetir<input type="text" id="pw-r" autocomplete="off" spellcheck="false"></label></div><p class="err" id="pw-e"></p><div class="bar"><button class="btn gold" id="pw-ok">Guardar</button><button class="btn" id="pw-x">Cancelar</button></div></div>`;
+  document.body.appendChild(m);m.querySelector("#pw-x").onclick=()=>m.remove();
+  m.querySelector("#pw-ok").onclick=async()=>{const e=m.querySelector("#pw-e"),n=m.querySelector("#pw-n").value;if(n!==m.querySelector("#pw-r").value){e.textContent="As palavras-passe não coincidem.";return}
+    try{await cb(n);m.remove()}catch(x){e.textContent=x.message}}}
+/* gestão de utilizadores */
+let UEDIT=null;
+function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&&PUBST!=="ok"&&!busy;
+  if(!tk)return `<div class="card pub on"><h3 style="margin-top:0">${pend?"⚠️ Alterações por publicar":"Publicação automática desligada"}</h3>
+   <p class="hint" style="margin-top:0">Liga a área privada ao GitHub <b>uma vez neste dispositivo</b>. A partir daí, cada utilizador que crias ou alteras é enviado logo para o site e fica ativo em todos os dispositivos em 1 a 2 minutos.</p>
+   <details class="ghh"><summary>Como obter o token (5 minutos)</summary><ol class="hint">
+    <li>No GitHub, abre o teu perfil e vai a <b>Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</b>.</li>
+    <li>Em Nome escreve “Área privada FC Gaia” e em Expiração escolhe 1 ano.</li>
+    <li>Em <b>Repository access</b> escolhe <b>Only select repositories → ${GH.repo}</b>.</li>
+    <li>Em <b>Permissions → Repository permissions → Contents</b> escolhe <b>Read and write</b>.</li>
+    <li>Carrega em <b>Generate token</b>, copia-o e cola-o aqui. Não o envies a ninguém.</li></ol></details>
+   <div class="row"><label class="f grow">Token do GitHub<input id="gh-t" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label></div>
+   <p class="err" id="gh-e"></p>
+   <div class="bar"><button class="btn gold" id="gh-on">Ligar e publicar</button>${pend?`<button class="btn" id="u-dl">Descarregar utilizadores.json</button><button class="btn" id="u-disc">Descartar alterações</button>`:""}</div></div>`;
+  return `<div class="card pub${pend||err?" on":""}"><h3 style="margin-top:0">${busy?"⏳ A publicar…":err?"⚠️ Por publicar":pend?"⚠️ Alterações por publicar":"✅ Publicado no site"}</h3>
+   <p class="hint" style="margin-top:0">${busy?"A enviar utilizadores.json para o GitHub.":err?esc(PUBST):pend?"Há alterações que ainda não foram enviadas.":"Cada alteração é enviada automaticamente para o GitHub e fica ativa nos outros dispositivos em 1 a 2 minutos."}</p>
+   <div class="bar">${pend||err?`<button class="btn gold" id="gh-pub"${busy?" disabled":""}>Publicar agora</button><button class="btn" id="u-disc">Descartar alterações</button>`:""}<button class="btn sm ghost" id="gh-off">Desligar GitHub neste dispositivo</button></div></div>`}
+function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||String(a.nome).localeCompare(b.nome));
+  const chk=(sel)=>ESC.map(([id,n])=>`<label class="chk"><input type="checkbox" value="${esc(id)}"${(sel||[]).includes(id)?" checked":""}> ${esc(n)}</label>`).join("");
+  const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();
+  return `<h2>Utilizadores</h2>
+  ${pubCard(pend)}
+  <div class="card" style="margin-top:14px"><h3 style="margin-top:0">${ed?"Escalões de "+esc(ed.nome):"Novo utilizador"}</h3>
+   ${ed?"":`<div class="row"><label class="f grow">Nome<input id="u-n" placeholder="Ex.: Rui Martins"></label><label class="f grow">Utilizador<input id="u-u" placeholder="Ex.: rui.martins" autocapitalize="none" spellcheck="false"></label><label class="f">Palavra-passe inicial<input id="u-p" type="text" placeholder="mín. ${PWMIN} caracteres" autocomplete="off" spellcheck="false"></label></div>`}
+   <div class="chks" id="u-esc"><span class="hint">Escalões (um ou mais):</span>${chk(ed?ed.escaloes:[])}</div>
+   <p class="err" id="u-err"></p>
+   <div class="bar">${ed?`<button class="btn gold" id="u-save">Guardar escalões</button><button class="btn" id="u-cancel">Cancelar</button>`:`<button class="btn gold" id="u-add">Criar utilizador</button>`}</div>
+   <p class="hint">Dá ao treinador o nome de utilizador e a palavra-passe em pessoa, nunca por escrito no repositório. Se alguém se esquecer da palavra-passe, usa “Palavra-passe” para definir uma nova. Os jogos ficam ligados ao escalão, por isso não se perdem.</p></div>
+  <div class="tblw" style="margin-top:14px"><table class="bs ul"><thead><tr><th class="l">Nome</th><th class="l">Utilizador</th><th class="l">Perfil</th><th class="l">Escalões</th><th>Estado</th><th></th></tr></thead><tbody>
+   ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador";return `<tr class="${u.ativo===false?"off":""}"><td class="l"><b>${esc(u.nome)}</b></td><td class="l">${esc(u.utilizador)}</td><td class="l">${adm?"Administrador":"Treinador"}</td><td class="l">${adm?"<small>todos</small>":(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join(" ")||"<small>nenhum</small>"}</td><td>${u.ativo===false?"Desativado":"Ativo"}</td>
+    <td class="acts-u">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Escalões</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm ${u.ativo===false?"":"danger"}" data-ua="${esc(u.utilizador)}" data-on="${u.ativo===false?1:0}">${u.ativo===false?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}">Apagar</button>`}</td></tr>`}).join("")}</tbody></table></div>`}
+function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
+  const dl=$("#u-dl");if(dl)dl.onclick=()=>{Acc.download();toast("utilizadores.json descarregado")};
+  const on=$("#gh-on");if(on)on.onclick=async()=>{const t=$("#gh-t").value.trim();if(!t){$("#gh-e").textContent="Cola o token.";return}
+    lsSet(GK,t);on.disabled=true;try{await Acc.publish();toast("Ligado ao GitHub e publicado")}catch(e){lsSet(GK,null);PUBST="";renderSetup();const ee=$("#gh-e");if(ee)ee.textContent=e.message}};
+  const pb=$("#gh-pub");if(pb)pb.onclick=async()=>{try{await Acc.publish();toast("Publicado")}catch(e){}};
+  const off=$("#gh-off");if(off)off.onclick=()=>confirmBox("Desligar o GitHub neste dispositivo? As alterações seguintes terão de ser publicadas à mão.",()=>{lsSet(GK,null);PUBST="";renderSetup()});
+  const dc=$("#u-disc");if(dc)dc.onclick=()=>confirmBox("Descartar as alterações e voltar à lista publicada?",()=>{Acc.discard();const me=USER&&USERS.find(u=>u.utilizador===USER.utilizador&&u.ativo!==false);if(!me||!USERS.some(u=>u.perfil==="coordenador"&&u.hash)){Acc.logout();USER=null;location.reload();return}USER={...me};whoBar();renderSetup()});
+  const add=$("#u-add");if(add)add.onclick=async()=>{const o={nome:$("#u-n").value.trim(),utilizador:$("#u-u").value.trim().toLowerCase(),pw:$("#u-p").value,escaloes:sel()};
+    if(!o.nome){err.textContent="Escreve o nome.";return}
+    if(!validUser(o.utilizador)){err.textContent="Utilizador: 3 a 30 caracteres, só letras minúsculas, números, ponto, hífen ou _ (sem espaços nem acentos).";return}
+    if(o.pw.length<PWMIN){err.textContent="A palavra-passe tem de ter pelo menos "+PWMIN+" caracteres.";return}
+    if(!o.escaloes.length){err.textContent="Escolhe pelo menos um escalão.";return}
+    add.disabled=true;try{await Acc.createUser(o);toast("Utilizador criado");renderSetup()}catch(e){err.textContent=e.message;add.disabled=false}};
+  const sv=$("#u-save");if(sv)sv.onclick=async()=>{const p={escaloes:sel()};if(!p.escaloes.length){err.textContent="Escolhe pelo menos um escalão.";return}
+    try{await Acc.updateUser(UEDIT,p);UEDIT=null;toast("Escalões guardados");renderSetup()}catch(e){err.textContent="Não foi possível guardar: "+e.message}};
+  const cc=$("#u-cancel");if(cc)cc.onclick=()=>{UEDIT=null;renderSetup()};
+  document.querySelectorAll("[data-ue]").forEach(b=>b.onclick=()=>{UEDIT=b.dataset.ue;renderSetup();window.scrollTo(0,0)});
+  document.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const u=USERS.find(x=>x.utilizador===b.dataset.up);pwPrompt("Nova palavra-passe · "+(u?u.nome:""),async n=>{await Acc.updateUser(b.dataset.up,{pw:n});toast("Palavra-passe alterada");renderSetup()})});
+  document.querySelectorAll("[data-ua]").forEach(b=>b.onclick=()=>{const on=b.dataset.on==="1";confirmBox(on?"Reativar esta conta?":"Desativar esta conta? A pessoa deixa de conseguir entrar.",async()=>{await Acc.updateUser(b.dataset.ua,{ativo:on});renderSetup()})});
+  document.querySelectorAll("[data-ux]").forEach(b=>b.onclick=()=>confirmBox("Apagar esta conta da lista? Os jogos não são apagados.",()=>{Acc.removeUser(b.dataset.ux);renderSetup()}))}
+
+
+/* ---------- arranque ---------- */
+async function boot(){$("#crest").src=CREST;
+  if(!DATA){try{const r=await fetch("data/jogos.json?t="+Date.now(),{cache:"no-store"});if(r.ok)DATA=await r.json()}catch(e){}}
+  if(!DATA)DATA={plantel:{},games:[]};
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  Acc.init(onUser);
+  $("#b-new").onclick=()=>{if(G&&G.running){toast("Pára o relógio primeiro");return}store();G=null;stopTick();SIDE="us";renderSetup()}}
+
+/* ---------- preparação ---------- */
+function teamGames(t){const today=new Date();today.setHours(0,0,0,0);
+  return (DATA.games||[]).filter(r=>r[0]===t).map(r=>({num:r[3],comp:r[1],date:r[5],time:r[6],home:r[7],away:r[8],venue:r[9],res:r[11]}))
+   .sort((a,b)=>Math.abs(new Date(a.date)-today)-Math.abs(new Date(b.date)-today))}
+let SETVIEW="novo";      // novo | jogos | epoca
+let EP={team:"",mode:"tot",sort:"pts",excl:{},ath:null,shotA:""};
+function snav(){const n=visGames().length;return `<nav class="snav">${[["novo","Novo jogo"],["jogos","Jogos ("+n+")"],["epoca","Época · acumulado"]].concat(isCoord()?[["users","Utilizadores"]]:[]).map(([k,l])=>`<button data-sv="${k}" aria-pressed="${SETVIEW===k}">${l}</button>`).join("")}</nav>`}
+function bindNav(){document.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{SETVIEW=b.dataset.sv;renderSetup();window.scrollTo(0,0)})}
+function renderSetup(){$("#b-new").hidden=true;const S=SETUP;
+  if(SETVIEW==="jogos"){$("#app").innerHTML=snav()+savedList();bindNav();bindSaved();return}
+  if(SETVIEW==="epoca"){$("#app").innerHTML=snav()+seasonView();bindNav();bindSeason();return}
+  if(SETVIEW==="users"&&isCoord()){$("#app").innerHTML=snav()+usersView();bindNav();bindUsers();return}
+  const teamOpts=TEAMS.filter(([id])=>allowed().includes(id)).map(([id,n])=>`<option value="${esc(id)}"${S.team===id?" selected":""}>${esc(n)}</option>`).join("");
+  const gs=S.team?teamGames(S.team):[];
+  const gameOpts=gs.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;const opp=g.home.startsWith("FC Gaia")?g.away:g.home;
+    return `<option value="${g.num}"${String(S.game)===String(g.num)?" selected":""}>${d?d.getDate()+" "+MSH[d.getMonth()]:"s/ data"} · vs ${esc(opp)} (${g.home.startsWith("FC Gaia")?"casa":"fora"})${g.res?" · "+g.res:""}</option>`}).join("");
+  const pl=(DATA.plantel&&DATA.plantel[S.team])||[];
+  const players=pl.map(p=>({id:String(p.id||p.name),name:pname(p.name),num:p.num}));
+  (S.extra||[]).filter(x=>x.team===S.team).forEach(x=>players.push(x));
+  const nOn=players.filter(p=>S.picked[p.id]).length,nSt=players.filter(p=>S.start[p.id]&&S.picked[p.id]).length;
+  $("#app").innerHTML=snav()+`<h2>Novo jogo</h2>
+  <div class="card"><div class="row">
+    <label class="f grow">Equipa<select id="s-team"><option value="">— escolher —</option>${teamOpts}</select></label>
+    <label class="f grow">Jogo<select id="s-game"${S.team?"":" disabled"}><option value="">Outro jogo (escrever adversário)</option>${gameOpts}</select></label>
+    <label class="f grow" ${S.game?"hidden":""}>Adversário<input id="s-opp" value="${esc(S.opp)}" placeholder="Nome do adversário"></label>
+    <label class="f">Períodos<select id="s-np">${[2,4].map(n=>`<option${S.np==n?" selected":""}>${n}</option>`).join("")}</select></label>
+    <label class="f">Minutos por período<select id="s-per">${[5,6,8,10,12].map(n=>`<option${S.per==n?" selected":""}>${n}</option>`).join("")}</select></label>
+  </div></div>
+  ${S.team?`<h3>Convocados (${nOn}) · Cinco inicial (${nSt}/5)</h3>
+  <div class="roster">${players.map(p=>`<div class="ritem${S.picked[p.id]?" on":""}">
+     <input type="checkbox" data-pick="${esc(p.id)}"${S.picked[p.id]?" checked":""} aria-label="Convocar ${esc(p.name)}">
+     <input class="num" data-num="${esc(p.id)}" inputmode="numeric" maxlength="3" placeholder="nº" value="${esc(S.nums[p.id]??p.num??"")}">
+     <span class="nm">${esc(p.name)}</span>
+     <button class="st${S.start[p.id]&&S.picked[p.id]?" on":""}" data-start="${esc(p.id)}" title="Cinco inicial">5I</button></div>`).join("")}
+   </div>
+   <div class="row" style="margin-top:10px"><label class="f grow">Acrescentar atleta (não está no plantel)<input id="s-xname" placeholder="Nome"></label><label class="f"><span>Nº</span><input id="s-xnum" inputmode="numeric" style="width:80px"></label><button class="btn" id="s-xadd">Acrescentar</button></div>
+   <p class="hint">Marca os convocados, confirma os números e escolhe o cinco inicial (5I). Os dados ficam só neste dispositivo.</p>`:`<p class="hint">Escolhe a equipa para ver o plantel.</p>`}
+  <p class="err" id="s-err"></p>
+  <div class="bar"><button class="btn gold" id="s-go"${S.team?"":" disabled"}>Começar jogo</button></div>
+`;
+  bindNav();
+  $("#s-team").onchange=e=>{S.team=e.target.value;const g0=S.team?teamGames(S.team)[0]:null;S.game=g0?String(g0.num):"";S.picked={};S.start={};renderSetup()};
+  const sg=$("#s-game");if(sg)sg.onchange=e=>{S.game=e.target.value;renderSetup()};
+  const so=$("#s-opp");if(so)so.oninput=e=>S.opp=e.target.value;
+  $("#s-np").onchange=e=>S.np=+e.target.value;$("#s-per").onchange=e=>S.per=+e.target.value;
+  document.querySelectorAll("[data-pick]").forEach(c=>c.onchange=()=>{S.picked[c.dataset.pick]=c.checked;if(!c.checked)delete S.start[c.dataset.pick];renderSetup()});
+  document.querySelectorAll("[data-num]").forEach(i=>i.oninput=()=>S.nums[i.dataset.num]=i.value.replace(/\D/g,""));
+  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{const id=b.dataset.start;if(!S.picked[id]){S.picked[id]=true}
+    if(S.start[id])delete S.start[id];else{if(Object.keys(S.start).filter(k=>S.start[k]&&S.picked[k]).length>=5){$("#s-err").textContent="Já tens 5 no cinco inicial.";return}S.start[id]=true}renderSetup()});
+  const xa=$("#s-xadd");if(xa)xa.onclick=()=>{const n=$("#s-xname").value.trim();if(!n)return;const id="x"+Date.now();S.extra=(S.extra||[]).concat([{id,name:n,num:$("#s-xnum").value.replace(/\D/g,""),team:S.team}]);S.picked[id]=true;renderSetup()};
+  $("#s-go").onclick=()=>{const roster=players.filter(p=>S.picked[p.id]).map(p=>({id:p.id,name:p.name,num:(S.nums[p.id]??p.num??"")+""}));
+    const st=roster.filter(p=>S.start[p.id]);const err=$("#s-err");
+    if(roster.length<5){err.textContent="Escolhe pelo menos 5 convocados.";return}
+    if(st.length!==5){err.textContent="Escolhe exatamente 5 atletas para o cinco inicial (5I).";return}
+    const nums=roster.map(p=>p.num).filter(Boolean),dup=nums.filter((n,i)=>nums.indexOf(n)!==i);
+    if(dup.length&&!S.dupOk){err.textContent=`Número repetido: ${[...new Set(dup)].join(", ")}. Corrige ou carrega outra vez em “Começar jogo” para avançar assim.`;S.dupOk=true;return}
+    const gm=teamGames(S.team).find(g=>String(g.num)===String(S.game));
+    const opp=gm?(gm.home.startsWith("FC Gaia")?gm.away:gm.home):(S.opp.trim()||"Adversário");
+    if(!gm&&!S.opp.trim()){err.textContent="Escreve o nome do adversário.";return}
+    S.picked={};S.start={};S.dupOk=false;
+    newGame({team:S.team,teamName:TN[S.team],gameNum:gm?gm.num:"",comp:gm?gm.comp:"",date:gm?gm.date:new Date().toISOString().slice(0,10),venue:gm?gm.venue:"",home:gm?gm.home.startsWith("FC Gaia"):true,opp,np:S.np,per:S.per,roster,oncourt:st.map(p=>p.id)})}}
+
+/* ---------- jogos guardados ---------- */
+function savedList(){const all=visGames().sort((a,b)=>(b.created||0)-(a.created||0));
+  return `<h2>Jogos guardados</h2>
+  ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}</span></div>
+    <div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"?"Ver":"Continuar"}</button><button class="btn sm gold" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div></div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
+  <div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button><label class="btn" for="bk-in">Importar cópia</label><input type="file" id="bk-in" accept=".json,application/json" hidden></div>
+  <p class="hint">Os jogos ficam guardados só neste dispositivo. Para os passar para outro tablet ou para o coordenador, exporta a cópia de segurança e importa-a no outro dispositivo. Se o mesmo jogo já existir, fica a versão mais recente.</p>`}
+function bindSaved(){
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"?"bs":"live";if(G.status!=="fim")store();render();startTick()});
+  document.querySelectorAll("[data-xls]").forEach(b=>b.onclick=()=>{const keep=G;G=fixGame(readAll()[b.dataset.xls]);exportXLS();G=keep});
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();delete m[b.dataset.del];writeAll(m);Acc.remove(b.dataset.del);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
+  const bo=$("#bk-out");if(bo)bo.onclick=()=>{const blob=new Blob([JSON.stringify({app:"fcgaia-estatisticas",v:3,exportado:new Date().toISOString(),jogos:readAll()})],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="fcgaia-estatisticas-copia-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();toast("Cópia de segurança exportada")};
+  const bi=$("#bk-in");if(bi)bi.onchange=()=>{const f=bi.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);const js=o.jogos||{};const m=readAll();let n=0;Object.entries(js).forEach(([k,g])=>{if(g&&g.st&&g.roster&&canSee(g)&&(!m[k]||(g.upd||0)>=(m[k].upd||0))){m[k]=g;n++}});writeAll(m);toast(n+" jogo(s) importado(s)");renderSetup()}catch(e){toast("Ficheiro inválido")}};r.readAsText(f)}}
+
+/* ---------- época / acumulado ---------- */
+const SUMK=["pts","m2","a2","m3","a3","mf","af","or","dr","ast","stl","blk","tov","pf","fp","fu","ft","fd","pm","sec"];
+function seasonData(){const all=visGames().map(fixGame).filter(g=>!EP.team||g.team===EP.team).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  const games=all.filter(g=>!EP.excl[g.id]);const A={};
+  games.forEach(g=>g.roster.forEach(p=>{const s=g.st[p.id];if(!s)return;const played=s.sec>0||SUMK.some(k=>k!=="sec"&&k!=="pm"&&s[k]);if(!played)return;
+    const a=A[p.id]=A[p.id]||{id:p.id,name:p.name,num:p.num,gp:0,teams:new Set(),...Object.fromEntries(SUMK.map(k=>[k,0])),games:[]};
+    a.gp++;a.num=p.num||a.num;a.teams.add(TN[g.team]||g.teamName);SUMK.forEach(k=>a[k]+=s[k]||0);a.games.push({g,s})}));
+  return {all,games,ath:Object.values(A)}}
+function seasonView(){const teams=[...new Set(visGames().map(g=>g.team))];
+  if(!teams.length)return `<h2>Época · acumulado</h2><p class="hint">Ainda não há jogos guardados neste dispositivo. Faz jogos ou importa cópias de segurança dos treinadores em “Jogos guardados”.</p>`;
+  const {all,games,ath}=seasonData();const avg=EP.mode==="avg";
+  const v=(a,k)=>avg?(a[k]/a.gp):a[k];const f1=x=>avg?(Math.round(x*10)/10).toFixed(1):x;
+  const cols=[["num","Nº"],["name","Atleta"],["gp","J"],["sec","MIN"],["pts","PTS"],["s2","2PT"],["s3","3PT"],["sf","LL"],["or","RO"],["dr","RD"],["rt","RT"],["ast","AST"],["stl","ROU"],["blk","DL"],["tov","PER"],["pf","F"],["fd","FR"],["pm","+/-"],["val","VAL"]];
+  const key=(a,k)=>k==="rt"?a.or+a.dr:k==="val"?eff(a):k==="s2"?a.m2:k==="s3"?a.m3:k==="sf"?a.mf:k==="name"?a.name:k==="num"?(+a.num||999):(a[k]||0);
+  const so=EP.sort,desc=!["name","num"].includes(so);
+  ath.sort((x,y)=>{let A=key(x,so),B=key(y,so);if(avg&&!["name","num","gp"].includes(so)&&typeof A==="number"){A/=x.gp;B/=y.gp}return desc?(B>A?1:B<A?-1:0):(A>B?1:A<B?-1:0)});
+  const w=games.filter(g=>g.us>g.them).length,l=games.filter(g=>g.us<g.them).length;
+  const pf=games.reduce((t,g)=>t+g.us,0),pa=games.reduce((t,g)=>t+g.them,0);
+  const sh=(m,a)=>`${f1(avg?m/aG():m)}/${f1(avg?a/aG():a)} <small>${pct(m,a)}</small>`;let cur=null;const aG=()=>cur.gp;
+  const rows=ath.map(a=>{cur=a;return `<tr data-ath="${esc(a.id)}"><td class="l">${esc(a.num)}</td><td class="l"><b>${esc(a.name)}</b>${a.teams.size>1?` <small>${esc([...a.teams].join(", "))}</small>`:""}</td><td>${a.gp}</td><td>${avg?fmtMin(a.sec/a.gp):fmtMin(a.sec)}</td><td><b>${f1(v(a,"pts"))}</b></td><td>${sh(a.m2,a.a2)}</td><td>${sh(a.m3,a.a3)}</td><td>${sh(a.mf,a.af)}</td><td>${f1(v(a,"or"))}</td><td>${f1(v(a,"dr"))}</td><td>${f1((a.or+a.dr)/(avg?a.gp:1))}</td><td>${f1(v(a,"ast"))}</td><td>${f1(v(a,"stl"))}</td><td>${f1(v(a,"blk"))}</td><td>${f1(v(a,"tov"))}</td><td>${f1(v(a,"pf"))}</td><td>${f1(v(a,"fd"))}</td><td>${(a.pm>0?"+":"")+f1(v(a,"pm"))}</td><td>${f1(eff(a)/(avg?a.gp:1))}</td></tr>`}).join("");
+  return `<h2>Época · acumulado</h2>
+  <div class="card"><div class="row">
+   <label class="f grow">Equipa<select id="ep-team"><option value="">Todos os escalões</option>${teams.map(t=>`<option value="${esc(t)}"${EP.team===t?" selected":""}>${esc(TN[t]||t)}</option>`).join("")}</select></label>
+   <div class="seg2 big" role="group" aria-label="Mostrar"><button data-epm="tot" aria-pressed="${!avg}">Totais</button><button data-epm="avg" aria-pressed="${avg}">Médias por jogo</button></div>
+   <button class="btn gold" id="ep-xls"${games.length?"":" disabled"}>Exportar Excel</button></div>
+   <div class="eps"><span><b>${games.length}</b> jogos</span><span><b>${w}V</b> · <b>${l}D</b></span><span>Marcados <b>${pf}</b> (${games.length?(pf/games.length).toFixed(1):0}/jogo)</span><span>Sofridos <b>${pa}</b> (${games.length?(pa/games.length).toFixed(1):0}/jogo)</span></div></div>
+  <h3>Jogos incluídos</h3><div class="epg">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<label class="epgi${EP.excl[g.id]?"":" on"}"><input type="checkbox" data-epx="${esc(g.id)}"${EP.excl[g.id]?"":" checked"}><span>${d?d.getDate()+" "+MSH[d.getMonth()]:""} · ${esc(TN[g.team]||"")} vs ${esc(g.opp)} <b class="${g.us>g.them?"w":g.us<g.them?"l":""}">${g.us}–${g.them}</b></span><button class="lnk" data-open="${esc(g.id)}" title="Abrir jogo">ver jogo ›</button></label>`}).join("")}</div>
+  <h3>Atletas · ${avg?"médias por jogo":"totais"} <small class="hint">(toca no cabeçalho para ordenar · toca num atleta para ver jogo a jogo)</small></h3>
+  <div class="tblw"><table class="bs ep"><thead><tr>${cols.map(([k,l])=>`<th class="${k==="name"||k==="num"?"l":""}${EP.sort===k?" srt":""}" data-eps="${k}">${l}</th>`).join("")}</tr></thead><tbody>${rows||'<tr><td class="l" colspan="19">Sem dados nos jogos escolhidos.</td></tr>'}</tbody></table></div>
+  <p class="hint">J jogos em que participou · MIN minutos · PTS pontos · 2PT/3PT/LL convertidos/tentados e % · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas cometidas · FR faltas recebidas · VAL valorização.</p>
+  ${EP.ath?athSeason(ath.find(a=>a.id===EP.ath)):""}`}
+function athSeason(a){if(!a)return "";const shots=a.games.flatMap(({g})=>g.log.filter(e=>e.x!=null&&e.side!=="o"&&e.id===a.id));
+  const n=a.gp,av=x=>(Math.round(x/n*10)/10).toFixed(1);
+  return `<div class="card athp" id="athp"><div class="athh"><h2>#${esc(a.num)} ${esc(a.name)}</h2><button class="btn sm" id="ath-x">Fechar</button></div>
+   <div class="tblw"><table class="bs"><thead><tr><th class="l">Data</th><th class="l">Jogo</th><th>MIN</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>RT</th><th>AST</th><th>ROU</th><th>PER</th><th>F</th><th>+/-</th><th>VAL</th></tr></thead><tbody>
+   ${a.games.map(({g,s})=>`<tr><td class="l">${esc(g.date)}</td><td class="l">vs ${esc(g.opp)} <small>${g.us}–${g.them}</small></td><td>${fmtMin(s.sec)}</td><td><b>${s.pts}</b></td><td>${s.m2}/${s.a2}</td><td>${s.m3}/${s.a3}</td><td>${s.mf}/${s.af}</td><td>${s.or+s.dr}</td><td>${s.ast}</td><td>${s.stl}</td><td>${s.tov}</td><td>${s.pf}</td><td>${s.pm>0?"+":""}${s.pm}</td><td>${eff(s)}</td></tr>`).join("")}
+   <tr class="tot"><td></td><td class="l">Total (${a.gp} jogos)</td><td>${fmtMin(a.sec)}</td><td>${a.pts}</td><td>${a.m2}/${a.a2}</td><td>${a.m3}/${a.a3}</td><td>${a.mf}/${a.af}</td><td>${a.or+a.dr}</td><td>${a.ast}</td><td>${a.stl}</td><td>${a.tov}</td><td>${a.pf}</td><td>${a.pm>0?"+":""}${a.pm}</td><td>${eff(a)}</td></tr>
+   <tr class="avgr"><td></td><td class="l">Média por jogo</td><td>${fmtMin(a.sec/n)}</td><td><b>${av(a.pts)}</b></td><td>${av(a.m2)}/${av(a.a2)} <small>${pct(a.m2,a.a2)}</small></td><td>${av(a.m3)}/${av(a.a3)} <small>${pct(a.m3,a.a3)}</small></td><td>${av(a.mf)}/${av(a.af)} <small>${pct(a.mf,a.af)}</small></td><td>${av(a.or+a.dr)}</td><td>${av(a.ast)}</td><td>${av(a.stl)}</td><td>${av(a.tov)}</td><td>${av(a.pf)}</td><td>${a.pm>0?"+":""}${av(a.pm)}</td><td>${av(eff(a))}</td></tr></tbody></table></div>
+   <div class="kpis"><div><b>${av(a.pts)}</b><span>pontos/jogo</span></div><div><b>${fmtMin(a.sec/n)}</b><span>minutos/jogo</span></div><div><b>${pct(a.m2+a.m3,a.a2+a.a3)}</b><span>lançamentos de campo</span></div><div><b>${pct(a.m3,a.a3)}</b><span>triplos</span></div><div><b>${pct(a.mf,a.af)}</b><span>lances livres</span></div><div><b>${av(a.or+a.dr)}</b><span>ressaltos/jogo</span></div></div>
+   <h3>Mapa de lançamentos acumulado por zona</h3>${zoneBlock(shots,false)}</div>`}
+function bindSeason(){
+  const t=$("#ep-team");if(t)t.onchange=e=>{EP.team=e.target.value;EP.ath=null;renderSetup()};
+  document.querySelectorAll("[data-epm]").forEach(b=>b.onclick=()=>{EP.mode=b.dataset.epm;renderSetup()});
+  document.querySelectorAll("[data-eps]").forEach(h=>h.onclick=()=>{EP.sort=h.dataset.eps;renderSetup()});
+  document.querySelectorAll("[data-epx]").forEach(c=>c.onchange=()=>{if(c.checked)delete EP.excl[c.dataset.epx];else EP.excl[c.dataset.epx]=1;renderSetup()});
+  document.querySelectorAll("tr[data-ath]").forEach(r=>r.onclick=()=>{EP.ath=r.dataset.ath;renderSetup();const p=$("#athp");if(p)p.scrollIntoView({behavior:"smooth"})});
+  const ax=$("#ath-x");if(ax)ax.onclick=()=>{EP.ath=null;renderSetup()};
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=ev=>{ev.preventDefault();G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"?"bs":"live";render();startTick()});
+  const x=$("#ep-xls");if(x)x.onclick=exportSeason}
+function exportSeason(){const {games,ath}=seasonData();if(!window.XLSX){toast("Excel indisponível neste momento");return}
+  const head=["Nº","Atleta","Jogos","MIN","PTS","2PT C","2PT T","2PT %","3PT C","3PT T","3PT %","LL C","LL T","LL %","RO","RD","RT","AST","ROU","DL","PER","F. pessoais","F. antidesp.","F. técnicas","Total faltas","F. recebidas","+/-","VAL"];
+  const r=(a,dv)=>{const d=x=>+(x/dv).toFixed(2);return [/^\d+$/.test(a.num)?+a.num:a.num,a.name,a.gp,d(a.sec/60),d(a.pts),d(a.m2),d(a.a2),a.a2?+(a.m2/a.a2).toFixed(3):"",d(a.m3),d(a.a3),a.a3?+(a.m3/a.a3).toFixed(3):"",d(a.mf),d(a.af),a.af?+(a.mf/a.af).toFixed(3):"",d(a.or),d(a.dr),d(a.or+a.dr),d(a.ast),d(a.stl),d(a.blk),d(a.tov),d(a.fp),d(a.fu),d(a.ft),d(a.pf),d(a.fd),d(a.pm),d(eff(a))]};
+  const srt=ath.slice().sort((x,y)=>y.pts-x.pts);
+  const wb=XLSX.utils.book_new();
+  const w1=XLSX.utils.aoa_to_sheet([head,...srt.map(a=>r(a,1))]);w1["!cols"]=head.map((h,i)=>({wch:i===1?24:h.length>6?11:7}));XLSX.utils.book_append_sheet(wb,w1,"Totais");
+  const w2=XLSX.utils.aoa_to_sheet([head,...srt.map(a=>r(a,a.gp))]);w2["!cols"]=w1["!cols"];XLSX.utils.book_append_sheet(wb,w2,"Médias por jogo");
+  const jh=["Data","Equipa","Adversário","Resultado","Nº","Atleta","MIN","PTS","2PT C","2PT T","3PT C","3PT T","LL C","LL T","RO","RD","AST","ROU","DL","PER","Faltas","F. recebidas","+/-","VAL"];
+  const jr=[];games.forEach(g=>g.roster.forEach(p=>{const s=g.st[p.id];if(!s||!(s.sec>0||s.pts||s.a2||s.a3||s.af||s.pf))return;jr.push([g.date,TN[g.team]||g.teamName,g.opp,`${g.us}-${g.them}`,/^\d+$/.test(p.num)?+p.num:p.num,p.name,+(s.sec/60).toFixed(1),s.pts,s.m2,s.a2,s.m3,s.a3,s.mf,s.af,s.or,s.dr,s.ast,s.stl,s.blk,s.tov,s.pf,s.fd,s.pm,eff(s)])}));
+  const w3=XLSX.utils.aoa_to_sheet([jh,...jr]);w3["!cols"]=jh.map((h,i)=>({wch:[1,2,5].includes(i)?20:8}));XLSX.utils.book_append_sheet(wb,w3,"Jogo a jogo");
+  const w4=XLSX.utils.aoa_to_sheet([["Data","Equipa","Adversário","FC Gaia","Adversário","Resultado","Competição"],...games.map(g=>[g.date,TN[g.team]||g.teamName,g.opp,g.us,g.them,g.us>g.them?"V":g.us<g.them?"D":"E",g.comp||""])]);w4["!cols"]=[{wch:11},{wch:12},{wch:26},{wch:8},{wch:10},{wch:9},{wch:30}];XLSX.utils.book_append_sheet(wb,w4,"Jogos");
+  const nm="fcgaia-epoca-"+(EP.team?EP.team.toLowerCase().replace(/[^a-z0-9]+/g,"-"):"todos")+"-"+new Date().toISOString().slice(0,10)+".xlsx";
+  try{XLSX.writeFile(wb,nm);toast("Excel da época exportado")}catch(e){toast("Não foi possível descarregar aqui")}}
+
+/* ---------- jogo ---------- */
+const STAT0=()=>({pts:0,m2:0,a2:0,m3:0,a3:0,mf:0,af:0,or:0,dr:0,ast:0,stl:0,blk:0,tov:0,pf:0,fp:0,fu:0,ft:0,fd:0,pm:0,sec:0});
+const dq=s=>s.pf>=5||s.fu>=2||s.ft>=2||(s.fu>=1&&s.ft>=1);
+/* campo FIBA (meio campo, em cm): 1500 x 1400, cesto a 157,5 cm da linha final */
+const BX=750,BY=157.5,R3=675,C3=90,YC=BY+Math.sqrt(R3*R3-(BX-C3)*(BX-C3));
+function shotVal(x,y){if(x<C3||x>1500-C3)return 3;return Math.hypot(x-BX,y-BY)>R3?3:2}
+/* zonas de lançamento: 1 garrafão · 2/3/4 meia distância esq./centro/dir. · 5/9 cantos · 6/7/8 triplo lateral esq./frontal/lateral dir. */
+const ZDESC={1:"Garrafão",2:"Meia distância esquerda",3:"Meia distância centro",4:"Meia distância direita",5:"Triplo canto esquerdo",6:"Triplo lateral esquerda",7:"Triplo frontal",8:"Triplo lateral direita",9:"Triplo canto direito"};
+const ZCOL={1:"#e2b812",2:"#4fc3f7",3:"#7e9cff",4:"#4fc3f7",5:"#ff7a6e",6:"#5fd27a",7:"#c792ea",8:"#5fd27a",9:"#ff7a6e"};
+const ZLAB={1:[750,380],2:[300,330],3:[750,720],4:[1200,330],5:[45,110],6:[200,980],7:[750,1180],8:[1300,980],9:[1455,110]};
+const ANG=22.5*Math.PI/180;
+function zoneN(x,y){if(Math.abs(x-BX)<=245&&y<=580)return 1;
+  if(shotVal(x,y)===2)return x<505?2:x>995?4:3;
+  if(y<=YC&&(x<C3||x>1500-C3))return x<BX?5:9;
+  return Math.abs(Math.atan2(x-BX,y-BY))<=ANG?7:(x<BX?6:8)}
+function shotZone(x,y){return "Zona "+zoneN(x,y)}
+function zoneStats(sh){const z={};for(let i=1;i<=9;i++)z[i]=[0,0];sh.forEach(e=>{const k=zoneN(e.x,e.y);z[k][1]++;if(e.t.endsWith("+"))z[k][0]++});return z}
+function zonesLayer(zs){const L=2200,dx=Math.sin(ANG)*L,dy=Math.cos(ANG)*L,f=n=>`fill="${ZCOL[n]}" fill-opacity="${zs&&zs[n][1]?0.30:0.16}"`;
+  return `<defs><clipPath id="arc2"><path d="M${C3} 0V${YC.toFixed(1)}A${R3} ${R3} 0 0 0 ${1500-C3} ${YC.toFixed(1)}V0Z"/></clipPath></defs>
+   <rect x="0" y="0" width="750" height="1400" ${f(6)}/><rect x="750" y="0" width="750" height="1400" ${f(8)}/>
+   <path d="M${BX} ${BY}L${(BX+dx).toFixed(0)} ${(BY+dy).toFixed(0)}L${(BX-dx).toFixed(0)} ${(BY+dy).toFixed(0)}Z" fill="#111"/><path d="M${BX} ${BY}L${(BX+dx).toFixed(0)} ${(BY+dy).toFixed(0)}L${(BX-dx).toFixed(0)} ${(BY+dy).toFixed(0)}Z" ${f(7)}/>
+   <rect x="0" y="0" width="${C3}" height="${YC.toFixed(1)}" fill="#111" /><rect x="0" y="0" width="${C3}" height="${YC.toFixed(1)}" ${f(5)}/>
+   <rect x="${1500-C3}" y="0" width="${C3}" height="${YC.toFixed(1)}" fill="#111"/><rect x="${1500-C3}" y="0" width="${C3}" height="${YC.toFixed(1)}" ${f(9)}/>
+   <g clip-path="url(#arc2)"><rect x="0" y="0" width="1500" height="1400" fill="#111"/><rect x="0" y="0" width="505" height="1400" ${f(2)}/><rect x="505" y="0" width="490" height="1400" ${f(3)}/><rect x="995" y="0" width="505" height="1400" ${f(4)}/></g>
+   <rect x="505" y="0" width="490" height="580" fill="#111"/><rect x="505" y="0" width="490" height="580" ${f(1)}/>
+`}
+function zonesLabels(zs){return Object.entries(ZLAB).map(([n,[x,y]])=>{const v=zs[n];return `<g class="zl"><text x="${x}" y="${y}" class="zl-n">Z${n}</text>${v[1]?`<text x="${x}" y="${y+58}" class="zl-v">${v[0]}/${v[1]} · ${Math.round(100*v[0]/v[1])}%</text>`:""}</g>`}).join("")}
+function zoneBlock(sh,opp,extra){const zs=zoneStats(sh);
+  return `<div class="sc-wrap"><div class="sc-court${opp?" o":""}">${courtSVG(sh,false,zs)}</div>
+   <div class="sc-side">${extra||""}<table class="bs zt"><thead><tr><th class="l">Zona</th><th>C/T</th><th>%</th></tr></thead><tbody>${Object.entries(zs).map(([k,v])=>`<tr title="${esc(ZDESC[k])}"><td class="l"><i class="zsw" style="background:${ZCOL[k]}"></i>Zona ${k}</td><td>${v[0]}/${v[1]}</td><td>${pct(v[0],v[1])}</td></tr>`).join("")}</tbody></table>
+   <p class="hint">Z1 garrafão · Z2–Z4 meia distância (esq./centro/dir.) · Z5 e Z9 cantos · Z6–Z8 triplos (lateral esq./frontal/lateral dir.)</p></div></div>`}
+function courtSVG(shots,live,zs){const m=shots.map(e=>{const ok=e.t.endsWith("+");return ok?`<circle cx="${e.x}" cy="${e.y}" r="26" class="mk-ok"/>`:`<path d="M${e.x-22} ${e.y-22}L${e.x+22} ${e.y+22}M${e.x+22} ${e.y-22}L${e.x-22} ${e.y+22}" class="mk-ko"/>`}).join("");
+  return `<svg class="court${live?" live":""}" viewBox="0 0 1500 1400" ${live?'id="court"':""} role="img" aria-label="Campo de basquetebol">
+   <rect x="0" y="0" width="1500" height="1400" class="c-floor"/>${zs?zonesLayer(zs):""}
+   <path class="c-3p" d="M${C3} 0V${YC.toFixed(1)}A${R3} ${R3} 0 0 0 ${1500-C3} ${YC.toFixed(1)}V0"/>
+   <rect x="505" y="0" width="490" height="580" class="c-paint"/>
+   <circle cx="750" cy="580" r="180" class="c-line"/>
+   <path class="c-line" d="M625 ${BY}A125 125 0 0 0 875 ${BY}"/>
+   <line x1="660" y1="120" x2="840" y2="120" class="c-board"/><circle cx="${BX}" cy="${BY}" r="23" class="c-rim"/>
+   <path class="c-line" d="M570 1400A180 180 0 0 1 930 1400"/>
+   <rect x="0" y="0" width="1500" height="1400" class="c-out"/>${zs?zonesLabels(zs):""}${m}<g id="tmpmk"></g></svg>`}
+function newGame(o){const now=Date.now();G={...o,id:"j"+now,status:"jogo",q:1,clock:o.per*60,running:false,us:0,them:0,tfUs:{},tfThem:{},st:Object.fromEntries(o.roster.map(p=>[p.id,STAT0()])),ost:STAT0(),log:[],undo:[],created:now};
+  SEL=null;SUB=null;SIDE="us";VIEW="live";store();render();startTick()}
+function qLabel(q){return q<=G.np?(G.np===2?q+".ª parte":q+".º período"):"Prol. "+(q-G.np)}
+function startTick(){stopTick();let last=Date.now();tick=setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;
+  if(!G||!G.running)return;const d=Math.min(dt,G.clock);G.clock-=d;G.oncourt.forEach(id=>G.st[id].sec+=d);
+  if(G.clock<=0){G.clock=0;G.running=false;addLog({t:"fimq"});toast("Fim do "+qLabel(G.q));store();render();return}
+  if(Math.floor(G.clock)!==Math.floor(G.clock+d)){paintClock();if(Math.floor(G.clock)%5===0)store()}},200)}
+function stopTick(){if(tick)clearInterval(tick);tick=null}
+function paintClock(){const t=$("#clk");if(t){t.textContent=fmtT(G.clock);t.classList.toggle("run",G.running)}
+  document.querySelectorAll("[data-min]").forEach(e=>e.textContent=fmtMin(G.st[e.dataset.min].sec))}
+function snap(){G.undo.push(JSON.stringify({us:G.us,them:G.them,tfUs:G.tfUs,tfThem:G.tfThem,ost:G.ost,st:Object.fromEntries(Object.entries(G.st).map(([k,v])=>[k,{...v,sec:undefined}])),log:G.log.length,oncourt:G.oncourt}));if(G.undo.length>80)G.undo.shift()}
+function undo(){const s=G.undo.pop();if(!s){toast("Nada para anular");return}const o=JSON.parse(s);
+  ["us","them","tfUs","tfThem","oncourt"].forEach(k=>G[k]=o[k]);if(o.ost)G.ost=o.ost;Object.entries(o.st).forEach(([k,v])=>{const sec=G.st[k].sec;G.st[k]={...v,sec}});G.log.length=o.log;store();render();toast("Última ação anulada")}
+function addLog(e){G.log.push({q:G.q,c:Math.round(G.clock),us:G.us,them:G.them,...e})}
+const pById=id=>G.roster.find(p=>p.id===id);
+const tfKey=()=>G.q>G.np?G.np:G.q;
+function actOpp(type,extra){const s=G.ost;snap();let pts=0;
+  switch(type){case "2+":s.m2++;s.a2++;pts=2;break;case "2-":s.a2++;break;case "3+":s.m3++;s.a3++;pts=3;break;case "3-":s.a3++;break;
+   case "1+":s.mf++;s.af++;pts=1;break;case "1-":s.af++;break;case "or":case "dr":case "ast":case "stl":case "blk":case "tov":case "fd":s[type]++;break;
+   case "fp":case "fu":case "ft":s[type]++;s.pf++;G.tfThem[tfKey()]=(G.tfThem[tfKey()]||0)+1;break}
+  if(pts){s.pts+=pts;G.them+=pts;G.oncourt.forEach(k=>G.st[k].pm-=pts)}
+  addLog({t:type,side:"o",...(extra||{})});store();render()}
+function act(type,extra){if(SIDE==="them")return actOpp(type,extra);if(!SEL){toast("Escolhe primeiro um atleta");return}const id=SEL,s=G.st[id];snap();
+  let pts=0;
+  switch(type){case "2+":s.m2++;s.a2++;pts=2;break;case "2-":s.a2++;break;case "3+":s.m3++;s.a3++;pts=3;break;case "3-":s.a3++;break;
+   case "1+":s.mf++;s.af++;pts=1;break;case "1-":s.af++;break;case "or":s.or++;break;case "dr":s.dr++;break;case "ast":s.ast++;break;
+   case "stl":s.stl++;break;case "blk":s.blk++;break;case "tov":s.tov++;break;
+   case "fp":case "fu":case "ft":s[type]++;s.pf++;G.tfUs[tfKey()]=(G.tfUs[tfKey()]||0)+1;break;case "fd":s.fd++;break}
+  if(pts){s.pts+=pts;G.us+=pts;G.oncourt.forEach(k=>G.st[k].pm+=pts)}
+  addLog({t:type,id,...(extra||{})});
+  if(["fp","fu","ft"].includes(type)&&dq(s))toast(pById(id).name+" — desqualificado/excluído ("+(s.pf>=5?"5 faltas":"2 faltas antidesportivas/técnicas")+")");
+  else if(type==="fu"||type==="ft")toast(pById(id).name+": "+LBL[type].toLowerCase());
+  store();render()}
+function oppAct(type){actOpp({o1:"1+",o2:"2+",o3:"3+",opf:"fp"}[type])}
+function doSub(inId,outId){snap();G.oncourt=G.oncourt.map(x=>x===outId?inId:x);addLog({t:"sub",id:inId,out:outId});SUB=null;SEL=inId;store();render()}
+function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
+  if(G.q>=G.np&&G.us!==G.them){confirmBox("Terminar o jogo?",()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render()});return}
+  const ot=G.q>=G.np;confirmBox(ot?"Jogo empatado: começar prolongamento (5 min)?":"Passar ao "+qLabel(G.q+1)+"?",()=>{G.undo=[];G.q++;G.clock=(ot?5:G.per)*60;addLog({t:"iniq"});store();render()})}
+const LBL={"2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3+":"Triplo convertido","3-":"Triplo falhado","1+":"Lance livre convertido","1-":"Lance livre falhado",
+ or:"Ressalto ofensivo",dr:"Ressalto defensivo",ast:"Assistência",stl:"Roubo de bola",blk:"Desarme de lançamento",tov:"Perda de bola",fp:"Falta pessoal",fu:"Falta antidesportiva",ft:"Falta técnica",fd:"Falta recebida",
+ o1:"Adversário: lance livre",o2:"Adversário: 2 pontos",o3:"Adversário: 3 pontos",opf:"Adversário: falta",sub:"Substituição",fimq:"Fim do período",iniq:"Início do período",fim:"Fim do jogo"};
+function logText(e){if(e.side==="o")return "Adversário — "+(LBL[e.t]||e.t);const p=e.id?pById(e.id):null;
+  if(e.t==="sub"){const o=pById(e.out);return `Entra ${p?"#"+p.num+" "+p.name:""} · sai ${o?"#"+o.num+" "+o.name:""}`}
+  return (p?`#${p.num} ${p.name} — `:"")+(LBL[e.t]||e.t)}
+function totals(){const t=STAT0();Object.values(G.st).forEach(s=>Object.keys(t).forEach(k=>t[k]+=s[k]||0));return t}
+const pct=(m,a)=>a?Math.round(100*m/a)+"%":"–";
+const eff=s=>s.pts+s.or+s.dr+s.ast+s.stl+s.blk-(s.a2-s.m2)-(s.a3-s.m3)-(s.af-s.mf)-s.tov;
+function bsRows(){return G.roster.map(p=>{const s=G.st[p.id];return {p,s}})}
+function render(){if(!G)return renderSetup();$("#b-new").hidden=false;const fin=G.status==="fim";
+  const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
+  const board=`<div class="board"><div class="tm"><span class="n">FC Gaia · ${esc(G.teamName)}</span><span class="s">${G.us}</span><span class="tf">Faltas equipa <b class="${tfU>=4?"bonus":""}">${tfU}</b></span></div>
+   <div class="clock"><span class="p">${fin?"Final":qLabel(G.q)}</span><span class="t${G.running?" run":""}" id="clk">${fmtT(G.clock)}</span>
+    ${fin?"":`<div class="cb"><button class="btn${G.running?"":" gold"}" id="c-run">${G.running?"Parar":"Iniciar"}</button><button class="btn" id="c-adj" title="Acertar relógio">±</button><button class="btn" id="c-next">${G.q>=G.np&&G.us!==G.them?"Terminar":"Período ›"}</button></div>`}</div>
+   <div class="tm r"><span class="n">${esc(G.opp)}</span><span class="s">${G.them}</span><span class="tf">Faltas equipa <b class="${tfT>=4?"bonus":""}">${tfT}</b></span>
+    ${fin?"":`<div class="opp"><button class="btn" data-o="o1">+1</button><button class="btn" data-o="o2">+2</button><button class="btn" data-o="o3">+3</button><button class="btn" data-o="opf">Falta</button></div>`}</div></div>`;
+  const tabs=`<div class="tabs" role="tablist">${[["live","Jogo"],["bs","Estatísticas"],["pbp","Jogadas"]].map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
+  let body="";
+  if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id));
+    const plb=(p,b)=>{const s=G.st[p.id];return `<button class="pl${b?" bench":""}${SEL===p.id?" sel":""}${SUB&&b?" subpick":""}${dq(s)?" out5":""}" data-p="${esc(p.id)}"><span class="nb">${esc(p.num||"–")}</span><span class="nm">${esc(p.name)}<span class="sm">${s.pts} pts · <span data-min="${esc(p.id)}">${fmtMin(s.sec)}</span></span></span><span class="fo f${Math.min(s.pf,5)}"><b>${s.pf}</b>${s.fu||s.ft?`<i>${s.fu?s.fu+"A":""}${s.ft?" "+s.ft+"T":""}</i>`:"faltas"}</span></button>`};
+    const opp=SIDE==="them";const sp=SEL?pById(SEL):null;const dis=!opp&&(!SEL||!G.oncourt.includes(SEL));const D=dis?" disabled":"";
+    const shots=G.log.filter(e=>e.x!=null&&e.q===G.q&&(opp?e.side==="o":e.side!=="o"));
+    body=`<div class="live">
+     <div class="lcol"><div class="secth"><h3>Em campo</h3><button class="btn sm${SUB?" gold":""}" id="b-sub">${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div><div class="plist court5">${on.map(p=>plb(p,false)).join("")}<button class="btn sm${SUB?" gold":""} subm" data-subbtn>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
+      <div class="benchw"><h3>Banco</h3><div class="plist bench">${bench.map(p=>plb(p,true)).join("")}</div></div></div>
+     <div class="ccol"><div class="sidebar"><div class="seg2" role="group" aria-label="Equipa"><button data-side="us" aria-pressed="${!opp}">FC Gaia</button><button data-side="them" aria-pressed="${opp}">${esc(G.opp)}</button></div>
+      <div class="selname${opp?" o":""}">${opp?"Adversário · ações de equipa":sp?"#"+esc(sp.num)+" "+esc(sp.name):"Escolhe um atleta em campo"}</div></div>
+      <div class="cwrap${opp?" o":""}">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${dis?`<div class="cmask">Escolhe um atleta para marcar lançamentos</div>`:""}</div>
+      <p class="chint">Toca no campo onde foi o lançamento ${opp?"do adversário":""} · ● convertido · ✕ falhado (${qLabel(G.q)})</p></div>
+     <div class="acol"><div class="acts">
+       <button class="act mk" data-a="1+"${D}>L. livre<small>Convertido</small></button><button class="act ms" data-a="1-"${D}>L. livre<small>Falhado</small></button>
+       <button class="act" data-a="or"${D}>Ressalto<small>Ofensivo</small></button><button class="act" data-a="dr"${D}>Ressalto<small>Defensivo</small></button>
+       <button class="act" data-a="ast"${D}>Assist.</button><button class="act" data-a="tov"${D}>Perda</button>
+       <button class="act" data-a="stl"${D}>Roubo</button><button class="act" data-a="blk"${D}>Desarme</button>
+       <p class="agrp">Faltas cometidas</p>
+       <button class="act fl wide" data-a="fp"${D}>Falta pessoal</button>
+       <button class="act fx" data-a="fu"${D}>Antidesp.<small>Falta</small></button><button class="act fx" data-a="ft"${D}>Técnica<small>Falta</small></button>
+       <p class="agrp">Falta sofrida</p>
+       <button class="act fr wide" data-a="fd"${D}>✋ Falta recebida</button></div>
+      <div class="bar"><button class="btn" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button><button class="btn" id="b-xls">Excel</button></div>
+      <ul class="pbp mini">${G.log.slice(-5).reverse().map(pbpLi).join("")||'<li><span></span><span></span><span class="q">Sem jogadas ainda.</span><span></span></li>'}</ul></div></div>`}
+  else if(VIEW==="pbp"){body=`<ul class="pbp">${G.log.slice().reverse().map(pbpLi).join("")}</ul><div class="bar"><button class="btn gold" id="b-xls">Exportar Excel</button></div>`}
+  else{const t=totals();
+    body=`${fin?`<p class="hint">Jogo terminado e guardado neste dispositivo. Podes exportar o Excel agora ou mais tarde em “Jogos guardados”.</p>`:""}<div class="tblw"><table class="bs"><thead><tr><th class="l">Nº</th><th class="l">Atleta</th><th>MIN</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>RO</th><th>RD</th><th>RT</th><th>AST</th><th>ROU</th><th>DL</th><th>PER</th><th>FP</th><th>FA</th><th>FT</th><th>F</th><th>FR</th><th>+/-</th><th>VAL</th></tr></thead><tbody>
+     ${bsRows().map(({p,s})=>`<tr class="${G.oncourt.includes(p.id)&&!fin?"oncourt":""}"><td class="l">${esc(p.num)}</td><td class="l">${esc(p.name)}</td><td>${fmtMin(s.sec)}</td><td><b>${s.pts}</b></td><td>${s.m2}/${s.a2}</td><td>${s.m3}/${s.a3}</td><td>${s.mf}/${s.af}</td><td>${s.or}</td><td>${s.dr}</td><td>${s.or+s.dr}</td><td>${s.ast}</td><td>${s.stl}</td><td>${s.blk}</td><td>${s.tov}</td><td>${s.fp}</td><td>${s.fu}</td><td>${s.ft}</td><td><b>${s.pf}</b></td><td>${s.fd}</td><td>${s.pm>0?"+":""}${s.pm}</td><td>${eff(s)}</td></tr>`).join("")}
+     <tr class="tot"><td></td><td class="l">Total</td><td></td><td>${t.pts}</td><td>${t.m2}/${t.a2} <small>${pct(t.m2,t.a2)}</small></td><td>${t.m3}/${t.a3} <small>${pct(t.m3,t.a3)}</small></td><td>${t.mf}/${t.af} <small>${pct(t.mf,t.af)}</small></td><td>${t.or}</td><td>${t.dr}</td><td>${t.or+t.dr}</td><td>${t.ast}</td><td>${t.stl}</td><td>${t.blk}</td><td>${t.tov}</td><td>${t.fp}</td><td>${t.fu}</td><td>${t.ft}</td><td>${t.pf}</td><td>${t.fd}</td><td></td><td>${eff(t)}</td></tr>
+     ${(o=>`<tr class="oppr"><td></td><td class="l">${esc(G.opp)} <small>(equipa)</small></td><td></td><td>${o.pts}</td><td>${o.m2}/${o.a2} <small>${pct(o.m2,o.a2)}</small></td><td>${o.m3}/${o.a3} <small>${pct(o.m3,o.a3)}</small></td><td>${o.mf}/${o.af} <small>${pct(o.mf,o.af)}</small></td><td>${o.or}</td><td>${o.dr}</td><td>${o.or+o.dr}</td><td>${o.ast}</td><td>${o.stl}</td><td>${o.blk}</td><td>${o.tov}</td><td>${o.fp}</td><td>${o.fu}</td><td>${o.ft}</td><td>${o.pf}</td><td>${o.fd}</td><td></td><td>${eff(o)}</td></tr>`)(G.ost)}</tbody></table></div>
+     <p class="hint">MIN minutos · 2PT/3PT/LL convertidos/tentados · RO/RD/RT ressaltos ofensivos/defensivos/total · AST assistências · ROU roubos · DL desarmes · PER perdas · FP faltas pessoais · FA antidesportivas · FT técnicas · F total de faltas · FR faltas recebidas · VAL valorização.</p>
+     ${shotChart()}
+     <div class="bar"><button class="btn gold" id="b-xls">Exportar Excel</button>${fin?`<button class="btn" id="b-reopen">Reabrir jogo</button><button class="btn" id="b-list">Voltar aos jogos</button>`:""}</div>`}
+  $("#app").innerHTML=board+tabs+body;bind()}
+function shotChart(){const all=G.log.filter(e=>e.x!=null&&e.side!=="o"),oppS=G.log.filter(e=>e.x!=null&&e.side==="o"),sh=SHOTF==="_o"?oppS:SHOTF?all.filter(e=>e.id===SHOTF):all;
+  const opts=G.roster.filter(p=>all.some(e=>e.id===p.id)).map(p=>`<option value="${esc(p.id)}"${SHOTF===p.id?" selected":""}>#${esc(p.num)} ${esc(p.name)}</option>`).join("");
+  return `<h3>Mapa de lançamentos por zona</h3>`+zoneBlock(sh,SHOTF==="_o",`<label class="f">Mostrar<select id="shotf"><option value="">FC Gaia (equipa)</option>${opts}<option value="_o"${SHOTF==="_o"?" selected":""}>Adversário: ${esc(G.opp)}</option></select></label>`)}
+function courtPoint(ev){const sv=$("#court");const pt=sv.createSVGPoint();const t=ev.touches?ev.touches[0]:ev;pt.x=t.clientX;pt.y=t.clientY;const q=pt.matrixTransform(sv.getScreenCTM().inverse());return {x:Math.max(0,Math.min(1500,q.x)),y:Math.max(0,Math.min(1400,q.y))}}
+function openShot(x,y){if(SIDE!=="them"&&(!SEL||!G.oncourt.includes(SEL))){toast("Escolhe primeiro um atleta em campo");return}
+  PEND={x:Math.round(x),y:Math.round(y),v:shotVal(x,y)};
+  $("#tmpmk").innerHTML=`<circle cx="${PEND.x}" cy="${PEND.y}" r="30" class="mk-tmp"/>`;
+  const pop=$("#shotpop");const left=Math.min(Math.max(PEND.x/1500*100,22),78),top=PEND.y/1400*100;
+  pop.style.left=left+"%";pop.style.top=(top>60?top-4:top+6)+"%";pop.style.transform=top>60?"translate(-50%,-100%)":"translate(-50%,0)";
+  const pp=SIDE==="them"?{num:"ADV"}:pById(SEL);
+  pop.innerHTML=`<p>${SIDE==="them"?esc(G.opp):"#"+esc(pp.num)} · <b>${PEND.v} pts</b> · ${esc(shotZone(PEND.x,PEND.y))}</p><div class="sp-b"><button class="act mk" id="sp-ok">Convertido</button><button class="act ms" id="sp-ko">Falhado</button></div>
+   <div class="sp-l"><button class="btn sm" id="sp-tg">Mudar para ${PEND.v===3?2:3} pts</button><button class="btn sm ghost" id="sp-x">Cancelar</button></div>`;
+  pop.hidden=false;
+  $("#sp-ok").onclick=()=>{const P=PEND;PEND=null;act(P.v+"+",{x:P.x,y:P.y})};
+  $("#sp-ko").onclick=()=>{const P=PEND;PEND=null;act(P.v+"-",{x:P.x,y:P.y})};
+  $("#sp-tg").onclick=()=>{PEND.v=PEND.v===3?2:3;openShot(PEND.x,PEND.y)};
+  $("#sp-x").onclick=()=>{PEND=null;pop.hidden=true;$("#tmpmk").innerHTML=""}}
+function pbpLi(e){const sc=["fimq","iniq","fim"].includes(e.t)?"":`${e.us}-${e.them}`;
+  return `<li class="${e.side==="o"||(e.t[0]==="o"&&e.t!=="or")?"opp":""}"><span class="q">${e.q>G.np?"P"+(e.q-G.np):e.q+"P"}</span><span class="q">${fmtT(e.c)}</span><span>${esc(logText(e))}</span><span class="sc">${sc}</span></li>`}
+function bind(){
+  const cv=$("#court");if(cv)cv.addEventListener("click",ev=>{if(ev.target.closest&&ev.target.closest("#shotpop"))return;const q=courtPoint(ev);openShot(q.x,q.y)});
+  const sf=$("#shotf");if(sf)sf.onchange=e=>{SHOTF=e.target.value;render()};
+  document.querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;render()});
+  document.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>{SIDE=b.dataset.side;render()});
+  document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>act(b.dataset.a));
+  document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>oppAct(b.dataset.o));
+  document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{const id=b.dataset.p,onC=G.oncourt.includes(id);
+    if(SUB){if(onC){SUB=id;toast("Sai #"+pById(id).num+": escolhe no banco quem entra");render();return}
+      if(SUB==="?"){toast("Escolhe primeiro quem sai (em campo)");return}
+      if(G.st[id].pf>=5){toast("Atleta excluído (5 faltas)");return}doSub(id,SUB);return}
+    if(onC){SEL=id;SIDE="us"}else toast("Está no banco — usa Substituição");render()});
+  const subClick=()=>{if(SUB){SUB=null}else{SUB=SEL&&G.oncourt.includes(SEL)?SEL:"?";if(SUB!=="?")toast("Sai #"+pById(SUB).num+": escolhe no banco quem entra");else toast("Escolhe quem sai")}render()};
+  const bs=$("#b-sub");if(bs)bs.onclick=subClick;document.querySelectorAll("[data-subbtn]").forEach(b=>b.onclick=subClick);
+  const cr=$("#c-run");if(cr)cr.onclick=()=>{if(G.clock<=0){toast("Período terminado");return}G.running=!G.running;store();render()};
+  const ca=$("#c-adj");if(ca)ca.onclick=()=>{if(G.running){toast("Pára o relógio primeiro");return}const v=prompt("Tempo que falta (mm:ss)",fmtT(G.clock));if(!v)return;const m=v.match(/^(\d{1,2}):(\d{2})$/);if(!m){toast("Formato mm:ss");return}G.clock=Math.min(+m[1]*60+ +m[2],(G.q>G.np?5:G.per)*60);store();render()};
+  const cn=$("#c-next");if(cn)cn.onclick=nextQ;
+  const bu=$("#b-undo");if(bu)bu.onclick=undo;
+  document.querySelectorAll("#b-xls").forEach(b=>b.onclick=exportXLS);
+  const ro=$("#b-reopen");if(ro)ro.onclick=()=>{G.status="jogo";store();VIEW="live";render()};
+  const bl=$("#b-list");if(bl)bl.onclick=()=>{G=null;stopTick();renderSetup()}}
+function confirmBox(msg,ok){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><p style="margin:0 0 14px;font-size:17px">${esc(msg)}</p><div class="bar"><button class="btn gold" id="m-ok">Sim</button><button class="btn" id="m-no">Não</button></div></div>`;
+  document.body.appendChild(m);m.querySelector("#m-ok").onclick=()=>{m.remove();ok()};m.querySelector("#m-no").onclick=()=>m.remove()}
+
+/* ---------- exportar ---------- */
+function exportXLS(){const t=totals(),fn=`fcgaia-${G.team.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")}-${G.date}-vs-${G.opp.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")}`.replace(/-+/g,"-");
+  const head=["Nº","Atleta","MIN","PTS","2PT C","2PT T","2PT %","3PT C","3PT T","3PT %","LL C","LL T","LL %","RO","RD","RT","AST","ROU","DL","PER","F. pessoais","F. antidesportivas","F. técnicas","Total faltas","F. recebidas","+/-","VAL"];
+  const row=(n,nm,s,min)=>[n,nm,min,s.pts,s.m2,s.a2,s.a2?+(s.m2/s.a2).toFixed(3):"",s.m3,s.a3,s.a3?+(s.m3/s.a3).toFixed(3):"",s.mf,s.af,s.af?+(s.mf/s.af).toFixed(3):"",s.or,s.dr,s.or+s.dr,s.ast,s.stl,s.blk,s.tov,s.fp,s.fu,s.ft,s.pf,s.fd,s.pm,eff(s)];
+  const bs=[head,...bsRows().map(({p,s})=>row(/^\d+$/.test(p.num)?+p.num:p.num,p.name,s,+(s.sec/60).toFixed(1))),row("","TOTAL",t,""),[],row("",G.opp+" (equipa)",G.ost,"")];
+  const pbp=[["Período","Tempo","Equipa","Jogada","Atleta","Nº","FC Gaia","Adversário"],...G.log.map(e=>{const p=e.id&&e.side!=="o"?pById(e.id):null;return [e.q>G.np?"Prol. "+(e.q-G.np):e.q,fmtT(e.c),e.side==="o"||/^o/.test(e.t)&&e.t!=="or"?G.opp:["fimq","iniq","fim"].includes(e.t)?"":"FC Gaia",e.t==="sub"?"Substituição (sai "+(pById(e.out)||{}).name+")":LBL[e.t]||e.t,p?p.name:"",p&&/^\d+$/.test(p.num)?+p.num:"",e.us,e.them]})];
+  const info=[["Equipa","FC Gaia · "+G.teamName],["Adversário",G.opp],["Data",G.date],["Competição",G.comp||""],["Jogo n.º",G.gameNum||""],["Pavilhão",G.venue||""],["Local",G.home?"Casa":"Fora"],["Resultado",`FC Gaia ${G.us} – ${G.them} ${G.opp}`],["Períodos",`${G.np} × ${G.per} min`],["Exportado",new Date().toLocaleString("pt-PT")]];
+  if(window.XLSX){const wb=XLSX.utils.book_new();
+    const ws1=XLSX.utils.aoa_to_sheet(bs);ws1["!cols"]=head.map((h,i)=>({wch:i===1?24:h.length>6?12:7}));XLSX.utils.book_append_sheet(wb,ws1,"Estatísticas");
+    const ws2=XLSX.utils.aoa_to_sheet(pbp);ws2["!cols"]=[{wch:8},{wch:7},{wch:20},{wch:34},{wch:24},{wch:5},{wch:8},{wch:10}];XLSX.utils.book_append_sheet(wb,ws2,"Jogadas");
+    const shots=[["Período","Tempo","Equipa","Atleta","Nº","Valor","Resultado","Zona","X (m)","Y (m)"],...G.log.filter(e=>e.x!=null).map(e=>{const p=e.side==="o"?{}:pById(e.id)||{};return [e.q>G.np?"Prol. "+(e.q-G.np):e.q,fmtT(e.c),e.side==="o"?G.opp:"FC Gaia",p.name||"",/^\d+$/.test(p.num)?+p.num:"",+e.t[0],e.t.endsWith("+")?"Convertido":"Falhado",shotZone(e.x,e.y),+(e.x/100).toFixed(2),+(e.y/100).toFixed(2)]})];
+    const wsS=XLSX.utils.aoa_to_sheet(shots);wsS["!cols"]=[{wch:8},{wch:7},{wch:20},{wch:24},{wch:5},{wch:6},{wch:11},{wch:24},{wch:7},{wch:7}];XLSX.utils.book_append_sheet(wb,wsS,"Lançamentos");
+    const ws3=XLSX.utils.aoa_to_sheet(info);ws3["!cols"]=[{wch:14},{wch:40}];XLSX.utils.book_append_sheet(wb,ws3,"Jogo");
+    try{XLSX.writeFile(wb,fn+".xlsx");toast("Excel exportado")}catch(e){toast("Não foi possível descarregar aqui")}return}
+  const csv=bs.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"}));a.download=fn+".csv";document.body.appendChild(a);a.click();a.remove();toast("Exportado em CSV (sem ligação para gerar Excel)")}
+window.addEventListener("beforeunload",()=>{if(G)store()});
+document.addEventListener("visibilitychange",()=>{if(G)store()});
+boot();
+</script></body></html>
