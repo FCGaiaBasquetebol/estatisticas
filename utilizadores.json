@@ -1,5 +1,5 @@
 {
- "atualizado": 1792188800970,
+ "atualizado": 1792188802378,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -20,21 +20,6 @@
    "ativo": true,
    "salt": "5lC7YPL+6/HUelNpCiHghA==",
    "hash": "KClVRjcIxQXAJjzW2v1kLceZBQz8ZEOIRqmYhHZuFMs="
-  },
-  {
-   "utilizador": "smoura",
-   "nome": "Samuel Moura",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-18 Masc A",
-    "Sub-18 Masc B",
-    "Sub-16 Masc A",
-    "Sub-16 Masc B",
-    "Sub-14 Masc A"
-   ],
-   "ativo": true,
-   "salt": "4N6Tw/UfchujzGRoTDEq9Q==",
-   "hash": "BYaSpa7WFNO26pg8tHwXIKqiLTdVWxPXBAwd1HXGuyc="
   }
  ]
 }
