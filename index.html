@@ -285,6 +285,66 @@ body.dragging{cursor:grabbing}
 .gact .btn{white-space:nowrap}
 @media (max-width:1100px){.top:has(#gact:not([hidden])) .wn{display:none}}
 @media (max-width:600px){.plist2{grid-template-columns:1fr}.prow{grid-template-columns:26px 40px minmax(0,1fr) 80px;gap:8px}}
+
+/* ===== v4: ecrã de jogo sem scroll; banco junto de quem está em campo ===== */
+.cin{position:relative;width:var(--cw,100%);margin:0 auto}
+.cin svg.court{width:100%;height:auto}
+body.fit{height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+body.fit main{flex:1;min-height:0;display:flex;flex-direction:column;max-width:none;padding:6px 10px 8px;width:100%;box-sizing:border-box}
+body.fit #app{flex:1;min-height:0;display:flex;flex-direction:column}
+body.fit .top{padding:5px 12px}body.fit .top img{width:28px}body.fit .top h1{font-size:20px}
+body.fit .board{padding:4px 12px;flex:none}
+body.fit .tm .s{font-size:40px}body.fit .tm .n{font-size:13px}body.fit .tm .tf{font-size:11px}
+body.fit .clock{gap:0}body.fit .clock .p{font-size:11px}
+body.fit .clock .t{font-size:58px!important}body.fit .cbtn{min-height:46px;min-width:104px;font-size:15px}
+body.fit .opp{flex-wrap:nowrap;margin-top:4px}body.fit .opp .btn{padding:6px 10px;font-size:13px}
+body.fit .tabs{margin:4px 0 4px;flex:none}body.fit .tabs button{padding:5px 12px;font-size:14px}
+body.fit .live{flex:1;min-height:0;margin:0;height:auto;align-items:stretch}
+body.fit .ccol{display:flex;flex-direction:column;min-height:0}
+body.fit .sidebar{margin-bottom:5px;flex:none}body.fit .selname{font-size:18px;min-height:0}
+body.fit .cgrid{flex:1;min-height:0;grid-template-rows:minmax(0,1fr);grid-template-columns:112px var(--cw,minmax(0,1fr)) 112px;align-items:stretch}
+body.fit .cwrap{display:flex;align-items:center;min-height:0;height:100%}
+body.fit .cin{width:var(--cw,100%)}
+body.fit svg.court{max-height:none!important}
+body.fit .acts.side{min-height:0}body.fit .acts.side .act{min-height:0}
+body.fit .pbp.mini{flex:none;margin-top:5px}body.fit .pbp.mini li+li{display:none}body.fit .pbp.mini li{padding:5px 10px}
+/* tablet deitado: atletas à esquerda (em campo e banco seguidos), campo à direita */
+@media (min-width:1101px),(orientation:landscape){
+ body.fit .live{display:grid;grid-template-columns:236px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:12px}
+ body.fit .lcol{max-height:none;height:100%;overflow:auto;overscroll-behavior:contain}
+ body.fit .lcol .secth{margin:0 0 5px}body.fit .benchw{margin-top:6px}body.fit .benchw h3{margin:0 0 5px}
+ body.fit .plist{gap:5px}body.fit .pl{min-height:52px;padding:6px 8px}body.fit .pl.bench{min-height:44px;padding:4px 8px}}
+/* tablet ao alto: fila "em campo" e logo abaixo o banco, depois o campo */
+@media (max-width:1100px) and (orientation:portrait){
+ body.fit .live{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"s" "b" "c";gap:6px}
+ body.fit .lcol{display:contents}
+ body.fit .plist.court5{grid-area:s;gap:6px}
+ body.fit .plist.court5 .pl{min-height:54px;padding:5px 7px}body.fit .plist.court5 .pl .nm{font-size:14px}
+ body.fit .benchw{grid-area:b;display:flex;align-items:stretch;gap:6px;margin:0;padding:5px;border:1px dashed #333;border-radius:10px}
+ body.fit .benchw h3{writing-mode:vertical-rl;transform:rotate(180deg);margin:0;font-size:10px;letter-spacing:2px;text-align:center;color:var(--dim)}
+ body.fit .plist.bench{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:5px}
+ body.fit .pl.bench{min-height:0;padding:4px 6px;grid-template-columns:30px minmax(0,1fr) auto;gap:5px}
+ body.fit .pl.bench .av{width:28px;height:28px}body.fit .pl.bench .av .nb{font-size:16px}body.fit .pl.bench .sm{display:none}
+ body.fit .pl.bench .nm{font-size:13px}body.fit .pl.bench .fo{font-size:0}body.fit .pl.bench .fo b{font-size:16px}body.fit .pl.bench .fo i{display:none}
+ body.fit .ccol{grid-area:c}
+ body.fit .cgrid{grid-template-columns:100px var(--cw,minmax(0,1fr)) 100px;gap:6px}
+ body.fit .acts.side{gap:6px}body.fit .acts.side .act{font-size:15px;padding:2px}body.fit .acts.side .act small{font-size:10px}}
+
+/* tablet pequeno deitado (≤1100 px): anula a disposição em filas e põe os atletas em coluna à esquerda */
+@media (max-width:1100px) and (orientation:landscape){
+ body.fit .live{grid-template-columns:214px minmax(0,1fr);grid-template-areas:none;gap:10px}
+ body.fit .lcol{display:block;grid-area:auto}body.fit .lcol .secth{display:flex}body.fit .ccol,body.fit .benchw,body.fit .plist.court5{grid-area:auto}body.fit .ccol{grid-column:2;grid-row:1}body.fit .lcol{grid-column:1;grid-row:1}
+ body.fit .plist.court5,body.fit .plist.bench{grid-template-columns:1fr}
+ body.fit .plist.court5 .subm{display:none}
+ body.fit .plist.court5 .pl,body.fit .pl.bench{grid-template-columns:40px minmax(0,1fr) auto;gap:6px}
+ body.fit .plist.court5 .pl .fo{font-size:11px}body.fit .plist.court5 .pl .fo b{font-size:20px}
+ body.fit .plist.court5 .av{width:38px;height:38px}
+ body.fit .cgrid{grid-template-columns:104px var(--cw,minmax(0,1fr)) 104px;gap:6px}
+ body.fit .acts.side .act{font-size:15px}body.fit .acts.side .act small{font-size:10px}}
+/* ecrãs baixos: marcador mais compacto para sobrar campo */
+@media (max-height:760px){body.fit .board{padding:2px 12px}body.fit .tm .s{font-size:32px}body.fit .clock .t{font-size:46px!important}
+ body.fit .cbtn{min-height:40px;min-width:92px;font-size:14px}body.fit .opp .btn{padding:4px 8px}body.fit .tabs button{padding:3px 10px}
+ body.fit .lcol .pl{min-height:44px;padding:4px 8px}body.fit .pl.bench{min-height:38px}}
 </style></head>
 <body>
 <header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
@@ -569,7 +629,7 @@ let SETVIEW="novo";      // novo | jogos | epoca
 let EP={team:"",mode:"tot",sort:"pts",excl:{},ath:null,shotA:""};
 function snav(){const n=visGames().length;return `<nav class="snav">${[["novo","Novo jogo"],["jogos","Jogos ("+n+")"],["epoca","Época · acumulado"]].concat(isCoord()?[["users","Utilizadores"]]:[]).map(([k,l])=>`<button data-sv="${k}" aria-pressed="${SETVIEW===k}">${l}</button>`).join("")}</nav>`}
 function bindNav(){document.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{SETVIEW=b.dataset.sv;renderSetup();window.scrollTo(0,0)})}
-function renderSetup(){$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
+function renderSetup(){document.body.classList.remove("fit");$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
   if(SETVIEW==="jogos"){$("#app").innerHTML=snav()+savedList();bindNav();bindSaved();return}
   if(SETVIEW==="epoca"){$("#app").innerHTML=snav()+seasonView();bindNav();bindSeason();return}
   if(SETVIEW==="users"&&isCoord()){$("#app").innerHTML=snav()+usersView();bindNav();bindUsers();return}
@@ -810,7 +870,12 @@ function totals(){const t=STAT0();Object.values(G.st).forEach(s=>Object.keys(t).
 const pct=(m,a)=>a?Math.round(100*m/a)+"%":"–";
 const eff=s=>s.pts+s.or+s.dr+s.ast+s.stl+s.blk-(s.a2-s.m2)-(s.a3-s.m3)-(s.af-s.mf)-s.tov;
 function bsRows(){return G.roster.map(p=>{const s=G.st[p.id];return {p,s}})}
-function render(){if(!G)return renderSetup();const fin=G.status==="fim";$("#b-new").hidden=true;$("#gact").hidden=false;
+/* modo de jogo: tudo cabe num ecrã (tablet), o campo ocupa o espaço que sobra */
+const FITQ=matchMedia("(min-width:700px) and (min-height:560px)");
+function fitCourt(){const g=document.querySelector(".fit .cgrid");if(!g)return;const cs=getComputedStyle(g),side=document.querySelector(".cgrid .al");
+  const w=g.clientWidth-2*(side?side.offsetWidth:0)-2*parseFloat(cs.columnGap||0),h=g.clientHeight;const s=Math.max(200,Math.floor(Math.min(w,h*1500/1400)));g.style.setProperty("--cw",s+"px")}
+addEventListener("resize",()=>{if(G&&VIEW==="live"){document.body.classList.toggle("fit",G.status!=="fim"&&FITQ.matches);fitCourt()}});
+function render(){if(!G)return renderSetup();const fin=G.status==="fim";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
   $("#b-save").textContent=fin?"‹ Voltar":"💾 Gravar";$("#b-cancel").hidden=fin;
   const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
   const board=`<div class="board"><div class="tm"><span class="n">FC Gaia · ${esc(G.teamName)}</span><span class="s">${G.us}</span><span class="tf">Faltas equipa <b class="${tfU>=4?"bonus":""}">${tfU}</b></span></div>
@@ -838,7 +903,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim";$("#b-ne
       <div class="sb-r"><button class="btn sm" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button><button class="btn sm" id="b-xls">Excel</button></div></div>
       <div class="cgrid">
        <div class="acts side al">${A("1+","L. livre","Convertido","mk")}${A("1-","L. livre","Falhado","ms")}${A("or","Ressalto","Ofensivo")}${A("dr","Ressalto","Defensivo")}${A("ast","Assist.")}${A("stl","Roubo")}</div>
-       <div class="cwrap${opp?" o":""}">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${need>0&&!opp?`<div class="cmask five"><b>Cinco inicial · ${G.oncourt.length}/5</b><span>Toca nos atletas do banco ou arrasta-os para “Em campo”.</span></div>`:dis?`<div class="cmask">Toca num atleta em campo para marcar lançamentos</div>`:""}</div>
+       <div class="cwrap${opp?" o":""}"><div class="cin">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${need>0&&!opp?`<div class="cmask five"><b>Cinco inicial · ${G.oncourt.length}/5</b><span>Toca nos atletas do banco ou arrasta-os para “Em campo”.</span></div>`:dis?`<div class="cmask">Toca num atleta em campo para marcar lançamentos</div>`:""}</div></div>
        <div class="acts side ar">${A("tov","Perda")}${A("blk","Desarme")}${A("fp","Falta","Pessoal","fl")}${A("fu","Antidesp.","Falta","fx")}${A("ft","Técnica","Falta","fx")}${A("fd","✋ Falta","Recebida","fr")}</div>
       </div>
       <ul class="pbp mini">${last.map(pbpLi).join("")||'<li><span></span><span></span><span class="q">Toca no campo onde foi o lançamento · arrasta um atleta do banco para cima de outro em campo para substituir.</span><span></span></li>'}</ul></div></div>`}
@@ -851,7 +916,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim";$("#b-ne
      <p class="hint">MIN minutos · 2PT/3PT/LL convertidos/tentados · RO/RD/RT ressaltos ofensivos/defensivos/total · AST assistências · ROU roubos · DL desarmes · PER perdas · FP faltas pessoais · FA antidesportivas · FT técnicas · F total de faltas · FR faltas recebidas · VAL valorização.</p>
      ${shotChart()}
      <div class="bar"><button class="btn gold" id="b-xls">Exportar Excel</button>${fin?`<button class="btn" id="b-reopen">Reabrir jogo</button><button class="btn" id="b-list">Voltar aos jogos</button>`:""}</div>`}
-  $("#app").innerHTML=board+tabs+body;bind()}
+  $("#app").innerHTML=board+tabs+body;bind();fitCourt()}
 function shotChart(){const all=G.log.filter(e=>e.x!=null&&e.side!=="o"),oppS=G.log.filter(e=>e.x!=null&&e.side==="o"),sh=SHOTF==="_o"?oppS:SHOTF?all.filter(e=>e.id===SHOTF):all;
   const opts=G.roster.filter(p=>all.some(e=>e.id===p.id)).map(p=>`<option value="${esc(p.id)}"${SHOTF===p.id?" selected":""}>#${esc(p.num)} ${esc(p.name)}</option>`).join("");
   return `<h3>Mapa de lançamentos por zona</h3>`+zoneBlock(sh,SHOTF==="_o",`<label class="f">Mostrar<select id="shotf"><option value="">FC Gaia (equipa)</option>${opts}<option value="_o"${SHOTF==="_o"?" selected":""}>Adversário: ${esc(G.opp)}</option></select></label>`)}
