@@ -571,6 +571,11 @@ main:has(.uhead){max-width:1320px}
 #help{font-weight:800;font-family:var(--f-cond);font-size:18px}
 :root[data-theme=light] .inst{background:#fff}
 .uf-role .seg2{justify-self:start}
+.av.nbonly .nb{font-family:var(--f-disp);font-size:30px!important;line-height:1;color:var(--gold);position:static!important;background:none!important;border:0!important;padding:0!important}
+.pl.bench .av.nbonly .nb{font-size:24px!important;color:var(--muted)}
+body.fit .pl.bench .av.nbonly .nb{font-size:20px!important}
+.selname .av.nbonly{width:auto;min-width:34px;height:auto}.selname .av.nbonly .nb{font-size:26px!important}
+:root[data-theme=light] .av.nbonly .nb{color:var(--gold-ink)}:root[data-theme=light] .pl.bench .av.nbonly .nb{color:var(--muted)}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1222,7 +1227,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||isRO();
   const tabs=`<div class="tabs" role="tablist">${(isRO()?[]:[["live","Jogo"]]).concat([["bs","Estatísticas"],["pbp","Jogadas"]]).map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
   let body="";
   if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id)),need=5-G.oncourt.length;
-    const av=p=>`<span class="av">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">`:""}<span class="nb">${esc(p.num||"–")}</span></span>`;
+    const av=p=>`<span class="av nbonly"><span class="nb">${esc(p.num||"–")}</span></span>`;   // no jogo: só o número, como na camisola
     const pips=s=>`<span class="pips f${Math.min(s.pf,5)}" title="${s.pf} falta(s)">${[0,1,2,3,4].map(i=>`<i${i<s.pf?' class="on"':""}></i>`).join("")}${s.fu?`<em>${s.fu}A</em>`:""}${s.ft?`<em>${s.ft}T</em>`:""}</span>`;
     const fl=FLASH&&Date.now()-FLASH.t<1400?FLASH:null;
     const plb=(p,b)=>{const s=G.st[p.id];return `<button class="pl${b?" bench":""}${SEL===p.id?" sel":""}${SUB&&b?" subpick":""}${dq(s)?" out5":""}" data-p="${esc(p.id)}">${av(p)}<span class="nm">${esc(p.name)}<span class="sm">${pips(s)}<span class="mn" data-min="${esc(p.id)}">${fmtMin(s.sec)}</span></span></span><span class="pts"><b>${s.pts}</b>pts</span>${fl&&fl.id===p.id?`<span class="flash ${fl.c}">${esc(fl.x)}</span>`:""}</button>`};
