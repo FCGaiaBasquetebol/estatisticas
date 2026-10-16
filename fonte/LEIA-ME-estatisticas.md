@@ -8,7 +8,15 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Lê as equipas, os atletas e os jogos de https://andreferraz12.github.io/Fcgaiacalendario/data/jogos.json (site principal, mesma origem github.io, sem problemas de CORS).
 
 ## Funcionalidades feitas
-- **Registo do jogo:** escolha da equipa, do jogo e dos atletas. O relógio conta os minutos, e há +/-, faltas de equipa e desfazer.
+- **Registo do jogo:**
+  - Em Novo jogo aparece uma grelha com foto, número e posição de cada atleta, e toca-se para convocar.
+  - O cinco inicial escolhe-se já no ecrã do jogo, tocando ou arrastando, e o relógio só arranca com 5 em campo.
+  - Substitui-se arrastando um atleta do banco para cima de outro em campo, ou ao contrário. O botão Substituir continua a existir.
+  - As ações estão em duas colunas encostadas ao campo:
+    - à esquerda: lance livre convertido e falhado, ressalto ofensivo e defensivo, assistência e roubo;
+    - à direita: perda, desarme, falta pessoal, antidesportiva, técnica e recebida.
+  - As fotos vêm de `plantel[].photo` no jogos.json e ficam guardadas pelo service worker.
+  - O relógio conta os minutos, e há +/-, faltas de equipa e anular.
 - **Faltas:** pessoal, antidesportiva, técnica e recebida (a recebida tem um layout próprio). Desqualificação com 5 faltas, 2 antidesportivas, 2 técnicas ou antidesportiva + técnica.
 - **Mapa de lançamentos:** toca-se no campo e escolhe-se Convertido ou Falhado; os 2 ou 3 pontos são calculados automaticamente. O campo está dividido em 9 zonas coloridas:
   - Z1: garrafão
