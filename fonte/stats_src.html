@@ -498,9 +498,37 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
 :root[data-theme=light] .urow{background:#fff}
 .cend{margin-top:4px;background:transparent;border:1px solid #5a2d2d;border-radius:999px;color:#ff9b91;font-family:var(--f-cond);font-weight:700;font-size:13px;letter-spacing:.8px;text-transform:uppercase;padding:4px 14px;cursor:pointer}
 .cend:hover{background:#2a1412}
+
+/* ===== v8: utilizadores para PC ===== */
+.brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none;border-radius:8px}
+.brand:hover h1{color:var(--gold)}
+.uhead{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:4px}
+.uhead h2,.usec h2{margin:0}.uhead .hint,.usec>.hint{margin:0}
+.ugrid{grid-template-columns:minmax(0,1.5fr) minmax(360px,1fr);gap:28px;margin-top:18px}
+.ugrid .uform{order:2;position:sticky;top:14px}.ugrid .ulist{order:1}
+.uf{grid-template-columns:1fr}.uf-esc{grid-template-columns:repeat(3,1fr)}
+.ulist{gap:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ulist h3{padding:14px 16px 10px;margin:0}
+.uth{display:grid;grid-template-columns:44px minmax(160px,1fr) minmax(0,1.2fr) auto;gap:14px;padding:6px 16px;font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--panel2)}
+.urow{grid-template-columns:44px minmax(160px,1fr) minmax(0,1.2fr) auto;gap:14px;border:0;border-radius:0;border-bottom:1px solid var(--line);padding:12px 16px;background:transparent}
+.urow:last-child{border-bottom:0}.urow:hover{background:rgba(255,255,255,.03)}
+.urow.cur{background:rgba(226,184,18,.08);box-shadow:inset 3px 0 0 var(--gold)}
+.ui{display:contents}.ui b{grid-column:2;align-self:end}.ui>small{grid-column:2;grid-row:2;align-self:start}
+.urow .uav{grid-row:1/3}.ui .tags{grid-column:3;grid-row:1/3;margin:0;align-self:center}
+.ua{grid-column:4;grid-row:1/3;margin:0;justify-content:flex-end;align-self:center}
+.usec{margin-top:36px;border-top:1px solid var(--line);padding-top:18px}
+.usec>.hint{margin:4px 0 14px}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.lgrid .card{margin:0!important}
+@media (max-width:1100px){.ugrid{grid-template-columns:1fr}.ugrid .uform{order:0;position:static}.lgrid{grid-template-columns:1fr}
+ .uth{display:none}.urow{grid-template-columns:44px minmax(0,1fr)}.ui .tags{grid-column:2;grid-row:auto}.ua{grid-column:2;grid-row:auto;justify-content:flex-start}}
+main:has(.uhead){max-width:1320px}
+:root[data-theme=light] .urow:hover{background:#f7f8fa}:root[data-theme=light] .urow.cur{background:#fff9e0}
+.uth,.urow{grid-template-columns:44px minmax(140px,.8fr) minmax(220px,1.4fr) auto}
+.urow .tag{white-space:nowrap}.ua .btn{padding:5px 9px;font-size:12px}
+@media (max-width:1100px){.urow{grid-template-columns:44px minmax(0,1fr)}}
 </style></head>
 <body>
-<header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
+<header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
  <button class="btn ghost" id="b-new" hidden>Jogos</button><span class="gact" id="gact" hidden><button class="btn sm" id="b-save">Gravar e sair</button><button class="btn sm ghost" id="b-cancel" hidden>Cancelar jogo</button></span></header>
 <main id="app"></main>
 <div class="toast" id="toast" hidden></div>
@@ -723,9 +751,7 @@ async function dbConnect(t,pw){const r=await fetch(`https://api.github.com/repos
 function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||(a.ativo===false)-(b.ativo===false)||String(a.nome).localeCompare(b.nome));
   const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();const sel=ed?ed.escaloes||[]:[];
   const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
-  return `<h2>Utilizadores</h2>
-  ${dbCard()}
-  ${pubCard(pend)}
+  return `<div class="uhead"><h2>Utilizadores</h2><p class="hint">Quem pode entrar na área privada e em que escalões.</p></div>
   <div class="ugrid">
    <section class="card uform${ed?" editing":""}">
     <h3>${ed?`Escalões de ${esc(ed.nome)}`:"Novo utilizador"}</h3>
@@ -742,13 +768,16 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
     <p class="hint">Entrega o utilizador e a palavra-passe em pessoa. Se alguém se esquecer, usa “Palavra-passe” na lista para definir uma nova.</p>
    </section>
    <section class="ulist"><h3>Contas <span class="cnt">${rows.length}</span></h3>
+    <div class="uth"><span></span><span>Nome</span><span>Escalões</span><span></span></div>
     ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador",off=u.ativo===false;return `<div class="urow${off?" off":""}${UEDIT===u.utilizador?" cur":""}">
      <span class="uav${adm?" adm":""}">${esc(ini(u.nome))}</span>
      <div class="ui"><b>${esc(u.nome)}${me?' <small class="me">(tu)</small>':""}</b><small>${esc(u.utilizador)} · ${adm?"Administrador":"Treinador"}${off?" · desativado":""}</small>
       <div class="tags">${adm?`<span class="tag">Todos os escalões</span>`:(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join("")||`<small class="warn">Sem escalões</small>`}${Sync.tok()&&!u.dk&&!off?`<small class="warn">Sem acesso à base de dados: define nova palavra-passe</small>`:""}</div></div>
      <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Escalões</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
    </section>
-  </div>`}
+  </div>
+  <div class="usec"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
+   <div class="lgrid">${pubCard(pend)}${dbCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
     const go=async pw=>{dbo.disabled=true;try{await dbConnect(t,pw);toast("Base de dados ligada");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
@@ -783,7 +812,13 @@ const TK="fcgaia-stats-tema";
 function applyTheme(t){document.documentElement.dataset.theme=t;const b=$("#thm");if(b){b.textContent=t==="light"?"☾":"☀";b.title=t==="light"?"Mudar para tema escuro":"Mudar para tema claro";b.setAttribute("aria-label",b.title)}
   const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content="#000000"}
 applyTheme(lsGet("fcgaia-stats-tema")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"));
-async function boot(){$("#thm").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";lsSet(TK,t);applyTheme(t);toast(t==="light"?"Tema claro":"Tema escuro")};applyTheme(document.documentElement.dataset.theme);$("#crest").src=CREST;
+function goLogin(){const go=async()=>{if(G){if(G.running)G.running=false;store()}G=null;stopTick();SEL=null;SUB=null;SIDE="us";SETVIEW="novo";try{localStorage.removeItem(KC)}catch(e){}
+    await Acc.logout();USER=null;document.body.classList.remove("fit");renderLogin()};
+  if(!USER){renderLogin();return}
+  if(G&&G.status!=="fim")confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
+  else if(Sync.tok()&&Sync.pending())confirmBox("Ainda há jogos por enviar. Ficam guardados neste tablet e seguem quando alguém entrar com internet. Ir para o início de sessão?",go);
+  else go()}
+async function boot(){$("#brand").onclick=e=>{e.preventDefault();goLogin()};$("#thm").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";lsSet(TK,t);applyTheme(t);toast(t==="light"?"Tema claro":"Tema escuro")};applyTheme(document.documentElement.dataset.theme);$("#crest").src=CREST;
   if(!DATA){try{const r=await fetch("data/jogos.json?t="+Date.now(),{cache:"no-store"});if(r.ok)DATA=await r.json()}catch(e){}}
   if(!DATA)DATA={plantel:{},games:[]};
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
