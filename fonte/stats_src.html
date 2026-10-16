@@ -526,6 +526,31 @@ main:has(.uhead){max-width:1320px}
 .uth,.urow{grid-template-columns:44px minmax(140px,.8fr) minmax(220px,1.4fr) auto}
 .urow .tag{white-space:nowrap}.ua .btn{padding:5px 9px;font-size:12px}
 @media (max-width:1100px){.urow{grid-template-columns:44px minmax(0,1fr)}}
+
+/* ===== v9: novo jogo simples ===== */
+.ns{margin:14px 0 18px}.ns>h3{margin:0 0 8px}
+.teamone{margin:0;font-family:var(--f-disp);font-size:28px;color:var(--gold)}
+.tchips{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:10px 16px;font-family:var(--f-cond);font-weight:700;font-size:16px;cursor:pointer}
+.tchip.on{background:var(--gold);border-color:var(--gold);color:#000}
+.gc{display:grid;grid-template-columns:110px minmax(0,1fr) 34px;gap:14px;align-items:center;width:100%;text-align:left;background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:10px 14px;color:var(--ink);cursor:pointer}
+.gc.big{padding:16px 18px;grid-template-columns:130px minmax(0,1fr) 40px}
+.gc.on{border-color:var(--gold);background:rgba(226,184,18,.1)}
+.gd b{display:block;font-family:var(--f-disp);font-weight:400;font-size:24px;line-height:1}.gc.big .gd b{font-size:32px}.gd span{color:var(--muted);font-weight:700}
+.go b{display:block;font-size:18px}.gc.big .go b{font-size:22px}.go small{display:block;color:var(--dim);font-size:13px;margin-top:2px}
+.gck{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:900}
+.gc.on .gck{background:var(--gold);border-color:var(--gold);color:#000}
+.moreg{margin-top:10px}.moreg summary{cursor:pointer;color:var(--muted);font-weight:700;padding:6px 0}
+.glist{display:grid;gap:6px;margin-top:6px}
+.gother{margin-top:10px;display:grid;gap:8px}.gother.on .lnk{color:var(--gold)}
+.lnk{background:none;border:0;padding:0;color:var(--muted);font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:14px;justify-self:start}
+.fmt{margin:14px 0 0;color:var(--muted);font-size:14px}.fmt b{color:var(--ink)}
+.seg2.sm button{padding:6px 12px;font-size:13px}
+:root[data-theme=light] .gc,:root[data-theme=light] .tchip{background:#fff}:root[data-theme=light] .gc.on{background:#fff6cf}:root[data-theme=light] .teamone{color:var(--gold-ink)}
+@media (max-width:600px){.gc,.gc.big{grid-template-columns:86px minmax(0,1fr) 30px;gap:10px}}
+:root[data-theme=light] .tchip.on{background:var(--gold);border-color:var(--gold);color:#000}
+.gc.big{grid-template-columns:170px minmax(0,1fr) 40px}.gd b{white-space:nowrap}.gc{grid-template-columns:130px minmax(0,1fr) 34px}
+@media (max-width:600px){.gc.big{grid-template-columns:110px minmax(0,1fr) 30px}.gc.big .gd b{font-size:24px}}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -561,7 +586,7 @@ let G=null;            // jogo em curso
 let SEL=null;          // atleta selecionado
 let SUB=null;          // modo substituição: id de quem sai
 let VIEW="live";       // live | bs | pbp
-let SETUP={team:"",game:"",per:10,np:4,opp:"",picked:{},nums:{},start:{}};
+let SETUP={team:"",game:undefined,sort:"az",per:10,np:4,opp:"",picked:{},nums:{},start:{}};
 let tick=null;
 let SHOTF="";           // filtro do mapa de lançamentos (id do atleta ou "")
 let PEND=null;          // lançamento à espera de confirmação {x,y,v}
@@ -844,25 +869,36 @@ function renderSetup(){document.body.classList.remove("fit");$("#b-new").hidden=
   if(SETVIEW==="jogos"){$("#app").innerHTML=snav()+savedList();bindNav();bindSaved();return}
   if(SETVIEW==="epoca"){$("#app").innerHTML=snav()+seasonView();bindNav();bindSeason();return}
   if(SETVIEW==="users"&&isCoord()){$("#app").innerHTML=snav()+usersView();bindNav();bindUsers();return}
-  const teamOpts=TEAMS.filter(([id])=>allowed().includes(id)).map(([id,n])=>`<option value="${esc(id)}"${S.team===id?" selected":""}>${esc(n)}</option>`).join("");
-  const gs=S.team?teamGames(S.team):[];
-  const gameOpts=gs.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;const opp=g.home.startsWith("FC Gaia")?g.away:g.home;
-    return `<option value="${g.num}"${String(S.game)===String(g.num)?" selected":""}>${d?d.getDate()+" "+MSH[d.getMonth()]:"s/ data"} · vs ${esc(opp)} (${g.home.startsWith("FC Gaia")?"casa":"fora"})${g.res?" · "+g.res:""}</option>`}).join("");
+  const myTeams=TEAMS.filter(([id])=>allowed().includes(id));
+  if(S.team&&!allowed().includes(S.team)){S.team="";S.game=undefined;S.picked={}}
+  if(!S.team&&myTeams.length===1){S.team=myTeams[0][0];S.game=undefined}
+  const today=new Date();today.setHours(0,0,0,0);const dd=g=>g.date?new Date(g.date+"T12:00"):null;
+  const gs=S.team?teamGames(S.team).filter(g=>{const d=dd(g);if(!d)return !g.res;const days=(d-today)/864e5;return days>=-0.5||(!g.res&&days>=-4)}).sort((a,b)=>(a.date||"9")>(b.date||"9")?1:-1):[];
+  const sug=gs.find(g=>{const d=dd(g);return d&&d>=today})||gs[gs.length-1]||null;
+  if(S.team&&S.game===undefined)S.game=sug?String(sug.num):"";
+  const dayLab=d=>{if(!d)return "Sem data";const n=Math.round((d-today)/864e5);return n===0?"Hoje":n===1?"Amanhã":n===-1?"Ontem":["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][d.getDay()]+" "+d.getDate()+" "+MSH[d.getMonth()]};
+  const gcard=(g,big)=>{const d=dd(g),home=g.home.startsWith("FC Gaia"),opp=home?g.away:g.home,on=String(S.game)===String(g.num);
+    return `<button class="gc${big?" big":""}${on?" on":""}" data-g="${esc(g.num)}" aria-pressed="${on}"><span class="gd"><b>${dayLab(d)}</b>${g.time?`<span>${esc(g.time)}</span>`:""}</span>
+      <span class="go"><b>${esc(opp)}</b><small>${home?"Em casa":"Fora"} · ${esc(g.venue||"local por confirmar")}</small>${big?`<small>${esc(g.comp||"")}</small>`:""}</span><span class="gck">${on?"✓":""}</span></button>`};
+  const others=gs.filter(g=>!sug||g.num!==sug.num);const otherSel=others.some(g=>String(S.game)===String(g.num));
   const pl=(DATA.plantel&&DATA.plantel[S.team])||[];
   const players=pl.map(p=>({id:String(p.id||p.name),name:pname(p.name),num:p.num,photo:p.photo||"",pos:p.pos||""}));
   (S.extra||[]).filter(x=>x.team===S.team).forEach(x=>players.push(x));
+  const numOf=p=>{const n=S.nums[p.id]??p.num;return n===""||n==null||+n===0?999:+n};
+  players.sort(S.sort==="num"?(a,b)=>numOf(a)-numOf(b)||a.name.localeCompare(b.name):(a,b)=>a.name.localeCompare(b.name));
   const nOn=players.filter(p=>S.picked[p.id]).length;
   $("#app").innerHTML=snav()+`<h2>Novo jogo</h2>
-  <div class="card"><div class="row">
-    <label class="f grow">Equipa<select id="s-team"><option value="">— escolher —</option>${teamOpts}</select></label>
-    <label class="f grow">Jogo<select id="s-game"${S.team?"":" disabled"}><option value="">Outro jogo (escrever adversário)</option>${gameOpts}</select></label>
-    <label class="f grow" ${S.game?"hidden":""}>Adversário<input id="s-opp" value="${esc(S.opp)}" placeholder="Nome do adversário"></label>
-    <label class="f">Períodos<select id="s-np">${[2,4].map(n=>`<option${S.np==n?" selected":""}>${n}</option>`).join("")}</select></label>
-    <label class="f">Minutos por período<select id="s-per">${[5,6,8,10,12].map(n=>`<option${S.per==n?" selected":""}>${n}</option>`).join("")}</select></label>
-  </div></div>
-  ${S.team?`<div class="secth"><h3>Convocados <span class="cnt${nOn>=5?" ok":""}">${nOn}</span></h3><div class="bar" style="margin:0"><button class="btn sm" id="s-all">Todos</button><button class="btn sm" id="s-none">Nenhum</button></div></div>
+  <section class="ns"><h3>Escalão</h3>${myTeams.length===1?`<p class="teamone">${esc(myTeams[0][1])}</p>`:`<div class="tchips">${myTeams.map(([id,n])=>`<button class="tchip${S.team===id?" on":""}" data-team="${esc(id)}" aria-pressed="${S.team===id}">${esc(n)}</button>`).join("")}</div>`}</section>
+  ${S.team?`<section class="ns"><h3>Jogo</h3>
+   ${sug?gcard(sug,true):`<p class="hint">Não há jogos marcados para este escalão. Usa “Outro jogo”.</p>`}
+   ${others.length?`<details class="moreg"${otherSel?" open":""}><summary>Outros jogos (${others.length})</summary><div class="glist">${others.map(g=>gcard(g,false)).join("")}</div></details>`:""}
+   <div class="gother${S.game===""?" on":""}"><button class="lnk" id="s-other">${S.game===""?"✓ ":""}Outro jogo (amigável, torneio…)</button>${S.game===""?`<label class="f">Adversário<input id="s-opp" value="${esc(S.opp)}" placeholder="Nome do adversário"></label>`:""}</div>
+   <p class="fmt">Formato: <b>${S.np} períodos × ${S.per} min</b> ${S.fmtEdit?"":`<button class="lnk" id="s-fmt">Alterar</button>`}</p>
+   ${S.fmtEdit?`<div class="row"><label class="f">Períodos<select id="s-np">${[2,4].map(n=>`<option${S.np==n?" selected":""}>${n}</option>`).join("")}</select></label><label class="f">Minutos por período<select id="s-per">${[5,6,8,10,12].map(n=>`<option${S.per==n?" selected":""}>${n}</option>`).join("")}</select></label></div>`:""}
+  </section>`:""}
+  ${S.team?`<div class="secth"><h3>Convocados <span class="cnt${nOn>=5?" ok":""}">${nOn}</span></h3><div class="bar" style="margin:0"><div class="seg2 sm" role="group" aria-label="Ordenar"><button data-sort="az" aria-pressed="${S.sort!=="num"}">A–Z</button><button data-sort="num" aria-pressed="${S.sort==="num"}">Nº</button></div><button class="btn sm" id="s-all">Todos</button><button class="btn sm" id="s-none">Nenhum</button></div></div>
   <p class="hint" style="margin-top:0">Toca nos atletas que vão a jogo. O cinco inicial escolhe-se no ecrã do jogo.</p>
-  <div class="plist2">${players.map(p=>{const on=!!S.picked[p.id],n=S.nums[p.id]??p.num??"";return `<div class="prow${on?" on":""}" data-pick="${esc(p.id)}" role="checkbox" tabindex="0" aria-checked="${on}">
+  <div class="plist2">${players.map(p=>{const on=!!S.picked[p.id],n=S.nums[p.id]??(p.num||"");return `<div class="prow${on?" on":""}" data-pick="${esc(p.id)}" role="checkbox" tabindex="0" aria-checked="${on}">
      <span class="ck">✓</span><span class="av">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="nb">${esc(n||"–")}</span></span>
      <span class="pnm">${esc(p.name)}${p.pos?`<small>${esc(p.pos)}</small>`:""}</span>
      <label class="pcnum">Nº<input data-num="${esc(p.id)}" inputmode="numeric" maxlength="3" value="${esc(n)}"></label></div>`}).join("")||`<p class="hint">Este escalão ainda não tem plantel no site. Acrescenta os atletas em baixo.</p>`}
@@ -872,10 +908,13 @@ function renderSetup(){document.body.classList.remove("fit");$("#b-new").hidden=
   <div class="bar"><button class="btn gold" id="s-go"${S.team?"":" disabled"}>Começar jogo${S.team?" · "+nOn+" convocados":""}</button></div>
 <p class="ver">Versão ${esc(VER||"local")}</p>`;
   bindNav();
-  $("#s-team").onchange=e=>{S.team=e.target.value;const g0=S.team?teamGames(S.team)[0]:null;S.game=g0?String(g0.num):"";S.picked={};renderSetup()};
-  const sg=$("#s-game");if(sg)sg.onchange=e=>{S.game=e.target.value;renderSetup()};
+  document.querySelectorAll("[data-team]").forEach(b=>b.onclick=()=>{if(S.team===b.dataset.team)return;S.team=b.dataset.team;S.game=undefined;S.picked={};renderSetup()});
+  document.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{S.game=b.dataset.g;renderSetup()});
+  const sot=$("#s-other");if(sot)sot.onclick=()=>{S.game="";renderSetup();const i=$("#s-opp");if(i)i.focus()};
+  const sf=$("#s-fmt");if(sf)sf.onclick=()=>{S.fmtEdit=true;renderSetup()};
+  document.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{S.sort=b.dataset.sort;const y=scrollY;renderSetup();scrollTo(0,y)});
   const so=$("#s-opp");if(so)so.oninput=e=>S.opp=e.target.value;
-  $("#s-np").onchange=e=>S.np=+e.target.value;$("#s-per").onchange=e=>S.per=+e.target.value;
+  const snp=$("#s-np");if(snp)snp.onchange=e=>{S.np=+e.target.value;renderSetup()};const spe=$("#s-per");if(spe)spe.onchange=e=>{S.per=+e.target.value;renderSetup()};
   const keepY=f=>{const y=scrollY;f();renderSetup();scrollTo(0,y)};
   document.querySelectorAll(".prow[data-pick]").forEach(c=>{const tg=()=>keepY(()=>{const id=c.dataset.pick;S.picked[id]=!S.picked[id]});
     c.onclick=e=>{if(e.target.closest(".pcnum"))return;tg()};c.onkeydown=e=>{if((e.key===" "||e.key==="Enter")&&!e.target.closest("input")){e.preventDefault();tg()}}});
@@ -883,7 +922,7 @@ function renderSetup(){document.body.classList.remove("fit");$("#b-new").hidden=
   const sa=$("#s-all");if(sa)sa.onclick=()=>keepY(()=>players.forEach(p=>S.picked[p.id]=true));
   const sn=$("#s-none");if(sn)sn.onclick=()=>keepY(()=>{S.picked={}});
   const xa=$("#s-xadd");if(xa)xa.onclick=()=>{const n=$("#s-xname").value.trim();if(!n)return;const id="x"+Date.now();S.extra=(S.extra||[]).concat([{id,name:n,num:$("#s-xnum").value.replace(/\D/g,""),team:S.team}]);S.picked[id]=true;renderSetup()};
-  $("#s-go").onclick=()=>{const roster=players.filter(p=>S.picked[p.id]).map(p=>({id:p.id,name:p.name,num:(S.nums[p.id]??p.num??"")+"",photo:p.photo||""}));
+  $("#s-go").onclick=()=>{const roster=players.filter(p=>S.picked[p.id]).map(p=>({id:p.id,name:p.name,num:(S.nums[p.id]??(p.num||""))+"",photo:p.photo||""}));
     const err=$("#s-err");
     if(roster.length<5){err.textContent="Escolhe pelo menos 5 convocados.";return}
     const nums=roster.map(p=>p.num).filter(Boolean),dup=nums.filter((n,i)=>nums.indexOf(n)!==i);
