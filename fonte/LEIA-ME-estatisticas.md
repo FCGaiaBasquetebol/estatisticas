@@ -76,3 +76,17 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Nada de palavras-passe no chat nem no código.
 - O `utilizadores.json` é público (está no site). Por isso só tem hashes, e as palavras-passe devem ter pelo menos 8 caracteres e não ser reutilizadas.
 - Não usar o login do Swish/NBN23 para recolher dados.
+
+## Perfis
+- **Administrador** (`perfil: "coordenador"`, legado): gere utilizadores e ligações e vê todos os escalões.
+- **Treinador** (`perfil: "treinador"`): regista jogos dos seus escalões.
+- **Coordenador** e **Diretor** (`perfil: "consulta"`, `cargo: "Coordenador"|"Diretor"`): só consulta.
+  - Não veem Novo jogo nem conseguem reabrir, apagar ou importar jogos.
+  - Veem Jogos (Estatísticas/Jogadas), Época e Excel.
+  - Escalões: os que forem escolhidos, ou `["*"]` para ver todos.
+
+## Ajuda e instalação
+- **Botão "?" no topo:** abre o guia rápido com 8 passos. As imagens estão em `ajuda/1-8.jpg`, tiradas da própria app e guardadas para funcionar offline.
+- **Aviso "Instala a app neste tablet":** só aparece em ecrãs táteis e se a app ainda não estiver instalada.
+  - Pode ser dispensado por 14 dias.
+  - No Chrome/Android/Edge aparece o botão Instalar; no iPad aparecem as instruções do Safari.

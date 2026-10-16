@@ -551,9 +551,29 @@ main:has(.uhead){max-width:1320px}
 :root[data-theme=light] .tchip.on{background:var(--gold);border-color:var(--gold);color:#000}
 .gc.big{grid-template-columns:170px minmax(0,1fr) 40px}.gd b{white-space:nowrap}.gc{grid-template-columns:130px minmax(0,1fr) 34px}
 @media (max-width:600px){.gc.big{grid-template-columns:110px minmax(0,1fr) 30px}.gc.big .gd b{font-size:24px}}
+
+/* ===== v10: perfis de consulta, guia rápido, instalar ===== */
+.uf-role{border:0;margin:0 0 4px;padding:0;display:grid;gap:6px}.uf-role legend{padding:0;margin-bottom:6px;font-family:var(--f-cond);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.uf-role .seg2 button{padding:9px 16px;font-size:14px}
+.uf-esc .chk.all{grid-column:1/-1}
+.help .card.hb{max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:18px 20px}
+.hb-h{display:flex;align-items:center;justify-content:space-between;position:sticky;top:-18px;background:inherit;padding:4px 0 10px;z-index:1}.hb-h h3{margin:0}
+.hb-l{list-style:none;counter-reset:hb;margin:0;padding:0;display:grid;gap:14px}
+.hb-l li{counter-increment:hb;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:16px;align-items:start;padding-top:14px;border-top:1px solid var(--line)}
+.hb-l li:first-child{border-top:0;padding-top:0}
+.hb-l img{width:100%;border-radius:8px;border:1px solid var(--line);display:block}
+.hb-l b{display:block;font-size:17px;margin-bottom:4px}.hb-l b::before{content:counter(hb) ". ";color:var(--gold)}
+.hb-l p{margin:0;color:var(--muted);line-height:1.45;font-size:15px}
+.hb-i{margin-top:16px;padding:12px 14px;border:1px dashed var(--gold);border-radius:10px}.hb-i p{margin:4px 0 0;color:var(--muted)}
+@media (max-width:640px){.hb-l li{grid-template-columns:1fr}}
+.inst{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--gold);border-radius:10px;padding:10px 14px;margin:0 0 10px}
+.inst div{flex:1;min-width:220px}.inst b{display:block}.inst span{color:var(--muted);font-size:14px}
+#help{font-weight:800;font-family:var(--f-cond);font-size:18px}
+:root[data-theme=light] .inst{background:#fff}
+.uf-role .seg2{justify-self:start}
 </style></head>
 <body>
-<header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
+<header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
  <button class="btn ghost" id="b-new" hidden>Jogos</button><span class="gact" id="gact" hidden><button class="btn sm" id="b-save">Gravar e sair</button><button class="btn sm ghost" id="b-cancel" hidden>Cancelar jogo</button></span></header>
 <main id="app"></main>
 <div class="toast" id="toast" hidden></div>
@@ -601,7 +621,10 @@ const GH={owner:"andreferraz12",repo:"fcgaia-estatisticas",branch:"main",path:"u
 let USER=null,USERS=[],UFILE=null,UPUB=null,PUBST="";
 function refreshPub(){if(SETVIEW==="users"&&isCoord()&&!G&&document.querySelector(".pub")){const y=scrollY;renderSetup();scrollTo(0,y)}}
 const isCoord=()=>USER&&USER.perfil==="coordenador";
-const allowed=()=>isCoord()?TEAMS.map(t=>t[0]):(USER&&USER.escaloes)||[];
+const isRO=()=>USER&&USER.perfil==="consulta";   // coordenador técnico / diretor: só consulta
+const allowed=()=>isCoord()||(isRO()&&(USER.escaloes||[]).includes("*"))?TEAMS.map(t=>t[0]):(USER&&USER.escaloes)||[];
+const roleLabel=u=>u.perfil==="coordenador"?"Administrador":u.perfil==="consulta"?(u.cargo||"Consulta")+" · consulta":"Treinador";
+let UROLE="treinador";
 const canSee=g=>!!g&&allowed().includes(g.team);
 const visGames=()=>Object.values(readAll()).filter(canSee);
 const clean=o=>JSON.parse(JSON.stringify(o));
@@ -645,7 +668,7 @@ const Acc={
     if(u.dk){try{lsSet(DTK,await unwrapTok(u.dk,pw,u.salt))}catch(e){}}return {...u}},
   async logout(){lsSet(US,null);lsSet(DTK,null);PWMEM=""},
   async createUser(o){if(USERS.some(u=>u.utilizador===o.utilizador))throw new Error("Já existe esse nome de utilizador.");
-    const c=await newCred(o.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",escaloes:o.escaloes||[],ativo:true,...c}]))},
+    const c=await newCred(o.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",...(o.cargo?{cargo:o.cargo}:{}),escaloes:o.escaloes||[],ativo:true,...c}]))},
   async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),patch.pw,c.salt);Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
     this.save(USERS.map(u=>u.utilizador===un?{...u,...patch}:u));
     if(USER&&USER.utilizador===un){USER={...USER,...patch};if(patch.hash)lsSet(US,sessKey(USER))}},
@@ -679,7 +702,7 @@ function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who
    <p class="hint" style="margin-top:14px">Funciona sem internet. Os jogos ficam guardados neste dispositivo.</p></div></div>`;
   $("#lf").onsubmit=async e=>{e.preventDefault();$("#l-err").textContent="";try{onUser(await Acc.login($("#l-e").value,$("#l-p").value))}catch(x){$("#l-err").textContent=x.message}};
 }
-function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":"Treinador · "+esc((USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
+function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":esc(roleLabel(USER).replace(" · consulta",""))+" · "+esc((USER.escaloes||[]).includes("*")?"todos os escalões":(USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
   const sy=$("#sync");if(sy){sy.onclick=()=>{Sync.soon(0);toast(Sync.tok()?(navigator.onLine?"A sincronizar…":"Sem internet: os jogos ficam guardados e seguem quando houver ligação"):"Base de dados não ligada (o administrador liga-a em Utilizadores)")};Sync.paint()}
   const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo?",async()=>{await Acc.logout();USER=null;G=null;renderLogin()})}}
 function netState(){}
@@ -687,7 +710,7 @@ function onUser(u){USER=u;stopTick();
   if(!u){renderLogin();return}
   if(u.ativo===false){USER=null;renderLogin("Conta desativada. Fala com o administrador.");Acc.logout();return}
   whoBar();Sync.soon(500);
-  G=load();if(G&&!canSee(G))G=null;
+  G=isRO()?null:load();if(G&&!canSee(G))G=null;
   if(G&&G.status!=="fim"){fixGame(G);render();startTick()}else{G=null;renderSetup()}}
 function askPw(cb){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><h3 style="margin-top:0">Confirma a tua palavra-passe</h3><p class="hint">Serve para guardar o acesso à base de dados de forma cifrada.</p><label class="f">Palavra-passe<input type="password" id="ap-p" autocomplete="current-password"></label><p class="err" id="ap-e"></p><div class="bar"><button class="btn gold" id="ap-ok">Confirmar</button><button class="btn" id="ap-x">Cancelar</button></div></div>`;
   document.body.appendChild(m);m.querySelector("#ap-x").onclick=()=>m.remove();m.querySelector("#ap-ok").onclick=async()=>{try{await cb(m.querySelector("#ap-p").value);m.remove()}catch(x){m.querySelector("#ap-e").textContent=x.message}}}
@@ -779,26 +802,28 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
   return `<div class="uhead"><h2>Utilizadores</h2><p class="hint">Quem pode entrar na área privada e em que escalões.</p></div>
   <div class="ugrid">
    <section class="card uform${ed?" editing":""}">
-    <h3>${ed?`Escalões de ${esc(ed.nome)}`:"Novo utilizador"}</h3>
+    <h3>${ed?`Editar ${esc(ed.nome)}`:"Novo utilizador"}</h3>
     <div class="uf">
      <div class="uf-fields">${ed?`<div class="uedit"><span class="uav">${esc(ini(ed.nome))}</span><div><b>${esc(ed.nome)}</b><small>${esc(ed.utilizador)}</small></div></div>`:`
       <label class="f">Nome<input id="u-n" placeholder="Ex.: Rui Martins" autocomplete="off"></label>
       <label class="f">Utilizador<input id="u-u" placeholder="Ex.: rui.martins" autocapitalize="none" autocomplete="off" spellcheck="false"><small class="fh">Só minúsculas e números, sem espaços. É o que a pessoa escreve para entrar.</small></label>
       <label class="f">Palavra-passe inicial<span class="pwrow"><input id="u-p" type="text" placeholder="Mínimo ${PWMIN} caracteres" autocomplete="off" spellcheck="false"><button class="btn sm" id="u-gen" type="button">Gerar</button></span></label>`}
      </div>
-     <fieldset class="uf-esc" id="u-esc"><legend>Escalões</legend>${ESC.map(([id,n])=>`<label class="chk"><input type="checkbox" value="${esc(id)}"${sel.includes(id)?" checked":""}> ${esc(n)}</label>`).join("")}</fieldset>
+     <fieldset class="uf-role"><legend>Perfil</legend><div class="seg2" role="group">${[["treinador","Treinador"],["Coordenador","Coordenador"],["Diretor","Diretor"]].map(([k,l])=>`<button type="button" data-role="${k}" aria-pressed="${UROLE===k}">${l}</button>`).join("")}</div>
+      <small class="fh">${UROLE==="treinador"?"Regista jogos dos seus escalões.":"Só consulta: vê jogos e estatísticas, não regista nem apaga."}</small></fieldset>
+     <fieldset class="uf-esc" id="u-esc"><legend>Escalões</legend>${UROLE!=="treinador"?`<label class="chk all"><input type="checkbox" value="*"${sel.includes("*")?" checked":""}> Todos os escalões</label>`:""}${ESC.map(([id,n])=>`<label class="chk"><input type="checkbox" value="${esc(id)}"${sel.includes(id)?" checked":""}> ${esc(n)}</label>`).join("")}</fieldset>
     </div>
     <p class="err" id="u-err"></p>
-    <div class="bar">${ed?`<button class="btn gold" id="u-save">Guardar escalões</button><button class="btn" id="u-cancel">Cancelar</button>`:`<button class="btn gold" id="u-add">Criar utilizador</button>`}</div>
+    <div class="bar">${ed?`<button class="btn gold" id="u-save">Guardar alterações</button><button class="btn" id="u-cancel">Cancelar</button>`:`<button class="btn gold" id="u-add">Criar utilizador</button>`}</div>
     <p class="hint">Entrega o utilizador e a palavra-passe em pessoa. Se alguém se esquecer, usa “Palavra-passe” na lista para definir uma nova.</p>
    </section>
    <section class="ulist"><h3>Contas <span class="cnt">${rows.length}</span></h3>
     <div class="uth"><span></span><span>Nome</span><span>Escalões</span><span></span></div>
     ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador",off=u.ativo===false;return `<div class="urow${off?" off":""}${UEDIT===u.utilizador?" cur":""}">
      <span class="uav${adm?" adm":""}">${esc(ini(u.nome))}</span>
-     <div class="ui"><b>${esc(u.nome)}${me?' <small class="me">(tu)</small>':""}</b><small>${esc(u.utilizador)} · ${adm?"Administrador":"Treinador"}${off?" · desativado":""}</small>
-      <div class="tags">${adm?`<span class="tag">Todos os escalões</span>`:(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join("")||`<small class="warn">Sem escalões</small>`}${Sync.tok()&&!u.dk&&!off?`<small class="warn">Sem acesso à base de dados: define nova palavra-passe</small>`:""}</div></div>
-     <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Escalões</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
+     <div class="ui"><b>${esc(u.nome)}${me?' <small class="me">(tu)</small>':""}</b><small>${esc(u.utilizador)} · ${esc(roleLabel(u))}${off?" · desativado":""}</small>
+      <div class="tags">${adm||(u.escaloes||[]).includes("*")?`<span class="tag">Todos os escalões</span>`:(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join("")||`<small class="warn">Sem escalões</small>`}${Sync.tok()&&!u.dk&&!off?`<small class="warn">Sem acesso à base de dados: define nova palavra-passe</small>`:""}</div></div>
+     <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Editar</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
    </section>
   </div>
   <div class="usec"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
@@ -816,16 +841,20 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
   const un=$("#u-n"),uu=$("#u-u");if(un&&uu){let touched=false;uu.oninput=()=>{touched=true;const v=uu.value.toLowerCase().replace(/\s+/g,"");if(v!==uu.value)uu.value=v};
     un.oninput=()=>{if(touched)return;const w=un.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/g,"").split(/\s+/).filter(Boolean);uu.value=w.length>1?w[0]+"."+w[w.length-1]:(w[0]||"")}}
   const gen=$("#u-gen");if(gen)gen.onclick=()=>{const A="abcdefghjkmnpqrstuvwxyz23456789";const r=crypto.getRandomValues(new Uint8Array(10));$("#u-p").value=[...r].map(x=>A[x%A.length]).join("")};
-  const add=$("#u-add");if(add)add.onclick=async()=>{const o={nome:$("#u-n").value.trim(),utilizador:$("#u-u").value.trim().toLowerCase(),pw:$("#u-p").value,escaloes:sel()};
+  document.querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{const keep={n:($("#u-n")||{}).value,u:($("#u-u")||{}).value,p:($("#u-p")||{}).value,e:sel()};UROLE=b.dataset.role;renderSetup();
+    if($("#u-n")){$("#u-n").value=keep.n||"";$("#u-u").value=keep.u||"";$("#u-p").value=keep.p||""}document.querySelectorAll("#u-esc input").forEach(i=>i.checked=keep.e.includes(i.value))});
+  const roleOf=()=>UROLE==="treinador"?{perfil:"treinador",cargo:undefined}:{perfil:"consulta",cargo:UROLE};
+  const add=$("#u-add");if(add)add.onclick=async()=>{const o={nome:$("#u-n").value.trim(),utilizador:$("#u-u").value.trim().toLowerCase(),pw:$("#u-p").value,escaloes:sel(),...roleOf()};
+    if(o.escaloes.includes("*"))o.escaloes=["*"];
     if(!o.nome){err.textContent="Escreve o nome.";return}
     if(!validUser(o.utilizador)){err.textContent="Utilizador: 3 a 30 caracteres, só letras minúsculas, números, ponto, hífen ou _ (sem espaços nem acentos).";return}
     if(o.pw.length<PWMIN){err.textContent="A palavra-passe tem de ter pelo menos "+PWMIN+" caracteres.";return}
     if(!o.escaloes.length){err.textContent="Escolhe pelo menos um escalão.";return}
     add.disabled=true;try{await Acc.createUser(o);toast("Utilizador criado");renderSetup()}catch(e){err.textContent=e.message;add.disabled=false}};
-  const sv=$("#u-save");if(sv)sv.onclick=async()=>{const p={escaloes:sel()};if(!p.escaloes.length){err.textContent="Escolhe pelo menos um escalão.";return}
-    try{await Acc.updateUser(UEDIT,p);UEDIT=null;toast("Escalões guardados");renderSetup()}catch(e){err.textContent="Não foi possível guardar: "+e.message}};
-  const cc=$("#u-cancel");if(cc)cc.onclick=()=>{UEDIT=null;renderSetup()};
-  document.querySelectorAll("[data-ue]").forEach(b=>b.onclick=()=>{UEDIT=b.dataset.ue;renderSetup();window.scrollTo(0,0)});
+  const sv=$("#u-save");if(sv)sv.onclick=async()=>{const p={escaloes:sel(),...roleOf()};if(p.escaloes.includes("*"))p.escaloes=["*"];if(!p.cargo)p.cargo=undefined;if(!p.escaloes.length){err.textContent="Escolhe pelo menos um escalão.";return}
+    try{await Acc.updateUser(UEDIT,p);UEDIT=null;UROLE="treinador";toast("Alterações guardadas");renderSetup()}catch(e){err.textContent="Não foi possível guardar: "+e.message}};
+  const cc=$("#u-cancel");if(cc)cc.onclick=()=>{UEDIT=null;UROLE="treinador";renderSetup()};
+  document.querySelectorAll("[data-ue]").forEach(b=>b.onclick=()=>{UEDIT=b.dataset.ue;const u=USERS.find(x=>x.utilizador===UEDIT);UROLE=u&&u.perfil==="consulta"?(u.cargo||"Coordenador"):"treinador";renderSetup();window.scrollTo(0,0)});
   document.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const u=USERS.find(x=>x.utilizador===b.dataset.up);pwPrompt("Nova palavra-passe · "+(u?u.nome:""),async n=>{await Acc.updateUser(b.dataset.up,{pw:n});toast("Palavra-passe alterada");renderSetup()})});
   document.querySelectorAll("[data-ua]").forEach(b=>b.onclick=()=>{const on=b.dataset.on==="1";confirmBox(on?"Reativar esta conta?":"Desativar esta conta? A pessoa deixa de conseguir entrar.",async()=>{await Acc.updateUser(b.dataset.ua,{ativo:on});renderSetup()})});
   document.querySelectorAll("[data-ux]").forEach(b=>b.onclick=()=>confirmBox("Apagar esta conta da lista? Os jogos não são apagados.",()=>{Acc.removeUser(b.dataset.ux);renderSetup()}))}
@@ -843,13 +872,36 @@ function goLogin(){const go=async()=>{if(G){if(G.running)G.running=false;store()
   if(G&&G.status!=="fim")confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
   else if(Sync.tok()&&Sync.pending())confirmBox("Ainda há jogos por enviar. Ficam guardados neste tablet e seguem quando alguém entrar com internet. Ir para o início de sessão?",go);
   else go()}
-async function boot(){$("#brand").onclick=e=>{e.preventDefault();goLogin()};$("#thm").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";lsSet(TK,t);applyTheme(t);toast(t==="light"?"Tema claro":"Tema escuro")};applyTheme(document.documentElement.dataset.theme);$("#crest").src=CREST;
+/* guia rápido */
+const HELP=[["Escolhe o jogo","Em Novo jogo, o escalão e o jogo de hoje (ou o próximo) já vêm escolhidos. Se for outro, abre “Outros jogos” ou “Outro jogo”.","1"],
+ ["Convoca os atletas","Toca nos atletas que vão a jogo. Confirma os números e carrega em Começar jogo.","2"],
+ ["Escolhe o cinco inicial","Toca em 5 atletas do banco (ou arrasta-os para Em campo). O relógio só arranca com cinco em campo.","3"],
+ ["Regista as jogadas","Toca no atleta e depois na ação dos lados do campo. Para um lançamento, toca no sítio do campo e escolhe Convertido ou Falhado. Errado? ↶ Anular, em baixo.","4"],
+ ["Adversário","Usa +1, +2, +3 e Falta no marcador, ou escolhe o adversário por cima do campo para marcar lançamentos e ações dele (o campo fica azul).","5"],
+ ["Substitui a arrastar","Arrasta um atleta do banco para cima de quem sai. Se alguém for excluído, o relógio pára e a app pede logo quem entra.","6"],
+ ["Relógio e períodos","▶ Iniciar e Parar ao lado do tempo. Toca no tempo para o corrigir. Período › mostra todos os períodos, com o seguinte em destaque.","7"],
+ ["Termina e grava","Terminar jogo → Gravar. Para parar e continuar mais tarde, Gravar e sair. Os números ficam em Jogos e em Época · acumulado, com Excel.","8"]];
+function helpBox(){const m=document.createElement("div");m.className="modal help";
+  m.innerHTML=`<div class="card hb"><div class="hb-h"><h3>Guia rápido</h3><button class="btn sm" id="hb-x">Fechar</button></div>
+   <ol class="hb-l">${HELP.map(([t,d,i])=>`<li><img src="ajuda/${i}.jpg" alt="" loading="lazy" onerror="this.remove()"><div><b>${esc(t)}</b><p>${esc(d)}</p></div></li>`).join("")}</ol>
+   ${installHint()?`<div class="hb-i"><b>Instalar no tablet</b><p>${installHint()}</p></div>`:""}</div>`;
+  document.body.appendChild(m);m.querySelector("#hb-x").onclick=()=>m.remove();m.onclick=e=>{if(e.target===m)m.remove()}}
+/* instalar como app */
+let INSTP=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();INSTP=e;if(!G&&USER)renderSetup()});
+const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const isIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+function installHint(){if(standalone())return "";return isIOS()?"No Safari, toca em Partilhar (o quadrado com a seta para cima) e depois em “Adicionar ao ecrã principal”.":INSTP?"Carrega em Instalar: a app abre em ecrã inteiro e mais depressa.":"No menu do browser (⋮), escolhe “Instalar app” ou “Adicionar ao ecrã principal”."}
+function installBanner(){if(standalone()||!matchMedia("(pointer:coarse)").matches)return "";let t=0;try{t=+localStorage.getItem("fcgaia-stats-inst")||0}catch(e){}if(Date.now()-t<14*864e5)return "";
+  return `<div class="inst"><div><b>Instala a app neste tablet</b><span>${installHint()}</span></div>${INSTP?`<button class="btn gold sm" id="in-go">Instalar</button>`:""}<button class="btn sm" id="in-x">Agora não</button></div>`}
+function bindInstall(){const g=$("#in-go");if(g)g.onclick=async()=>{INSTP.prompt();try{await INSTP.userChoice}catch(e){}INSTP=null;renderSetup()};
+  const x=$("#in-x");if(x)x.onclick=()=>{lsSet("fcgaia-stats-inst",String(Date.now()));renderSetup()}}
+async function boot(){$("#help").onclick=helpBox;$("#brand").onclick=e=>{e.preventDefault();goLogin()};$("#thm").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";lsSet(TK,t);applyTheme(t);toast(t==="light"?"Tema claro":"Tema escuro")};applyTheme(document.documentElement.dataset.theme);$("#crest").src=CREST;
   if(!DATA){try{const r=await fetch("data/jogos.json?t="+Date.now(),{cache:"no-store"});if(r.ok)DATA=await r.json()}catch(e){}}
   if(!DATA)DATA={plantel:{},games:[]};
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   Acc.init(onUser);
   $("#b-new").onclick=()=>{if(G&&G.running){toast("Pára o relógio primeiro");return}store();G=null;stopTick();SIDE="us";renderSetup()};
-  $("#b-save").onclick=()=>{if(!G)return;const fin=G.status==="fim";if(G.running){G.running=false;addLog({t:"pausa"})}store();const n=G.opp;G=null;stopTick();SIDE="us";SEL=null;SUB=null;
+  $("#b-save").onclick=()=>{if(!G)return;if(isRO()){G=null;stopTick();SETVIEW="jogos";renderSetup();return}const fin=G.status==="fim";if(G.running){G.running=false;addLog({t:"pausa"})}store();const n=G.opp;G=null;stopTick();SIDE="us";SEL=null;SUB=null;
     try{localStorage.removeItem(KC)}catch(e){}SETVIEW="jogos";renderSetup();if(!fin)toast("Jogo gravado. Continua em Jogos quando quiseres");Sync.soon(0)};
   $("#b-cancel").onclick=()=>{if(!G)return;confirmBox(`Cancelar o jogo vs ${G.opp}? Tudo o que foi registado neste jogo é apagado.`,()=>{const g=G;G=null;stopTick();
     const m=readAll();delete m[g.id];writeAll(m);Sync.del(g);try{localStorage.removeItem(KC)}catch(e){}SEL=null;SUB=null;SIDE="us";SETVIEW="novo";renderSetup();toast("Jogo cancelado")})};
@@ -863,9 +915,9 @@ function teamGames(t){const today=new Date();today.setHours(0,0,0,0);
    .sort((a,b)=>Math.abs(new Date(a.date)-today)-Math.abs(new Date(b.date)-today))}
 let SETVIEW="novo";      // novo | jogos | epoca
 let EP={team:"",mode:"tot",sort:"pts",excl:{},ath:null,shotA:""};
-function snav(){const n=visGames().length;return `<nav class="snav">${[["novo","Novo jogo"],["jogos","Jogos ("+n+")"],["epoca","Época · acumulado"]].concat(isCoord()?[["users","Utilizadores"]]:[]).map(([k,l])=>`<button data-sv="${k}" aria-pressed="${SETVIEW===k}">${l}</button>`).join("")}</nav>`}
-function bindNav(){document.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{SETVIEW=b.dataset.sv;renderSetup();window.scrollTo(0,0)})}
-function renderSetup(){document.body.classList.remove("fit");$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
+function snav(){const n=visGames().length;return installBanner()+`<nav class="snav">${(isRO()?[]:[["novo","Novo jogo"]]).concat([["jogos","Jogos ("+n+")"],["epoca","Época · acumulado"]]).concat(isCoord()?[["users","Utilizadores"]]:[]).map(([k,l])=>`<button data-sv="${k}" aria-pressed="${SETVIEW===k}">${l}</button>`).join("")}</nav>`}
+function bindNav(){bindInstall();document.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{SETVIEW=b.dataset.sv;renderSetup();window.scrollTo(0,0)})}
+function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW==="novo"||SETVIEW==="users"))SETVIEW="jogos";$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
   if(SETVIEW==="jogos"){$("#app").innerHTML=snav()+savedList();bindNav();bindSaved();return}
   if(SETVIEW==="epoca"){$("#app").innerHTML=snav()+seasonView();bindNav();bindSeason();return}
   if(SETVIEW==="users"&&isCoord()){$("#app").innerHTML=snav()+usersView();bindNav();bindUsers();return}
@@ -937,11 +989,11 @@ function renderSetup(){document.body.classList.remove("fit");$("#b-new").hidden=
 function savedList(){const all=visGames().sort((a,b)=>(b.created||0)-(a.created||0));
   return `<h2>Jogos guardados</h2>
   ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
-    <div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"?"Ver":"Continuar"}</button><button class="btn sm gold" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div></div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
-  <div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button><label class="btn" for="bk-in">Importar cópia</label><input type="file" id="bk-in" accept=".json,application/json" hidden></div>
+    <div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"||isRO()?"Ver":"Continuar"}</button><button class="btn sm gold" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div></div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
+  <div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button>${isRO()?"":`<label class="btn" for="bk-in">Importar cópia</label>`}<input type="file" id="bk-in" accept=".json,application/json" hidden></div>
   <p class="hint">${Sync.tok()?"Os jogos ficam gravados neste dispositivo e são enviados para a base de dados do clube sempre que há internet. Aparecem nos tablets de quem tem o mesmo escalão.":"Os jogos ficam gravados só neste dispositivo, porque a base de dados ainda não está ligada. Para os passar para outro tablet, exporta a cópia de segurança e importa-a no outro."}</p>`}
 function bindSaved(){
-  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"?"bs":"live";if(G.status!=="fim")store();render();startTick()});
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"||isRO()?"bs":"live";if(G.status!=="fim"&&!isRO())store();render();if(!isRO())startTick()});
   document.querySelectorAll("[data-xls]").forEach(b=>b.onclick=()=>{const keep=G;G=fixGame(readAll()[b.dataset.xls]);exportXLS();G=keep});
   document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();Sync.del(m[b.dataset.del]);delete m[b.dataset.del];writeAll(m);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
   const bo=$("#bk-out");if(bo)bo.onclick=()=>{const blob=new Blob([JSON.stringify({app:"fcgaia-estatisticas",v:3,exportado:new Date().toISOString(),jogos:readAll()})],{type:"application/json"});
@@ -995,7 +1047,7 @@ function bindSeason(){
   document.querySelectorAll("[data-epx]").forEach(c=>c.onchange=()=>{if(c.checked)delete EP.excl[c.dataset.epx];else EP.excl[c.dataset.epx]=1;renderSetup()});
   document.querySelectorAll("tr[data-ath]").forEach(r=>r.onclick=()=>{EP.ath=r.dataset.ath;renderSetup();const p=$("#athp");if(p)p.scrollIntoView({behavior:"smooth"})});
   const ax=$("#ath-x");if(ax)ax.onclick=()=>{EP.ath=null;renderSetup()};
-  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=ev=>{ev.preventDefault();G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"?"bs":"live";render();startTick()});
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=ev=>{ev.preventDefault();G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"||isRO()?"bs":"live";render();if(!isRO())startTick()});
   const x=$("#ep-xls");if(x)x.onclick=exportSeason}
 function exportSeason(){const {games,ath}=seasonData();if(!window.XLSX){toast("Excel indisponível neste momento");return}
   const head=["Nº","Atleta","Jogos","MIN","PTS","2PT C","2PT T","2PT %","3PT C","3PT T","3PT %","LL C","LL T","LL %","RO","RD","RT","AST","ROU","DL","PER","F. pessoais","F. antidesp.","F. técnicas","Total faltas","F. recebidas","+/-","VAL"];
@@ -1157,7 +1209,7 @@ const FITQ=matchMedia("(min-width:700px) and (min-height:560px)");
 function fitCourt(){const g=document.querySelector(".fit .cgrid");if(!g)return;const cs=getComputedStyle(g),side=document.querySelector(".cgrid .al");
   const w=g.clientWidth-2*(side?side.offsetWidth:0)-2*parseFloat(cs.columnGap||0),h=g.clientHeight;const s=Math.max(200,Math.floor(Math.min(w,h*1500/1400)));g.style.setProperty("--cw",s+"px")}
 addEventListener("resize",()=>{if(G&&VIEW==="live"){document.body.classList.toggle("fit",G.status!=="fim"&&FITQ.matches);fitCourt()}});
-function render(){if(!G)return renderSetup();const fin=G.status==="fim";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
+function render(){if(!G)return renderSetup();const fin=G.status==="fim"||isRO();if(isRO()&&VIEW==="live")VIEW="bs";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
   $("#b-save").textContent=fin?"‹ Voltar":"Gravar e sair";$("#b-cancel").hidden=true;
   const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
   const board=`<div class="board"><div class="tm"><span class="n">${esc(G.teamName)}</span><span class="s">${G.us}</span><span class="tf">Faltas equipa <b class="${tfU>=4?"bonus":""}">${tfU}</b></span></div>
@@ -1167,7 +1219,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim";document
      ${fin?"":`<button class="cbtn" id="c-next">Período ›</button>`}</div>${fin?"":`<button class="cend" id="c-end">Terminar jogo</button>`}</div>
    <div class="tm r"><span class="n">${esc(G.opp)}</span><span class="s">${G.them}</span><span class="tf">Faltas equipa <b class="${tfT>=4?"bonus":""}">${tfT}</b></span>
     ${fin?"":`<div class="opp"><button class="btn" data-o="o1">+1</button><button class="btn" data-o="o2">+2</button><button class="btn" data-o="o3">+3</button><button class="btn" data-o="opf">Falta</button></div>`}</div></div>`;
-  const tabs=`<div class="tabs" role="tablist">${[["live","Jogo"],["bs","Estatísticas"],["pbp","Jogadas"]].map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
+  const tabs=`<div class="tabs" role="tablist">${(isRO()?[]:[["live","Jogo"]]).concat([["bs","Estatísticas"],["pbp","Jogadas"]]).map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
   let body="";
   if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id)),need=5-G.oncourt.length;
     const av=p=>`<span class="av">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">`:""}<span class="nb">${esc(p.num||"–")}</span></span>`;
@@ -1199,7 +1251,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim";document
      ${(o=>`<tr class="oppr"><td></td><td class="l">${esc(G.opp)} <small>(equipa)</small></td><td></td><td>${o.pts}</td><td>${o.m2}/${o.a2} <small>${pct(o.m2,o.a2)}</small></td><td>${o.m3}/${o.a3} <small>${pct(o.m3,o.a3)}</small></td><td>${o.mf}/${o.af} <small>${pct(o.mf,o.af)}</small></td><td>${o.or}</td><td>${o.dr}</td><td>${o.or+o.dr}</td><td>${o.ast}</td><td>${o.stl}</td><td>${o.blk}</td><td>${o.tov}</td><td>${o.fp}</td><td>${o.fu}</td><td>${o.ft}</td><td>${o.pf}</td><td>${o.fd}</td><td></td><td>${eff(o)}</td></tr>`)(G.ost)}</tbody></table></div>
      <p class="hint">MIN minutos · 2PT/3PT/LL convertidos/tentados · RO/RD/RT ressaltos ofensivos/defensivos/total · AST assistências · ROU roubos · DL desarmes · PER perdas · FP faltas pessoais · FA antidesportivas · FT técnicas · F total de faltas · FR faltas recebidas · VAL valorização.</p>
      ${shotChart()}
-     <div class="bar"><button class="btn gold" id="b-xls">Exportar Excel</button>${fin?`<button class="btn" id="b-reopen">Reabrir jogo</button><button class="btn" id="b-list">Voltar aos jogos</button>`:""}</div>`}
+     <div class="bar"><button class="btn gold" id="b-xls">Exportar Excel</button>${fin?`${isRO()?"":`<button class="btn" id="b-reopen">Reabrir jogo</button>`}<button class="btn" id="b-list">Voltar aos jogos</button>`:""}</div>`}
   $("#app").innerHTML=board+tabs+body;bind();fitCourt()}
 function shotChart(){const all=G.log.filter(e=>e.x!=null&&e.side!=="o"),oppS=G.log.filter(e=>e.x!=null&&e.side==="o"),sh=SHOTF==="_o"?oppS:SHOTF?all.filter(e=>e.id===SHOTF):all;
   const opts=G.roster.filter(p=>all.some(e=>e.id===p.id)).map(p=>`<option value="${esc(p.id)}"${SHOTF===p.id?" selected":""}>#${esc(p.num)} ${esc(p.name)}</option>`).join("");
