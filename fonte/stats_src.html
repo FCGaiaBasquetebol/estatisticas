@@ -252,10 +252,42 @@ body.dragging{cursor:grabbing}
  .acts.side .act{font-size:15px}.acts.side .act small{font-size:10px}}
 @media (max-width:600px){.live{display:flex}.cgrid{grid-template-columns:1fr 1fr;grid-template-areas:"c c" "l r"}.cwrap{grid-area:c}.al{grid-area:l}.ar{grid-area:r}
  .acts.side{grid-template-columns:1fr 1fr;grid-template-rows:none}.sidebar{flex-wrap:wrap}.plist.court5 .av{display:none}.plist.court5 .pl{grid-template-columns:1fr}}
+
+/* ===== v3: lista de convocados, relógio grande, gravar/cancelar, sincronização ===== */
+.gact{display:flex;gap:6px;align-items:center}.gact[hidden]{display:none}
+.gact .btn{padding:6px 10px;font-size:12px}
+.sync{background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;cursor:pointer}
+.sync.ok{color:var(--ok);border-color:#2d5a36}.sync.on{color:var(--gold)}.sync.off{color:var(--muted)}.sync.bad{color:var(--ko);border-color:#7a2a24}
+.warn{color:var(--gold)}
+.plist2{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:6px}
+.prow{display:grid;grid-template-columns:28px 44px minmax(0,1fr) 92px;align-items:center;gap:10px;background:var(--panel);border:2px solid transparent;border-radius:10px;padding:6px 10px;cursor:pointer;user-select:none;-webkit-user-select:none;opacity:.6}
+.prow.on{border-color:var(--gold-lo);background:#211e0e;opacity:1}
+.prow:focus-visible{outline:3px solid var(--gold);outline-offset:1px}
+.prow .ck{width:26px;height:26px;border-radius:7px;border:2px solid #666;display:grid;place-items:center;font-weight:900;color:transparent}
+.prow.on .ck{background:var(--gold);border-color:var(--gold);color:#000}
+.prow .av .nb{font-family:var(--f-disp);font-size:24px;color:var(--gold)}
+.pnm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pnm small{display:block;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.prow .pcnum{margin:0}
+/* relógio */
+.board{grid-template-columns:1fr auto 1fr}
+.clock .crow{display:flex;align-items:center;gap:12px}
+.clock .t{background:transparent;border:2px solid transparent;border-radius:12px;color:var(--ink);font-family:var(--f-disp);font-size:72px!important;line-height:1;padding:0 10px;font-variant-numeric:tabular-nums;cursor:pointer}
+.clock .t:hover:not(:disabled),.clock .t:focus-visible{border-color:#444}
+.clock .t.run{color:var(--ok)}
+.cbtn{min-width:118px;min-height:56px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-family:var(--f-cond);font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:17px}
+.cbtn.run{background:var(--gold);border-color:var(--gold);color:#000}.cbtn.run.on{background:#3a1414;border-color:#7a2a24;color:#ffb4ab}
+.ce{max-width:460px!important}.ce-t{width:100%;font-family:var(--f-disp);font-size:64px;text-align:center;background:#000;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:6px;letter-spacing:2px}
+.ce-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.ce-g .btn{padding:14px 4px;font-size:16px}
+@media (min-width:1101px) and (min-height:600px){.clock .t{font-size:64px!important}.cbtn{min-height:50px}}
+@media (max-width:1100px){.clock .t{font-size:60px!important}.cbtn{min-width:96px;min-height:50px;font-size:15px}}
+@media (max-width:760px){.clock .crow{gap:6px}.clock .t{font-size:46px!important;padding:0 4px}.cbtn{min-width:0;padding:0 10px;min-height:46px;font-size:13px}.gact .btn{padding:5px 8px}.sync{display:none}}
+.gact .btn{white-space:nowrap}
+@media (max-width:1100px){.top:has(#gact:not([hidden])) .wn{display:none}}
+@media (max-width:600px){.plist2{grid-template-columns:1fr}.prow{grid-template-columns:26px 40px minmax(0,1fr) 80px;gap:8px}}
 </style></head>
 <body>
 <header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
- <button class="btn ghost" id="b-new" hidden>Jogos</button></header>
+ <button class="btn ghost" id="b-new" hidden>Jogos</button><span class="gact" id="gact" hidden><button class="btn sm gold" id="b-save">💾 Gravar</button><button class="btn sm ghost" id="b-cancel">Cancelar jogo</button></span></header>
 <main id="app"></main>
 <div class="toast" id="toast" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -275,8 +307,7 @@ function toast(t){const e=$("#toast");e.textContent=t;e.hidden=false;clearTimeou
 const KJ="fcgaia-stats-jogos",KC="fcgaia-stats-atual";
 function readAll(){try{return JSON.parse(localStorage.getItem(KJ)||"{}")}catch(e){return {}}}
 function writeAll(m){try{localStorage.setItem(KJ,JSON.stringify(m));return true}catch(e){toast("Sem espaço para guardar! Exporta e apaga jogos antigos.");return false}}
-function store(){if(!G)return;if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);
-  
+function store(){if(!G)return;if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);Sync.soon(G.running?45000:6000);
   try{if(G.status==="fim")localStorage.removeItem(KC);else localStorage.setItem(KC,G.id)}catch(e){}}
 function load(){try{const old=localStorage.getItem(KEY);if(old){const g=JSON.parse(old);if(g){g.id=g.id||"j"+(g.created||Date.now());const m=readAll();m[g.id]=g;writeAll(m);localStorage.setItem(KC,g.id)}localStorage.removeItem(KEY)}}catch(e){}
   try{const id=localStorage.getItem(KC);return id?readAll()[id]||null:null}catch(e){return null}}
@@ -342,11 +373,12 @@ const Acc={
     catch(e){PUBST=navigator.onLine?e.message:"Sem internet. Fica por publicar; carrega em Publicar quando houver ligação.";refreshPub();throw e}},
   async login(user,pw){user=String(user).trim().toLowerCase();const u=USERS.find(x=>x.utilizador===user);
     if(!u||!u.hash||await pwHash(pw,u.salt)!==u.hash)throw new Error("Utilizador ou palavra-passe errados.");
-    if(u.ativo===false)throw new Error("Conta desativada. Fala com o administrador.");lsSet(US,sessKey(u));return {...u}},
-  async logout(){lsSet(US,null)},
+    if(u.ativo===false)throw new Error("Conta desativada. Fala com o administrador.");lsSet(US,sessKey(u));PWMEM=pw;
+    if(u.dk){try{lsSet(DTK,await unwrapTok(u.dk,pw,u.salt))}catch(e){}}return {...u}},
+  async logout(){lsSet(US,null);lsSet(DTK,null);PWMEM=""},
   async createUser(o){if(USERS.some(u=>u.utilizador===o.utilizador))throw new Error("Já existe esse nome de utilizador.");
-    const c=await newCred(o.pw);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",escaloes:o.escaloes||[],ativo:true,...c}]))},
-  async updateUser(un,patch){patch={...patch};if("pw" in patch){Object.assign(patch,await newCred(patch.pw));delete patch.pw}
+    const c=await newCred(o.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",escaloes:o.escaloes||[],ativo:true,...c}]))},
+  async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),patch.pw,c.salt);Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
     this.save(USERS.map(u=>u.utilizador===un?{...u,...patch}:u));
     if(USER&&USER.utilizador===un){USER={...USER,...patch};if(patch.hash)lsSet(US,sessKey(USER))}},
   removeUser(un){this.save(USERS.filter(u=>u.utilizador!==un))},
@@ -356,7 +388,7 @@ const Acc={
   /* sem servidor: os jogos ficam no dispositivo (passam-se entre tablets com a cópia de segurança) */
   push(){},remove(){},listen(){}
 };
-function renderFirst(){$("#b-new").hidden=true;$("#who").innerHTML="";
+function renderFirst(){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who").innerHTML="";
   $("#app").innerHTML=`<div class="login"><div class="card lcard"><img src="${CREST}" alt=""><h2>Configuração inicial</h2>
    <p class="hint" style="margin:-6px 0 14px">Ainda não há administrador em <b>utilizadores.json</b>. Cria-o aqui. A palavra-passe fica guardada apenas de forma cifrada.</p>
    <form id="ff"><label class="f">Nome<input id="f-n" value="Administrador" required></label>
@@ -369,7 +401,7 @@ function renderFirst(){$("#b-new").hidden=true;$("#who").innerHTML="";
     if(!validUser(un)){err.textContent="Utilizador: 3 a 30 caracteres, só letras minúsculas, números, ponto, hífen ou _.";return}
     if(pw!==$("#f-r").value){err.textContent="As palavras-passe não coincidem.";return}
     try{await Acc.createUser({nome:$("#f-n").value.trim()||"Administrador",utilizador:un,pw,perfil:"coordenador",escaloes:[]});const u=await Acc.login(un,pw);SETVIEW="users";onUser(u)}catch(x){err.textContent=x.message}}}
-function renderLogin(msg){$("#b-new").hidden=true;$("#who").innerHTML="";
+function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who").innerHTML="";
   $("#app").innerHTML=`<div class="login"><div class="card lcard"><img src="${CREST}" alt=""><h2>Estatísticas</h2><p class="hint" style="margin:-6px 0 14px">FC Gaia Basquetebol · área privada</p>
    <form id="lf"><label class="f">Utilizador<input id="l-e" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
    <label class="f">Palavra-passe<input id="l-p" type="password" autocomplete="current-password" required></label>
@@ -379,19 +411,68 @@ function renderLogin(msg){$("#b-new").hidden=true;$("#who").innerHTML="";
    <p class="hint" style="margin-top:14px">Funciona sem internet. Os jogos ficam guardados neste dispositivo.</p></div></div>`;
   $("#lf").onsubmit=async e=>{e.preventDefault();$("#l-err").textContent="";try{onUser(await Acc.login($("#l-e").value,$("#l-p").value))}catch(x){$("#l-err").textContent=x.message}};
 }
-function whoBar(){$("#who").innerHTML=USER?`<span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":"Treinador · "+esc((USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
-  const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Termina ou sai do jogo antes de sair da conta");return}confirmBox("Sair da conta neste dispositivo?",async()=>{await Acc.logout();USER=null;G=null;renderLogin()})}}
+function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":"Treinador · "+esc((USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
+  const sy=$("#sync");if(sy){sy.onclick=()=>{Sync.soon(0);toast(Sync.tok()?(navigator.onLine?"A sincronizar…":"Sem internet: os jogos ficam guardados e seguem quando houver ligação"):"Base de dados não ligada (o administrador liga-a em Utilizadores)")};Sync.paint()}
+  const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo?",async()=>{await Acc.logout();USER=null;G=null;renderLogin()})}}
 function netState(){}
 function onUser(u){USER=u;stopTick();
   if(!u){renderLogin();return}
   if(u.ativo===false){USER=null;renderLogin("Conta desativada. Fala com o administrador.");Acc.logout();return}
-  whoBar();
+  whoBar();Sync.soon(500);
   G=load();if(G&&!canSee(G))G=null;
   if(G&&G.status!=="fim"){fixGame(G);render();startTick()}else{G=null;renderSetup()}}
+function askPw(cb){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><h3 style="margin-top:0">Confirma a tua palavra-passe</h3><p class="hint">Serve para guardar o acesso à base de dados de forma cifrada.</p><label class="f">Palavra-passe<input type="password" id="ap-p" autocomplete="current-password"></label><p class="err" id="ap-e"></p><div class="bar"><button class="btn gold" id="ap-ok">Confirmar</button><button class="btn" id="ap-x">Cancelar</button></div></div>`;
+  document.body.appendChild(m);m.querySelector("#ap-x").onclick=()=>m.remove();m.querySelector("#ap-ok").onclick=async()=>{try{await cb(m.querySelector("#ap-p").value);m.remove()}catch(x){m.querySelector("#ap-e").textContent=x.message}}}
 function pwPrompt(title,cb){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><h3 style="margin-top:0">${esc(title)}</h3><div style="display:grid;gap:10px"><label class="f">Nova palavra-passe<input type="text" id="pw-n" autocomplete="off" spellcheck="false"></label><label class="f">Repetir<input type="text" id="pw-r" autocomplete="off" spellcheck="false"></label></div><p class="err" id="pw-e"></p><div class="bar"><button class="btn gold" id="pw-ok">Guardar</button><button class="btn" id="pw-x">Cancelar</button></div></div>`;
   document.body.appendChild(m);m.querySelector("#pw-x").onclick=()=>m.remove();
   m.querySelector("#pw-ok").onclick=async()=>{const e=m.querySelector("#pw-e"),n=m.querySelector("#pw-n").value;if(n!==m.querySelector("#pw-r").value){e.textContent="As palavras-passe não coincidem.";return}
     try{await cb(n);m.remove()}catch(x){e.textContent=x.message}}}
+/* ---------- base de dados dos jogos: repositório privado no GitHub ----------
+   Cada jogo é um ficheiro jogos/<escalão>__<id>.json. Tudo é gravado primeiro no dispositivo;
+   quando há internet, envia o que falta e recebe os jogos dos outros dispositivos. */
+const GD={owner:"andreferraz12",repo:"fcgaia-estatisticas-dados",branch:"main",dir:"jogos"},DTK="fcgaia-stats-dados-token",DQK="fcgaia-stats-apagar";
+let PWMEM="";               // palavra-passe da sessão (só em memória) para proteger o acesso à base de dados
+const slug=t=>String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const b64s=str=>{const b=new TextEncoder().encode(str);let o="";for(let i=0;i<b.length;i+=8192)o+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(o)};
+const unb64s=s=>new TextDecoder().decode(Uint8Array.from(atob(String(s).replace(/\s/g,"")),c=>c.charCodeAt(0)));
+async function wrapKey(pw,salt){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt:new TextEncoder().encode("dados|"+salt),iterations:PBK},k,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function wrapTok(tok,pw,salt){const iv=crypto.getRandomValues(new Uint8Array(12));return {iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:"AES-GCM",iv},await wrapKey(pw,salt),new TextEncoder().encode(tok)))}}
+async function unwrapTok(w,pw,salt){return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(w.iv)},await wrapKey(pw,salt),unb64(w.ct)))}
+const Sync={st:"",busy:false,t:null,last:0,
+  tok(){return lsGet(DTK)},
+  file(g){return `${GD.dir}/${slug(g.team)}__${g.id}.json`},
+  dirty(g){return !g._sup||(g.upd||0)>g._sup},
+  pending(){return Object.values(readAll()).filter(g=>canSee(g)&&this.dirty(g)).length+this.dq().length},
+  dq(){try{return JSON.parse(lsGet(DQK)||"[]")}catch(e){return []}},
+  async api(path,opt){opt=opt||{};const url=`https://api.github.com/repos/${GD.owner}/${GD.repo}/contents/${path}`+(opt.method?"":`?ref=${GD.branch}&t=${Date.now()}`);
+    const r=await fetch(url,{method:opt.method||"GET",cache:"no-store",headers:{Authorization:"Bearer "+this.tok(),Accept:"application/vnd.github+json",...(opt.body?{"Content-Type":"application/json"}:{})},body:opt.body?JSON.stringify(opt.body):undefined});
+    if(r.status===401||r.status===403){this.st="erro";throw new Error("acesso")}return r},
+  soon(ms){clearTimeout(this.t);this.t=setTimeout(()=>this.run(),ms||0)},
+  del(g){if(!g||!g._sha)return;const q=this.dq();q.push({path:this.file(g),id:g.id});lsSet(DQK,JSON.stringify(q));this.soon(0)},
+  mark(id,sha,sup){const m=readAll();if(m[id]){m[id]._sha=sha;m[id]._sup=sup;writeAll(m)}if(G&&G.id===id){G._sha=sha;G._sup=sup}},
+  async push(g){const body={message:`Jogo ${g.teamName||g.team} vs ${g.opp} (${g.date})`,branch:GD.branch,content:b64s(JSON.stringify({...g,undo:[],_sha:undefined,_sup:undefined}))};
+    if(g._sha)body.sha=g._sha;let r=await this.api(this.file(g),{method:"PUT",body});
+    if(r.status===409||r.status===422){const cur=await this.api(this.file(g));if(cur.ok){const j=await cur.json();const rem=JSON.parse(unb64s(j.content));
+        if((rem.upd||0)>(g.upd||0)){this.adopt(rem,j.sha);return}body.sha=j.sha}else delete body.sha;r=await this.api(this.file(g),{method:"PUT",body})}
+    if(!r.ok)throw new Error("envio "+r.status);const j=await r.json();this.mark(g.id,j.content.sha,g.upd)},
+  adopt(rem,sha){const m=readAll(),loc=m[rem.id];if(G&&G.id===rem.id&&G.status!=="fim"&&loc&&this.dirty(loc))return false;
+    m[rem.id]={...rem,undo:(loc&&loc.undo)||[],_sha:sha,_sup:rem.upd};writeAll(m);if(G&&G.id===rem.id&&!G.running){G=fixGame(m[rem.id])}return true},
+  async run(){if(this.busy||!USER)return this.paint();if(!this.tok()){this.st="semtoken";return this.paint()}if(!navigator.onLine){this.st="offline";return this.paint()}
+    this.busy=true;this.st="sync";this.paint();let changed=false;
+    try{/* 1. apagar */const q=this.dq(),left=[];for(const d of q){const r=await this.api(d.path);if(r.ok){const j=await r.json();const x=await this.api(d.path,{method:"DELETE",body:{message:"Jogo apagado",sha:j.sha,branch:GD.branch}});if(!x.ok&&x.status!==404)left.push(d)}}lsSet(DQK,left.length?JSON.stringify(left):null);
+      /* 2. enviar */for(const g of Object.values(readAll()).filter(g=>canSee(g)&&this.dirty(g))){if(G&&G.id===g.id&&G.running&&Date.now()-this.last<40000)continue;await this.push(g)}
+      /* 3. receber */const r=await this.api(GD.dir);const list=r.status===404?[]:await r.json();if(!Array.isArray(list))throw new Error("lista");
+      const ok=new Set(allowed().map(slug)),seen=new Set(),m=readAll();
+      for(const f of list){const mm=f.name.match(/^(.+)__(.+)\.json$/);if(!mm||!ok.has(mm[1]))continue;const id=mm[2];seen.add(id);const loc=m[id];
+        if(loc&&loc._sha===f.sha)continue;if(loc&&this.dirty(loc)&&loc._sha)continue;
+        const x=await this.api(f.path);if(!x.ok)continue;const j=await x.json();const rem=JSON.parse(unb64s(j.content));if(!loc||(rem.upd||0)>=(loc.upd||0)){if(this.adopt(rem,j.sha))changed=true}else this.mark(id,j.sha,loc._sup)}
+      const m2=readAll();Object.values(m2).forEach(g=>{if(g._sha&&!seen.has(g.id)&&canSee(g)&&!(G&&G.id===g.id)){delete m2[g.id];changed=true}});if(changed)writeAll(m2);
+      this.st="ok";this.last=Date.now()}
+    catch(e){console.warn("sync",e);if(this.st!=="erro")this.st=navigator.onLine?"falha":"offline"}
+    this.busy=false;this.paint();if(changed&&!G)renderSetup()},
+  paint(){const e=$("#sync");if(!e)return;const n=this.pending();const S={semtoken:["Só neste dispositivo","off"],offline:[n?`Offline · ${n} por enviar`:"Offline","off"],sync:["A sincronizar…","on"],ok:[n?`${n} por enviar`:"Sincronizado","ok"],falha:[`Falhou · ${n} por enviar`,"off"],erro:["Sem acesso à base de dados","bad"]}[this.st]||[n?`${n} por enviar`:"…","on"];
+    e.textContent=(S[1]==="ok"&&!n?"☁︎ ":"")+S[0];e.className="sync "+S[1];e.title=this.st==="semtoken"?"Base de dados não ligada: os jogos ficam neste dispositivo":"Os jogos são gravados no dispositivo e enviados para a base de dados quando há internet"}};
 /* gestão de utilizadores */
 let UEDIT=null;
 function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&&PUBST!=="ok"&&!busy;
@@ -409,10 +490,26 @@ function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&
   return `<div class="card pub${pend||err?" on":""}"><h3 style="margin-top:0">${busy?"⏳ A publicar…":err?"⚠️ Por publicar":pend?"⚠️ Alterações por publicar":"✅ Publicado no site"}</h3>
    <p class="hint" style="margin-top:0">${busy?"A enviar utilizadores.json para o GitHub.":err?esc(PUBST):pend?"Há alterações que ainda não foram enviadas.":"Cada alteração é enviada automaticamente para o GitHub e fica ativa nos outros dispositivos em 1 a 2 minutos."}</p>
    <div class="bar">${pend||err?`<button class="btn gold" id="gh-pub"${busy?" disabled":""}>Publicar agora</button><button class="btn" id="u-disc">Descartar alterações</button>`:""}<button class="btn sm ghost" id="gh-off">Desligar GitHub neste dispositivo</button></div></div>`}
+function dbCard(){const tk=!!Sync.tok(),sem=USERS.filter(u=>u.ativo!==false&&!u.dk);
+  if(tk)return `<div class="card pub"><h3 style="margin-top:0">☁︎ Base de dados dos jogos ligada</h3><p class="hint" style="margin-top:0">Os jogos são enviados para o repositório privado <b>${GD.repo}</b> sempre que há internet, e cada pessoa recebe os jogos dos seus escalões.${sem.length?` <b>Sem acesso ainda:</b> ${sem.map(u=>esc(u.nome)).join(", ")}. Para ativar, carrega em “Palavra-passe” e define uma nova para essa pessoa.`:""}</p></div>`;
+  return `<div class="card pub on"><h3 style="margin-top:0">☁︎ Ligar a base de dados dos jogos</h3>
+   <p class="hint" style="margin-top:0">Sem isto, cada jogo fica só no tablet onde foi feito. Faz-se uma vez:</p>
+   <details class="ghh" open><summary>Como preparar (5 minutos)</summary><ol class="hint">
+    <li>No GitHub, cria um repositório <b>privado</b> chamado <b>${GD.repo}</b>. Marca “Add a README file”.</li>
+    <li>Cria um token fine-grained só para esse repositório, com <b>Contents: Read and write</b> (como fizeste para os utilizadores).</li>
+    <li>Cola-o aqui. O acesso fica guardado, cifrado com a palavra-passe de cada pessoa, para que os tablets dos treinadores também enviem os jogos.</li></ol></details>
+   <div class="row"><label class="f grow">Token da base de dados<input id="db-t" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label></div>
+   <p class="err" id="db-e"></p><div class="bar"><button class="btn gold" id="db-on">Ligar base de dados</button></div></div>`}
+async function dbConnect(t,pw){const r=await fetch(`https://api.github.com/repos/${GD.owner}/${GD.repo}`,{headers:{Authorization:"Bearer "+t,Accept:"application/vnd.github+json"},cache:"no-store"});
+  if(r.status===404)throw new Error(`Não encontrei o repositório ${GD.repo} (ou o token não tem acesso a ele).`);if(!r.ok)throw new Error("O token não é válido.");
+  const j=await r.json();if(j.permissions&&!j.permissions.push)throw new Error("O token não tem permissão de escrita (Contents: Read and write).");
+  if(!j.private&&!confirm("Atenção: o repositório é público e os jogos ficariam visíveis para todos. Continuar mesmo assim?"))throw new Error("Torna o repositório privado em Settings e tenta outra vez.");
+  lsSet(DTK,t);const me=USERS.find(u=>u.utilizador===USER.utilizador);await Acc.updateUser(USER.utilizador,{dk:await wrapTok(t,pw,me.salt)})}
 function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||String(a.nome).localeCompare(b.nome));
   const chk=(sel)=>ESC.map(([id,n])=>`<label class="chk"><input type="checkbox" value="${esc(id)}"${(sel||[]).includes(id)?" checked":""}> ${esc(n)}</label>`).join("");
   const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();
   return `<h2>Utilizadores</h2>
+  ${dbCard()}
   ${pubCard(pend)}
   <div class="card" style="margin-top:14px"><h3 style="margin-top:0">${ed?"Escalões de "+esc(ed.nome):"Novo utilizador"}</h3>
    ${ed?"":`<div class="row"><label class="f grow">Nome<input id="u-n" placeholder="Ex.: Rui Martins"></label><label class="f grow">Utilizador<input id="u-u" placeholder="Ex.: rui.martins" autocapitalize="none" spellcheck="false"></label><label class="f">Palavra-passe inicial<input id="u-p" type="text" placeholder="mín. ${PWMIN} caracteres" autocomplete="off" spellcheck="false"></label></div>`}
@@ -421,9 +518,12 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
    <div class="bar">${ed?`<button class="btn gold" id="u-save">Guardar escalões</button><button class="btn" id="u-cancel">Cancelar</button>`:`<button class="btn gold" id="u-add">Criar utilizador</button>`}</div>
    <p class="hint">Dá ao treinador o nome de utilizador e a palavra-passe em pessoa, nunca por escrito no repositório. Se alguém se esquecer da palavra-passe, usa “Palavra-passe” para definir uma nova. Os jogos ficam ligados ao escalão, por isso não se perdem.</p></div>
   <div class="tblw" style="margin-top:14px"><table class="bs ul"><thead><tr><th class="l">Nome</th><th class="l">Utilizador</th><th class="l">Perfil</th><th class="l">Escalões</th><th>Estado</th><th></th></tr></thead><tbody>
-   ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador";return `<tr class="${u.ativo===false?"off":""}"><td class="l"><b>${esc(u.nome)}</b></td><td class="l">${esc(u.utilizador)}</td><td class="l">${adm?"Administrador":"Treinador"}</td><td class="l">${adm?"<small>todos</small>":(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join(" ")||"<small>nenhum</small>"}</td><td>${u.ativo===false?"Desativado":"Ativo"}</td>
+   ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador";return `<tr class="${u.ativo===false?"off":""}"><td class="l"><b>${esc(u.nome)}</b></td><td class="l">${esc(u.utilizador)}</td><td class="l">${adm?"Administrador":"Treinador"}</td><td class="l">${adm?"<small>todos</small>":(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join(" ")||"<small>nenhum</small>"}</td><td>${u.ativo===false?"Desativado":"Ativo"}${Sync.tok()&&!u.dk&&u.ativo!==false?`<br><small class="warn">sem base de dados</small>`:""}</td>
     <td class="acts-u">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Escalões</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm ${u.ativo===false?"":"danger"}" data-ua="${esc(u.utilizador)}" data-on="${u.ativo===false?1:0}">${u.ativo===false?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}">Apagar</button>`}</td></tr>`}).join("")}</tbody></table></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
+  const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
+    const go=async pw=>{dbo.disabled=true;try{await dbConnect(t,pw);toast("Base de dados ligada");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
+    if(PWMEM)return go(PWMEM);askPw(async pw=>{const me=USERS.find(u=>u.utilizador===USER.utilizador);if(await pwHash(pw,me.salt)!==me.hash)throw new Error("Palavra-passe errada.");PWMEM=pw;go(pw)})};
   const dl=$("#u-dl");if(dl)dl.onclick=()=>{Acc.download();toast("utilizadores.json descarregado")};
   const on=$("#gh-on");if(on)on.onclick=async()=>{const t=$("#gh-t").value.trim();if(!t){$("#gh-e").textContent="Cola o token.";return}
     lsSet(GK,t);on.disabled=true;try{await Acc.publish();toast("Ligado ao GitHub e publicado")}catch(e){lsSet(GK,null);PUBST="";renderSetup();const ee=$("#gh-e");if(ee)ee.textContent=e.message}};
@@ -451,7 +551,14 @@ async function boot(){$("#crest").src=CREST;
   if(!DATA)DATA={plantel:{},games:[]};
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   Acc.init(onUser);
-  $("#b-new").onclick=()=>{if(G&&G.running){toast("Pára o relógio primeiro");return}store();G=null;stopTick();SIDE="us";renderSetup()}}
+  $("#b-new").onclick=()=>{if(G&&G.running){toast("Pára o relógio primeiro");return}store();G=null;stopTick();SIDE="us";renderSetup()};
+  $("#b-save").onclick=()=>{if(!G)return;const fin=G.status==="fim";if(G.running){G.running=false;addLog({t:"pausa"})}store();const n=G.opp;G=null;stopTick();SIDE="us";SEL=null;SUB=null;
+    try{localStorage.removeItem(KC)}catch(e){}SETVIEW="jogos";renderSetup();if(!fin)toast("Jogo gravado. Continua em Jogos quando quiseres");Sync.soon(0)};
+  $("#b-cancel").onclick=()=>{if(!G)return;confirmBox(`Cancelar o jogo vs ${G.opp}? Tudo o que foi registado neste jogo é apagado.`,()=>{const g=G;G=null;stopTick();
+    const m=readAll();delete m[g.id];writeAll(m);Sync.del(g);try{localStorage.removeItem(KC)}catch(e){}SEL=null;SUB=null;SIDE="us";SETVIEW="novo";renderSetup();toast("Jogo cancelado")})};
+  addEventListener("online",()=>Sync.soon(0));addEventListener("offline",()=>Sync.paint());
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(G)store();Sync.soon(0)}});
+  setInterval(()=>Sync.soon(0),90000)}
 
 /* ---------- preparação ---------- */
 function teamGames(t){const today=new Date();today.setHours(0,0,0,0);
@@ -461,7 +568,7 @@ let SETVIEW="novo";      // novo | jogos | epoca
 let EP={team:"",mode:"tot",sort:"pts",excl:{},ath:null,shotA:""};
 function snav(){const n=visGames().length;return `<nav class="snav">${[["novo","Novo jogo"],["jogos","Jogos ("+n+")"],["epoca","Época · acumulado"]].concat(isCoord()?[["users","Utilizadores"]]:[]).map(([k,l])=>`<button data-sv="${k}" aria-pressed="${SETVIEW===k}">${l}</button>`).join("")}</nav>`}
 function bindNav(){document.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{SETVIEW=b.dataset.sv;renderSetup();window.scrollTo(0,0)})}
-function renderSetup(){$("#b-new").hidden=true;const S=SETUP;
+function renderSetup(){$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
   if(SETVIEW==="jogos"){$("#app").innerHTML=snav()+savedList();bindNav();bindSaved();return}
   if(SETVIEW==="epoca"){$("#app").innerHTML=snav()+seasonView();bindNav();bindSeason();return}
   if(SETVIEW==="users"&&isCoord()){$("#app").innerHTML=snav()+usersView();bindNav();bindUsers();return}
@@ -482,10 +589,10 @@ function renderSetup(){$("#b-new").hidden=true;const S=SETUP;
     <label class="f">Minutos por período<select id="s-per">${[5,6,8,10,12].map(n=>`<option${S.per==n?" selected":""}>${n}</option>`).join("")}</select></label>
   </div></div>
   ${S.team?`<div class="secth"><h3>Convocados <span class="cnt${nOn>=5?" ok":""}">${nOn}</span></h3><div class="bar" style="margin:0"><button class="btn sm" id="s-all">Todos</button><button class="btn sm" id="s-none">Nenhum</button></div></div>
-  <p class="hint" style="margin-top:0">Toca nos atletas que vão a jogo e confirma os números. O cinco inicial escolhe-se depois, no ecrã do jogo.</p>
-  <div class="pgrid">${players.map(p=>{const on=!!S.picked[p.id],n=S.nums[p.id]??p.num??"";return `<div class="pc${on?" on":""}" data-pick="${esc(p.id)}" role="button" tabindex="0" aria-pressed="${on}">
-     <div class="pcph">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="pcn">${esc(n||"–")}</span><span class="pcck">✓</span></div>
-     <div class="pcnm">${esc(p.name)}</div>${p.pos?`<div class="pcpos">${esc(p.pos)}</div>`:""}
+  <p class="hint" style="margin-top:0">Toca nos atletas que vão a jogo. O cinco inicial escolhe-se no ecrã do jogo.</p>
+  <div class="plist2">${players.map(p=>{const on=!!S.picked[p.id],n=S.nums[p.id]??p.num??"";return `<div class="prow${on?" on":""}" data-pick="${esc(p.id)}" role="checkbox" tabindex="0" aria-checked="${on}">
+     <span class="ck">✓</span><span class="av">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="nb">${esc(n||"–")}</span></span>
+     <span class="pnm">${esc(p.name)}${p.pos?`<small>${esc(p.pos)}</small>`:""}</span>
      <label class="pcnum">Nº<input data-num="${esc(p.id)}" inputmode="numeric" maxlength="3" value="${esc(n)}"></label></div>`}).join("")||`<p class="hint">Este escalão ainda não tem plantel no site. Acrescenta os atletas em baixo.</p>`}
    </div>
    <div class="row" style="margin-top:12px"><label class="f grow">Acrescentar atleta (não está no plantel)<input id="s-xname" placeholder="Nome"></label><label class="f"><span>Nº</span><input id="s-xnum" inputmode="numeric" style="width:80px"></label><button class="btn" id="s-xadd">Acrescentar</button></div>`:`<p class="hint">Escolhe a equipa para ver o plantel.</p>`}
@@ -498,9 +605,9 @@ function renderSetup(){$("#b-new").hidden=true;const S=SETUP;
   const so=$("#s-opp");if(so)so.oninput=e=>S.opp=e.target.value;
   $("#s-np").onchange=e=>S.np=+e.target.value;$("#s-per").onchange=e=>S.per=+e.target.value;
   const keepY=f=>{const y=scrollY;f();renderSetup();scrollTo(0,y)};
-  document.querySelectorAll(".pc[data-pick]").forEach(c=>{const tg=()=>keepY(()=>{const id=c.dataset.pick;S.picked[id]=!S.picked[id]});
+  document.querySelectorAll(".prow[data-pick]").forEach(c=>{const tg=()=>keepY(()=>{const id=c.dataset.pick;S.picked[id]=!S.picked[id]});
     c.onclick=e=>{if(e.target.closest(".pcnum"))return;tg()};c.onkeydown=e=>{if((e.key===" "||e.key==="Enter")&&!e.target.closest("input")){e.preventDefault();tg()}}});
-  document.querySelectorAll("[data-num]").forEach(i=>{i.oninput=()=>{S.nums[i.dataset.num]=i.value.replace(/\D/g,"");const n=i.closest(".pc").querySelector(".pcn");if(n)n.textContent=S.nums[i.dataset.num]||"–"};i.onfocus=()=>{if(!S.picked[i.dataset.num]){S.picked[i.dataset.num]=true;i.closest(".pc").classList.add("on")}}});
+  document.querySelectorAll("[data-num]").forEach(i=>{i.oninput=()=>{S.nums[i.dataset.num]=i.value.replace(/\D/g,"");const n=i.closest(".prow").querySelector(".nb");if(n)n.textContent=S.nums[i.dataset.num]||"–"};i.onfocus=()=>{if(!S.picked[i.dataset.num]){S.picked[i.dataset.num]=true;i.closest(".prow").classList.add("on")}}});
   const sa=$("#s-all");if(sa)sa.onclick=()=>keepY(()=>players.forEach(p=>S.picked[p.id]=true));
   const sn=$("#s-none");if(sn)sn.onclick=()=>keepY(()=>{S.picked={}});
   const xa=$("#s-xadd");if(xa)xa.onclick=()=>{const n=$("#s-xname").value.trim();if(!n)return;const id="x"+Date.now();S.extra=(S.extra||[]).concat([{id,name:n,num:$("#s-xnum").value.replace(/\D/g,""),team:S.team}]);S.picked[id]=true;renderSetup()};
@@ -518,14 +625,14 @@ function renderSetup(){$("#b-new").hidden=true;const S=SETUP;
 /* ---------- jogos guardados ---------- */
 function savedList(){const all=visGames().sort((a,b)=>(b.created||0)-(a.created||0));
   return `<h2>Jogos guardados</h2>
-  ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}</span></div>
+  ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
     <div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"?"Ver":"Continuar"}</button><button class="btn sm gold" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div></div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
   <div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button><label class="btn" for="bk-in">Importar cópia</label><input type="file" id="bk-in" accept=".json,application/json" hidden></div>
-  <p class="hint">Os jogos ficam guardados só neste dispositivo. Para os passar para outro tablet ou para o coordenador, exporta a cópia de segurança e importa-a no outro dispositivo. Se o mesmo jogo já existir, fica a versão mais recente.</p>`}
+  <p class="hint">${Sync.tok()?"Os jogos ficam gravados neste dispositivo e são enviados para a base de dados do clube sempre que há internet. Aparecem nos tablets de quem tem o mesmo escalão.":"Os jogos ficam gravados só neste dispositivo, porque a base de dados ainda não está ligada. Para os passar para outro tablet, exporta a cópia de segurança e importa-a no outro."}</p>`}
 function bindSaved(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"?"bs":"live";if(G.status!=="fim")store();render();startTick()});
   document.querySelectorAll("[data-xls]").forEach(b=>b.onclick=()=>{const keep=G;G=fixGame(readAll()[b.dataset.xls]);exportXLS();G=keep});
-  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();delete m[b.dataset.del];writeAll(m);Acc.remove(b.dataset.del);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();Sync.del(m[b.dataset.del]);delete m[b.dataset.del];writeAll(m);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
   const bo=$("#bk-out");if(bo)bo.onclick=()=>{const blob=new Blob([JSON.stringify({app:"fcgaia-estatisticas",v:3,exportado:new Date().toISOString(),jogos:readAll()})],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="fcgaia-estatisticas-copia-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();toast("Cópia de segurança exportada")};
   const bi=$("#bk-in");if(bi)bi.onchange=()=>{const f=bi.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);const js=o.jogos||{};const m=readAll();let n=0;Object.entries(js).forEach(([k,g])=>{if(g&&g.st&&g.roster&&canSee(g)&&(!m[k]||(g.upd||0)>=(m[k].upd||0))){m[k]=g;n++}});writeAll(m);toast(n+" jogo(s) importado(s)");renderSetup()}catch(e){toast("Ficheiro inválido")}};r.readAsText(f)}}
@@ -692,7 +799,7 @@ function bindDrag(){document.querySelectorAll(".live .pl[data-p]").forEach(el=>e
 function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
   if(G.q>=G.np&&G.us!==G.them){confirmBox("Terminar o jogo?",()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render()});return}
   const ot=G.q>=G.np;confirmBox(ot?"Jogo empatado: começar prolongamento (5 min)?":"Passar ao "+qLabel(G.q+1)+"?",()=>{G.undo=[];G.q++;G.clock=(ot?5:G.per)*60;addLog({t:"iniq"});store();render()})}
-const LBL={"2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3+":"Triplo convertido","3-":"Triplo falhado","1+":"Lance livre convertido","1-":"Lance livre falhado",
+const LBL={pausa:"Jogo gravado (relógio parado)","2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3+":"Triplo convertido","3-":"Triplo falhado","1+":"Lance livre convertido","1-":"Lance livre falhado",
  or:"Ressalto ofensivo",dr:"Ressalto defensivo",ast:"Assistência",stl:"Roubo de bola",blk:"Desarme de lançamento",tov:"Perda de bola",fp:"Falta pessoal",fu:"Falta antidesportiva",ft:"Falta técnica",fd:"Falta recebida",
  o1:"Adversário: lance livre",o2:"Adversário: 2 pontos",o3:"Adversário: 3 pontos",opf:"Adversário: falta",sub:"Substituição",fimq:"Fim do período",iniq:"Início do período",fim:"Fim do jogo"};
 function logText(e){if(e.side==="o")return "Adversário — "+(LBL[e.t]||e.t);const p=e.id?pById(e.id):null;
@@ -702,11 +809,14 @@ function totals(){const t=STAT0();Object.values(G.st).forEach(s=>Object.keys(t).
 const pct=(m,a)=>a?Math.round(100*m/a)+"%":"–";
 const eff=s=>s.pts+s.or+s.dr+s.ast+s.stl+s.blk-(s.a2-s.m2)-(s.a3-s.m3)-(s.af-s.mf)-s.tov;
 function bsRows(){return G.roster.map(p=>{const s=G.st[p.id];return {p,s}})}
-function render(){if(!G)return renderSetup();$("#b-new").hidden=false;const fin=G.status==="fim";
+function render(){if(!G)return renderSetup();const fin=G.status==="fim";$("#b-new").hidden=true;$("#gact").hidden=false;
+  $("#b-save").textContent=fin?"‹ Voltar":"💾 Gravar";$("#b-cancel").hidden=fin;
   const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
   const board=`<div class="board"><div class="tm"><span class="n">FC Gaia · ${esc(G.teamName)}</span><span class="s">${G.us}</span><span class="tf">Faltas equipa <b class="${tfU>=4?"bonus":""}">${tfU}</b></span></div>
-   <div class="clock"><span class="p">${fin?"Final":qLabel(G.q)}</span><span class="t${G.running?" run":""}" id="clk">${fmtT(G.clock)}</span>
-    ${fin?"":`<div class="cb"><button class="btn${G.running?"":" gold"}" id="c-run">${G.running?"Parar":"Iniciar"}</button><button class="btn" id="c-adj" title="Acertar relógio">±</button><button class="btn" id="c-next">${G.q>=G.np&&G.us!==G.them?"Terminar":"Período ›"}</button></div>`}</div>
+   <div class="clock"><span class="p">${fin?"Final":qLabel(G.q)}</span>
+    <div class="crow">${fin?"":`<button class="cbtn run${G.running?" on":""}" id="c-run">${G.running?"❚❚ Parar":"▶ Iniciar"}</button>`}
+     <button class="t${G.running?" run":""}" id="clk" ${fin?"disabled":""} title="Toca para corrigir o tempo">${fmtT(G.clock)}</button>
+     ${fin?"":`<button class="cbtn" id="c-next">${G.q>=G.np&&G.us!==G.them?"Terminar":"Período ›"}</button>`}</div></div>
    <div class="tm r"><span class="n">${esc(G.opp)}</span><span class="s">${G.them}</span><span class="tf">Faltas equipa <b class="${tfT>=4?"bonus":""}">${tfT}</b></span>
     ${fin?"":`<div class="opp"><button class="btn" data-o="o1">+1</button><button class="btn" data-o="o2">+2</button><button class="btn" data-o="o3">+3</button><button class="btn" data-o="opf">Falta</button></div>`}</div></div>`;
   const tabs=`<div class="tabs" role="tablist">${[["live","Jogo"],["bs","Estatísticas"],["pbp","Jogadas"]].map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
@@ -778,12 +888,26 @@ function bind(){
   const bs=$("#b-sub");if(bs)bs.onclick=subClick;document.querySelectorAll("[data-subbtn]").forEach(b=>b.onclick=subClick);
   const cr=$("#c-run");if(cr)cr.onclick=()=>{if(G.clock<=0){toast("Período terminado");return}if(!G.running&&G.oncourt.length<5){toast("Escolhe primeiro o cinco inicial");return}
     if(!G.running&&!G.start5)G.start5=G.oncourt.slice();G.running=!G.running;store();render()};
-  const ca=$("#c-adj");if(ca)ca.onclick=()=>{if(G.running){toast("Pára o relógio primeiro");return}const v=prompt("Tempo que falta (mm:ss)",fmtT(G.clock));if(!v)return;const m=v.match(/^(\d{1,2}):(\d{2})$/);if(!m){toast("Formato mm:ss");return}G.clock=Math.min(+m[1]*60+ +m[2],(G.q>G.np?5:G.per)*60);store();render()};
+  const ca=$("#clk");if(ca&&G.status!=="fim")ca.onclick=clockEdit;
   const cn=$("#c-next");if(cn)cn.onclick=nextQ;
   const bu=$("#b-undo");if(bu)bu.onclick=undo;
   document.querySelectorAll("#b-xls").forEach(b=>b.onclick=exportXLS);
   const ro=$("#b-reopen");if(ro)ro.onclick=()=>{G.status="jogo";store();VIEW="live";render()};
   const bl=$("#b-list");if(bl)bl.onclick=()=>{G=null;stopTick();renderSetup()}}
+/* corrigir o tempo: botões grandes de ±, ou escrever mm:ss */
+function clockEdit(){const was=G.running;if(was){G.running=false;store();render()}let v=Math.round(G.clock);const max=(G.q>G.np?5:G.per)*60;
+  const m=document.createElement("div");m.className="modal";
+  const paint=()=>{m.querySelector("#ce-t").value=fmtT(v)};
+  m.innerHTML=`<div class="card ce"><h3 style="margin-top:0">Corrigir o tempo · ${esc(qLabel(G.q))}</h3>
+   <input id="ce-t" class="ce-t" inputmode="numeric" aria-label="Tempo que falta (mm:ss)">
+   <div class="ce-g">${[[-60,"−1 min"],[-10,"−10 s"],[-1,"−1 s"],[1,"+1 s"],[10,"+10 s"],[60,"+1 min"]].map(([d,l])=>`<button class="btn" data-d="${d}">${l}</button>`).join("")}</div>
+   <p class="err" id="ce-e"></p><div class="bar"><button class="btn gold" id="ce-ok">Guardar tempo</button><button class="btn" id="ce-x">Cancelar</button></div></div>`;
+  document.body.appendChild(m);paint();
+  m.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{v=Math.max(0,Math.min(max,v+ +b.dataset.d));paint()});
+  m.querySelector("#ce-t").oninput=e=>{const x=e.target.value.match(/^(\d{1,2}):?(\d{2})$/);if(x)v=Math.min(max,+x[1]*60+ +x[2])};
+  m.querySelector("#ce-x").onclick=()=>m.remove();
+  m.querySelector("#ce-ok").onclick=()=>{const x=m.querySelector("#ce-t").value.match(/^(\d{1,2}):?(\d{2})$/);if(!x||+x[2]>59){m.querySelector("#ce-e").textContent="Escreve o tempo como mm:ss (ex.: 07:45).";return}
+    v=Math.min(max,+x[1]*60+ +x[2]);G.clock=v;store();m.remove();render();toast("Tempo corrigido para "+fmtT(v))}}
 function confirmBox(msg,ok){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><p style="margin:0 0 14px;font-size:17px">${esc(msg)}</p><div class="bar"><button class="btn gold" id="m-ok">Sim</button><button class="btn" id="m-no">Não</button></div></div>`;
   document.body.appendChild(m);m.querySelector("#m-ok").onclick=()=>{m.remove();ok()};m.querySelector("#m-no").onclick=()=>m.remove()}
 

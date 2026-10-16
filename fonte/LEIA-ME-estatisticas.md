@@ -35,7 +35,24 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
   - No separador Utilizadores, só para o admin, cria-se, mudam-se escalões e palavra-passe, desativa-se ou apaga-se. Cada alteração é enviada diretamente para `utilizadores.json` (raiz do repositório fcgaia-estatisticas) no GitHub (API de conteúdos) com um token “fine-grained” só deste repositório e com permissão Contents: Read and write. O token é colado uma vez no dispositivo do admin, fica só nesse dispositivo e nunca vai para o código nem para o chat. Sem token, continua a dar para descarregar o ficheiro e carregá-lo à mão.
   - Se o ficheiro não tiver administrador, a app abre a “Configuração inicial” para o criar.
   - Mudar a palavra-passe de alguém termina as sessões abertas dessa pessoa, depois de publicado.
-- **Jogos só no dispositivo:** passam entre tablets com Exportar/Importar cópia. Na importação, fica a versão mais recente de cada jogo.
+- **Base de dados dos jogos:**
+  - Os jogos ficam no repositório **privado** `andreferraz12/fcgaia-estatisticas-dados`, um ficheiro por jogo em `jogos/<escalão>__<id>.json`.
+  - Tudo é gravado primeiro no dispositivo. Quando há internet, a app envia o que falta e recebe os jogos dos escalões de cada pessoa:
+    - ao entrar na conta;
+    - quando a ligação volta;
+    - de 90 em 90 segundos;
+    - quando se carrega em Gravar;
+    - quando se sai da app.
+  - O acesso é um token fine-grained só para esse repositório (Contents: Read and write).
+    - O admin cola-o uma vez em Utilizadores.
+    - Fica cifrado com AES-GCM em `dk` de cada utilizador do `utilizadores.json`, com uma chave PBKDF2 derivada da palavra-passe dessa pessoa. Assim, os tablets dos treinadores também sincronizam.
+    - Quem foi criado antes de a base de dados estar ligada só fica com acesso quando o admin lhe define uma nova palavra-passe.
+  - Sair da conta apaga o token do dispositivo.
+  - Sem base de dados ligada, os jogos ficam só no dispositivo, e passam entre tablets com Exportar/Importar cópia.
+- **No jogo:**
+  - O relógio é grande, com Iniciar/Parar e Período ao lado. Tocar no tempo abre a correção (±1 min, ±10 s, ±1 s, ou escrever mm:ss).
+  - No topo há Gravar, que grava, envia e volta à lista, e Cancelar jogo, que apaga o jogo neste dispositivo e na base de dados.
+  - Os convocados escolhem-se numa lista com foto pequena.
 
 ## Ficheiros (no zip)
 - `stats_src.html`: código-fonte da app.
