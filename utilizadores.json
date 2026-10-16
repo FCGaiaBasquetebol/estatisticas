@@ -1,5 +1,5 @@
 {
- "atualizado": 1792188974135,
+ "atualizado": 1792189556036,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -80,6 +80,22 @@
    "ativo": true,
    "salt": "yPHhRJSH+7V6WbdbUsNaLw==",
    "hash": "UA1ebialtOp10UtdLBdtRK5/zaYJpzOcPUmZxPunFHQ="
+  },
+  {
+   "utilizador": "miguel.costa",
+   "nome": "Miguel Costa",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-18 Masc A",
+    "Sub-18 Masc B",
+    "Sub-16 Masc A",
+    "Sub-16 Masc B",
+    "Sub-14 Masc A",
+    "Sub-14 Masc B"
+   ],
+   "ativo": true,
+   "salt": "/nludnlt/YGPHdOzyMyPOQ==",
+   "hash": "TH7hjswl3x4tPNX5m6reGmmXHEqatMzMsB9ICinjL0k="
   }
  ]
 }
