@@ -391,6 +391,7 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
  body.fit .plist.court5 .pl{grid-template-columns:34px minmax(0,1fr) auto}body.fit .plist.court5 .pts b{font-size:20px}body.fit .plist.court5 .mn{display:none}}
 @media (max-width:600px){.plist.court5 .pl .pts{display:none}}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.ver{margin-top:22px;font-size:11px;color:var(--dim)}
 </style></head>
 <body>
 <header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
@@ -400,6 +401,7 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const CREST=/*CREST*/"";
+const VER=/*VER*/"";
 let DATA=/*DATA*/null;
 const TEAMS=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"],["Sub-12","Sub 12"],["Sub-10","Sub 10"],["Sub-8","Sub 8"]];
 const TN=Object.fromEntries(TEAMS);
@@ -705,7 +707,7 @@ function renderSetup(){document.body.classList.remove("fit");$("#b-new").hidden=
    <div class="row" style="margin-top:12px"><label class="f grow">Acrescentar atleta (não está no plantel)<input id="s-xname" placeholder="Nome"></label><label class="f"><span>Nº</span><input id="s-xnum" inputmode="numeric" style="width:80px"></label><button class="btn" id="s-xadd">Acrescentar</button></div>`:`<p class="hint">Escolhe a equipa para ver o plantel.</p>`}
   <p class="err" id="s-err"></p>
   <div class="bar"><button class="btn gold" id="s-go"${S.team?"":" disabled"}>Começar jogo${S.team?" · "+nOn+" convocados":""}</button></div>
-`;
+<p class="ver">Versão ${esc(VER||"local")}</p>`;
   bindNav();
   $("#s-team").onchange=e=>{S.team=e.target.value;const g0=S.team?teamGames(S.team)[0]:null;S.game=g0?String(g0.num):"";S.picked={};renderSetup()};
   const sg=$("#s-game");if(sg)sg.onchange=e=>{S.game=e.target.value;renderSetup()};
