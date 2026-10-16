@@ -344,6 +344,10 @@ body.fit .pbp.mini{flex:none;margin-top:5px}body.fit .pbp.mini li+li{display:non
 @media (max-height:760px){body.fit .board{padding:2px 12px}body.fit .tm .s{font-size:32px}body.fit .clock .t{font-size:46px!important}
  body.fit .cbtn{min-height:40px;min-width:92px;font-size:14px}body.fit .opp .btn{padding:4px 8px}body.fit .tabs button{padding:3px 10px}
  body.fit .lcol .pl{min-height:44px;padding:4px 8px}body.fit .pl.bench{min-height:38px}}
+
+.pp{max-width:520px!important}.pp-g{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:6px}
+.pp-g .btn{padding:16px 6px;font-size:17px;display:flex;flex-direction:column;align-items:center;gap:2px}.pp-g .btn small{font-size:10px;letter-spacing:1px;opacity:.8}
+.pp-g .btn.cur{border-color:var(--gold);color:var(--gold)}
 </style></head>
 <body>
 <header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
@@ -856,6 +860,18 @@ function bindDrag(){document.querySelectorAll(".live .pl[data-p]").forEach(el=>e
     gh.remove();el.classList.remove("dragsrc");document.body.classList.remove("dragging");if(tgt)tgt.el.classList.remove("dropok");DRAG_T=Date.now();
     if(!tgt)return;if(tgt.kind==="swap"){from==="bench"?doSub(id,tgt.id):doSub(tgt.id,id)}else if(tgt.kind==="on")putOn(id);else takeOff(id)};
   addEventListener("pointermove",mv,{passive:false});addEventListener("pointerup",up);addEventListener("pointercancel",up)}))}
+/* escolher o período: todos à vista, o seguinte em destaque */
+function periodPick(){if(G.running){G.running=false;store();render()}
+  const last=G.q>=G.np?G.q+1:G.np,list=Array.from({length:last},(_,i)=>i+1),nx=G.q+1;
+  const m=document.createElement("div");m.className="modal";
+  m.innerHTML=`<div class="card pp"><h3 style="margin-top:0">Período</h3>
+   <div class="pp-g">${list.map(q=>`<button class="btn${q===nx?" gold":""}${q===G.q?" cur":""}" data-q="${q}">${esc(qLabel(q))}${q===G.q?"<small>atual</small>":q===nx?"<small>seguinte</small>":""}</button>`).join("")}</div>
+   <div class="bar"><button class="btn danger" id="pp-end">Terminar jogo</button><button class="btn" id="pp-x">Fechar</button></div></div>`;
+  document.body.appendChild(m);m.querySelector("#pp-x").onclick=()=>m.remove();
+  m.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{const q=+b.dataset.q;m.remove();if(q===G.q)return;
+    if(q>G.q){G.undo=[];addLog({t:"fimq"});G.q=q;G.clock=(q>G.np?5:G.per)*60;addLog({t:"iniq"});store();render();toast(qLabel(q)+" · "+fmtT(G.clock))}
+    else{G.q=q;store();render();toast("Voltaste ao "+qLabel(q)+". Acerta o tempo se precisares");clockEdit()}});
+  m.querySelector("#pp-end").onclick=()=>{m.remove();confirmBox(`Terminar o jogo? Resultado final ${G.us}–${G.them}.`,()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render();Sync.soon(0)})}}
 function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
   if(G.q>=G.np&&G.us!==G.them){confirmBox("Terminar o jogo?",()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render()});return}
   const ot=G.q>=G.np;confirmBox(ot?"Jogo empatado: começar prolongamento (5 min)?":"Passar ao "+qLabel(G.q+1)+"?",()=>{G.undo=[];G.q++;G.clock=(ot?5:G.per)*60;addLog({t:"iniq"});store();render()})}
@@ -881,7 +897,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim";document
    <div class="clock"><span class="p">${fin?"Final":qLabel(G.q)}</span>
     <div class="crow">${fin?"":`<button class="cbtn run${G.running?" on":""}" id="c-run">${G.running?"❚❚ Parar":"▶ Iniciar"}</button>`}
      <button class="t${G.running?" run":""}" id="clk" ${fin?"disabled":""} title="Toca para corrigir o tempo">${fmtT(G.clock)}</button>
-     ${fin?"":`<button class="cbtn" id="c-next">${G.q>=G.np&&G.us!==G.them?"Terminar":"Período ›"}</button>`}</div></div>
+     ${fin?"":`<button class="cbtn" id="c-next">Período ›</button>`}</div></div>
    <div class="tm r"><span class="n">${esc(G.opp)}</span><span class="s">${G.them}</span><span class="tf">Faltas equipa <b class="${tfT>=4?"bonus":""}">${tfT}</b></span>
     ${fin?"":`<div class="opp"><button class="btn" data-o="o1">+1</button><button class="btn" data-o="o2">+2</button><button class="btn" data-o="o3">+3</button><button class="btn" data-o="opf">Falta</button></div>`}</div></div>`;
   const tabs=`<div class="tabs" role="tablist">${[["live","Jogo"],["bs","Estatísticas"],["pbp","Jogadas"]].map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
@@ -927,11 +943,10 @@ function openShot(x,y){if(SIDE!=="them"&&(!SEL||!G.oncourt.includes(SEL))){toast
   pop.style.left=left+"%";pop.style.top=(top>60?top-4:top+6)+"%";pop.style.transform=top>60?"translate(-50%,-100%)":"translate(-50%,0)";
   const pp=SIDE==="them"?{num:"ADV"}:pById(SEL);
   pop.innerHTML=`<p>${SIDE==="them"?esc(G.opp):"#"+esc(pp.num)} · <b>${PEND.v} pts</b> · ${esc(shotZone(PEND.x,PEND.y))}</p><div class="sp-b"><button class="act mk" id="sp-ok">Convertido</button><button class="act ms" id="sp-ko">Falhado</button></div>
-   <div class="sp-l"><button class="btn sm" id="sp-tg">Mudar para ${PEND.v===3?2:3} pts</button><button class="btn sm ghost" id="sp-x">Cancelar</button></div>`;
+   <div class="sp-l"><button class="btn sm ghost" id="sp-x">Cancelar</button></div>`;
   pop.hidden=false;
   $("#sp-ok").onclick=()=>{const P=PEND;PEND=null;act(P.v+"+",{x:P.x,y:P.y})};
   $("#sp-ko").onclick=()=>{const P=PEND;PEND=null;act(P.v+"-",{x:P.x,y:P.y})};
-  $("#sp-tg").onclick=()=>{PEND.v=PEND.v===3?2:3;openShot(PEND.x,PEND.y)};
   $("#sp-x").onclick=()=>{PEND=null;pop.hidden=true;$("#tmpmk").innerHTML=""}}
 function pbpLi(e){const sc=["fimq","iniq","fim"].includes(e.t)?"":`${e.us}-${e.them}`;
   return `<li class="${e.side==="o"||(e.t[0]==="o"&&e.t!=="or")?"opp":""}"><span class="q">${e.q>G.np?"P"+(e.q-G.np):e.q+"P"}</span><span class="q">${fmtT(e.c)}</span><span>${esc(logText(e))}</span><span class="sc">${sc}</span></li>`}
@@ -954,7 +969,7 @@ function bind(){
   const cr=$("#c-run");if(cr)cr.onclick=()=>{if(G.clock<=0){toast("Período terminado");return}if(!G.running&&G.oncourt.length<5){toast("Escolhe primeiro o cinco inicial");return}
     if(!G.running&&!G.start5)G.start5=G.oncourt.slice();G.running=!G.running;store();render()};
   const ca=$("#clk");if(ca&&G.status!=="fim")ca.onclick=clockEdit;
-  const cn=$("#c-next");if(cn)cn.onclick=nextQ;
+  const cn=$("#c-next");if(cn)cn.onclick=periodPick;
   const bu=$("#b-undo");if(bu)bu.onclick=undo;
   document.querySelectorAll("#b-xls").forEach(b=>b.onclick=exportXLS);
   const ro=$("#b-reopen");if(ro)ro.onclick=()=>{G.status="jogo";store();VIEW="live";render()};
