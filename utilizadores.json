@@ -1,5 +1,5 @@
 {
- "atualizado": 1792188802378,
+ "atualizado": 1792188803898,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -9,17 +9,6 @@
    "ativo": true,
    "salt": "tldBaT0bBaWVI0CfxncfGg==",
    "hash": "hkjb9UVH9oh1NB3hVEI3LLDL/85Dy5+FxL5xbZGaQPc="
-  },
-  {
-   "utilizador": "duarte",
-   "nome": "Duarte",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-18 Masc A"
-   ],
-   "ativo": true,
-   "salt": "5lC7YPL+6/HUelNpCiHghA==",
-   "hash": "KClVRjcIxQXAJjzW2v1kLceZBQz8ZEOIRqmYhHZuFMs="
   }
  ]
 }
