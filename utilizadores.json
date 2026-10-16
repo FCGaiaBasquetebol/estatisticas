@@ -1,1 +1,14 @@
-{"atualizado":0,"utilizadores":[]}
+{
+ "atualizado": 1792168119794,
+ "utilizadores": [
+  {
+   "utilizador": "admin",
+   "nome": "Administrador",
+   "perfil": "coordenador",
+   "escaloes": [],
+   "ativo": true,
+   "salt": "tldBaT0bBaWVI0CfxncfGg==",
+   "hash": "hkjb9UVH9oh1NB3hVEI3LLDL/85Dy5+FxL5xbZGaQPc="
+  }
+ ]
+}
