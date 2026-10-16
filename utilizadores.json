@@ -1,5 +1,5 @@
 {
- "atualizado": 1792191878004,
+ "atualizado": 1792192487200,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -78,8 +78,8 @@
     "Sub-14 Masc B"
    ],
    "ativo": true,
-   "salt": "yPHhRJSH+7V6WbdbUsNaLw==",
-   "hash": "UA1ebialtOp10UtdLBdtRK5/zaYJpzOcPUmZxPunFHQ="
+   "salt": "gprQ5j8+FR+FSI0eBc4arw==",
+   "hash": "NiS7ay+ZjuWzqRabfOBYXvw3np/WmUmBPJoZw/03WIY="
   },
   {
    "utilizador": "miguel.costa",
