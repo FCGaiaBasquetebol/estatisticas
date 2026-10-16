@@ -199,6 +199,59 @@ table.bs tr.oncourt td:first-child{box-shadow:inset 3px 0 0 var(--ok)}
  .live{margin-top:6px;height:calc(100vh - 230px)}.lcol,.acol{max-height:calc(100vh - 230px);overflow:auto}
  .selname{font-size:18px;min-height:22px;margin:0 0 4px}svg.court{max-height:calc(100vh - 300px)}.cwrap{max-width:calc((100vh - 300px)*1.0714);margin:0 auto}
  .act{min-height:54px;padding:10px 4px}.pl{min-height:52px;padding:6px 10px}}
+
+/* ===== v2: convocados com fotos, cinco inicial no jogo, arrastar, ações junto ao campo ===== */
+.cnt{display:inline-block;min-width:26px;padding:0 7px;border-radius:999px;background:var(--panel2);color:var(--muted);font-size:14px;text-align:center;vertical-align:2px}
+.cnt.ok{background:var(--gold);color:#000}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.pc{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:border-color .12s,opacity .12s;opacity:.62}
+.pc.on{border-color:var(--gold);background:#221f0e;opacity:1}
+.pc:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.pcph{position:relative;aspect-ratio:1;border-radius:9px;overflow:hidden;background:#0b0b0b;display:grid;place-items:center}
+.pcph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top}
+.pcph .pcn{font-family:var(--f-disp);font-size:46px;color:var(--gold-lo)}
+.pcph img+.pcn{position:absolute;left:6px;bottom:6px;font-size:22px;line-height:1;color:var(--gold);background:rgba(0,0,0,.78);border-radius:7px;padding:3px 7px}
+.pcck{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:900;background:rgba(0,0,0,.6);color:transparent;border:2px solid #666}
+.pc.on .pcck{background:var(--gold);border-color:var(--gold);color:#000}
+.pcnm{font-weight:700;margin-top:7px;line-height:1.15;font-size:14px;min-height:2.3em}
+.pcpos{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.8px}
+.pcnum{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:var(--muted);font-weight:700}
+.pcnum input{width:100%;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px;text-align:center;font-weight:700;color:var(--ink)}
+/* atletas no jogo */
+.pl{grid-template-columns:44px 1fr auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.av{position:relative;width:42px;height:42px;display:grid;place-items:center}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:50%;border:2px solid #3a3a3a;pointer-events:none}
+.pl.sel .av img{border-color:var(--gold)}
+.av img+.nb{position:absolute;right:-7px;bottom:-5px;font-size:15px!important;line-height:1;background:#000;border:1px solid #333;border-radius:7px;padding:2px 4px;min-width:20px;color:var(--gold)}
+.pl.bench .av{width:36px;height:36px}
+.pl.slot{display:grid;place-items:center;border:2px dashed #555;background:transparent;color:var(--dim);font-family:var(--f-cond);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:12px;min-height:58px}
+.plist.court5.need{outline:2px dashed transparent}
+.dropok{outline:3px solid #5aa0ff!important;outline-offset:2px;background:#13233a!important}
+.dragsrc{opacity:.35}
+.dragghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;box-shadow:0 12px 30px rgba(0,0,0,.7);border-color:var(--gold)!important;opacity:.95}
+body.dragging{cursor:grabbing}
+.cmask.five{flex-direction:column;gap:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62);color:var(--ink)}
+.cmask.five b{font-family:var(--f-disp);font-size:28px;color:var(--gold);font-weight:400;text-transform:uppercase}
+/* ações dos dois lados do campo */
+.live{grid-template-columns:240px minmax(0,1fr)}
+.sidebar{flex-wrap:nowrap}.selname{flex:1;min-width:0;margin:0}.sb-r{display:flex;gap:6px;flex:none}
+.cgrid{display:grid;grid-template-columns:118px minmax(0,var(--cw,620px)) 118px;justify-content:center;gap:8px;align-items:stretch}
+.acts.side{display:grid;grid-template-columns:1fr;grid-template-rows:repeat(6,minmax(0,1fr));gap:7px}
+.acts.side .act{min-height:50px;padding:4px 2px;font-size:17px}
+.acts.side .act small{font-size:11px;letter-spacing:.5px}
+.cwrap{max-width:none!important;margin:0!important;align-self:center}
+.pbp.mini{margin-top:8px}
+@media (min-width:1101px){.cgrid{--cw:calc((100vh - 318px)*1.0714)}svg.court{max-height:calc(100vh - 318px)}.pbp.mini li+li{display:none}}
+.secth h3{white-space:nowrap}
+@media (min-width:1101px) and (min-height:600px){.live{height:auto}.lcol{max-height:calc(100vh - 200px)}}
+@media (max-width:1100px){
+ .live{grid-template-columns:minmax(0,1fr);grid-template-areas:"s" "c" "b"}
+ .plist.court5 .pl{grid-template-columns:34px minmax(0,1fr) auto}.plist.court5 .av{width:32px;height:32px}.plist.court5 .pl.slot{min-height:48px;font-size:10px}
+ .cgrid{--cw:calc(max(300px,calc(100vh - 470px))*1.0714);grid-template-columns:104px minmax(0,var(--cw)) 104px}
+ svg.court{max-height:max(300px,calc(100vh - 470px))}
+ .acts.side .act{font-size:15px}.acts.side .act small{font-size:10px}}
+@media (max-width:600px){.live{display:flex}.cgrid{grid-template-columns:1fr 1fr;grid-template-areas:"c c" "l r"}.cwrap{grid-area:c}.al{grid-area:l}.ar{grid-area:r}
+ .acts.side{grid-template-columns:1fr 1fr;grid-template-rows:none}.sidebar{flex-wrap:wrap}.plist.court5 .av{display:none}.plist.court5 .pl{grid-template-columns:1fr}}
 </style></head>
 <body>
 <header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
@@ -417,9 +470,9 @@ function renderSetup(){$("#b-new").hidden=true;const S=SETUP;
   const gameOpts=gs.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;const opp=g.home.startsWith("FC Gaia")?g.away:g.home;
     return `<option value="${g.num}"${String(S.game)===String(g.num)?" selected":""}>${d?d.getDate()+" "+MSH[d.getMonth()]:"s/ data"} · vs ${esc(opp)} (${g.home.startsWith("FC Gaia")?"casa":"fora"})${g.res?" · "+g.res:""}</option>`}).join("");
   const pl=(DATA.plantel&&DATA.plantel[S.team])||[];
-  const players=pl.map(p=>({id:String(p.id||p.name),name:pname(p.name),num:p.num}));
+  const players=pl.map(p=>({id:String(p.id||p.name),name:pname(p.name),num:p.num,photo:p.photo||"",pos:p.pos||""}));
   (S.extra||[]).filter(x=>x.team===S.team).forEach(x=>players.push(x));
-  const nOn=players.filter(p=>S.picked[p.id]).length,nSt=players.filter(p=>S.start[p.id]&&S.picked[p.id]).length;
+  const nOn=players.filter(p=>S.picked[p.id]).length;
   $("#app").innerHTML=snav()+`<h2>Novo jogo</h2>
   <div class="card"><div class="row">
     <label class="f grow">Equipa<select id="s-team"><option value="">— escolher —</option>${teamOpts}</select></label>
@@ -428,39 +481,39 @@ function renderSetup(){$("#b-new").hidden=true;const S=SETUP;
     <label class="f">Períodos<select id="s-np">${[2,4].map(n=>`<option${S.np==n?" selected":""}>${n}</option>`).join("")}</select></label>
     <label class="f">Minutos por período<select id="s-per">${[5,6,8,10,12].map(n=>`<option${S.per==n?" selected":""}>${n}</option>`).join("")}</select></label>
   </div></div>
-  ${S.team?`<h3>Convocados (${nOn}) · Cinco inicial (${nSt}/5)</h3>
-  <div class="roster">${players.map(p=>`<div class="ritem${S.picked[p.id]?" on":""}">
-     <input type="checkbox" data-pick="${esc(p.id)}"${S.picked[p.id]?" checked":""} aria-label="Convocar ${esc(p.name)}">
-     <input class="num" data-num="${esc(p.id)}" inputmode="numeric" maxlength="3" placeholder="nº" value="${esc(S.nums[p.id]??p.num??"")}">
-     <span class="nm">${esc(p.name)}</span>
-     <button class="st${S.start[p.id]&&S.picked[p.id]?" on":""}" data-start="${esc(p.id)}" title="Cinco inicial">5I</button></div>`).join("")}
+  ${S.team?`<div class="secth"><h3>Convocados <span class="cnt${nOn>=5?" ok":""}">${nOn}</span></h3><div class="bar" style="margin:0"><button class="btn sm" id="s-all">Todos</button><button class="btn sm" id="s-none">Nenhum</button></div></div>
+  <p class="hint" style="margin-top:0">Toca nos atletas que vão a jogo e confirma os números. O cinco inicial escolhe-se depois, no ecrã do jogo.</p>
+  <div class="pgrid">${players.map(p=>{const on=!!S.picked[p.id],n=S.nums[p.id]??p.num??"";return `<div class="pc${on?" on":""}" data-pick="${esc(p.id)}" role="button" tabindex="0" aria-pressed="${on}">
+     <div class="pcph">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" onerror="this.remove()">`:""}<span class="pcn">${esc(n||"–")}</span><span class="pcck">✓</span></div>
+     <div class="pcnm">${esc(p.name)}</div>${p.pos?`<div class="pcpos">${esc(p.pos)}</div>`:""}
+     <label class="pcnum">Nº<input data-num="${esc(p.id)}" inputmode="numeric" maxlength="3" value="${esc(n)}"></label></div>`}).join("")||`<p class="hint">Este escalão ainda não tem plantel no site. Acrescenta os atletas em baixo.</p>`}
    </div>
-   <div class="row" style="margin-top:10px"><label class="f grow">Acrescentar atleta (não está no plantel)<input id="s-xname" placeholder="Nome"></label><label class="f"><span>Nº</span><input id="s-xnum" inputmode="numeric" style="width:80px"></label><button class="btn" id="s-xadd">Acrescentar</button></div>
-   <p class="hint">Marca os convocados, confirma os números e escolhe o cinco inicial (5I). Os dados ficam só neste dispositivo.</p>`:`<p class="hint">Escolhe a equipa para ver o plantel.</p>`}
+   <div class="row" style="margin-top:12px"><label class="f grow">Acrescentar atleta (não está no plantel)<input id="s-xname" placeholder="Nome"></label><label class="f"><span>Nº</span><input id="s-xnum" inputmode="numeric" style="width:80px"></label><button class="btn" id="s-xadd">Acrescentar</button></div>`:`<p class="hint">Escolhe a equipa para ver o plantel.</p>`}
   <p class="err" id="s-err"></p>
-  <div class="bar"><button class="btn gold" id="s-go"${S.team?"":" disabled"}>Começar jogo</button></div>
+  <div class="bar"><button class="btn gold" id="s-go"${S.team?"":" disabled"}>Começar jogo${S.team?" · "+nOn+" convocados":""}</button></div>
 `;
   bindNav();
-  $("#s-team").onchange=e=>{S.team=e.target.value;const g0=S.team?teamGames(S.team)[0]:null;S.game=g0?String(g0.num):"";S.picked={};S.start={};renderSetup()};
+  $("#s-team").onchange=e=>{S.team=e.target.value;const g0=S.team?teamGames(S.team)[0]:null;S.game=g0?String(g0.num):"";S.picked={};renderSetup()};
   const sg=$("#s-game");if(sg)sg.onchange=e=>{S.game=e.target.value;renderSetup()};
   const so=$("#s-opp");if(so)so.oninput=e=>S.opp=e.target.value;
   $("#s-np").onchange=e=>S.np=+e.target.value;$("#s-per").onchange=e=>S.per=+e.target.value;
-  document.querySelectorAll("[data-pick]").forEach(c=>c.onchange=()=>{S.picked[c.dataset.pick]=c.checked;if(!c.checked)delete S.start[c.dataset.pick];renderSetup()});
-  document.querySelectorAll("[data-num]").forEach(i=>i.oninput=()=>S.nums[i.dataset.num]=i.value.replace(/\D/g,""));
-  document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{const id=b.dataset.start;if(!S.picked[id]){S.picked[id]=true}
-    if(S.start[id])delete S.start[id];else{if(Object.keys(S.start).filter(k=>S.start[k]&&S.picked[k]).length>=5){$("#s-err").textContent="Já tens 5 no cinco inicial.";return}S.start[id]=true}renderSetup()});
+  const keepY=f=>{const y=scrollY;f();renderSetup();scrollTo(0,y)};
+  document.querySelectorAll(".pc[data-pick]").forEach(c=>{const tg=()=>keepY(()=>{const id=c.dataset.pick;S.picked[id]=!S.picked[id]});
+    c.onclick=e=>{if(e.target.closest(".pcnum"))return;tg()};c.onkeydown=e=>{if((e.key===" "||e.key==="Enter")&&!e.target.closest("input")){e.preventDefault();tg()}}});
+  document.querySelectorAll("[data-num]").forEach(i=>{i.oninput=()=>{S.nums[i.dataset.num]=i.value.replace(/\D/g,"");const n=i.closest(".pc").querySelector(".pcn");if(n)n.textContent=S.nums[i.dataset.num]||"–"};i.onfocus=()=>{if(!S.picked[i.dataset.num]){S.picked[i.dataset.num]=true;i.closest(".pc").classList.add("on")}}});
+  const sa=$("#s-all");if(sa)sa.onclick=()=>keepY(()=>players.forEach(p=>S.picked[p.id]=true));
+  const sn=$("#s-none");if(sn)sn.onclick=()=>keepY(()=>{S.picked={}});
   const xa=$("#s-xadd");if(xa)xa.onclick=()=>{const n=$("#s-xname").value.trim();if(!n)return;const id="x"+Date.now();S.extra=(S.extra||[]).concat([{id,name:n,num:$("#s-xnum").value.replace(/\D/g,""),team:S.team}]);S.picked[id]=true;renderSetup()};
-  $("#s-go").onclick=()=>{const roster=players.filter(p=>S.picked[p.id]).map(p=>({id:p.id,name:p.name,num:(S.nums[p.id]??p.num??"")+""}));
-    const st=roster.filter(p=>S.start[p.id]);const err=$("#s-err");
+  $("#s-go").onclick=()=>{const roster=players.filter(p=>S.picked[p.id]).map(p=>({id:p.id,name:p.name,num:(S.nums[p.id]??p.num??"")+"",photo:p.photo||""}));
+    const err=$("#s-err");
     if(roster.length<5){err.textContent="Escolhe pelo menos 5 convocados.";return}
-    if(st.length!==5){err.textContent="Escolhe exatamente 5 atletas para o cinco inicial (5I).";return}
     const nums=roster.map(p=>p.num).filter(Boolean),dup=nums.filter((n,i)=>nums.indexOf(n)!==i);
     if(dup.length&&!S.dupOk){err.textContent=`Número repetido: ${[...new Set(dup)].join(", ")}. Corrige ou carrega outra vez em “Começar jogo” para avançar assim.`;S.dupOk=true;return}
     const gm=teamGames(S.team).find(g=>String(g.num)===String(S.game));
     const opp=gm?(gm.home.startsWith("FC Gaia")?gm.away:gm.home):(S.opp.trim()||"Adversário");
     if(!gm&&!S.opp.trim()){err.textContent="Escreve o nome do adversário.";return}
-    S.picked={};S.start={};S.dupOk=false;
-    newGame({team:S.team,teamName:TN[S.team],gameNum:gm?gm.num:"",comp:gm?gm.comp:"",date:gm?gm.date:new Date().toISOString().slice(0,10),venue:gm?gm.venue:"",home:gm?gm.home.startsWith("FC Gaia"):true,opp,np:S.np,per:S.per,roster,oncourt:st.map(p=>p.id)})}}
+    S.picked={};S.dupOk=false;
+    newGame({team:S.team,teamName:TN[S.team],gameNum:gm?gm.num:"",comp:gm?gm.comp:"",date:gm?gm.date:new Date().toISOString().slice(0,10),venue:gm?gm.venue:"",home:gm?gm.home.startsWith("FC Gaia"):true,opp,np:S.np,per:S.per,roster,oncourt:[]})}}
 
 /* ---------- jogos guardados ---------- */
 function savedList(){const all=visGames().sort((a,b)=>(b.created||0)-(a.created||0));
@@ -615,7 +668,27 @@ function act(type,extra){if(SIDE==="them")return actOpp(type,extra);if(!SEL){toa
   else if(type==="fu"||type==="ft")toast(pById(id).name+": "+LBL[type].toLowerCase());
   store();render()}
 function oppAct(type){actOpp({o1:"1+",o2:"2+",o3:"3+",opf:"fp"}[type])}
-function doSub(inId,outId){snap();G.oncourt=G.oncourt.map(x=>x===outId?inId:x);addLog({t:"sub",id:inId,out:outId});SUB=null;SEL=inId;store();render()}
+function started(){return G.q>1||G.clock<G.per*60||G.log.some(e=>e.t!=="sub")}
+function doSub(inId,outId){if(G.st[inId].pf>=5&&dq(G.st[inId])){toast("Atleta excluído — não pode entrar");return}
+  snap();G.oncourt=G.oncourt.map(x=>x===outId?inId:x);if(started())addLog({t:"sub",id:inId,out:outId});SUB=null;SEL=inId;store();render()}
+function putOn(id){if(G.oncourt.length>=5||G.oncourt.includes(id))return;if(dq(G.st[id])){toast("Atleta excluído — não pode entrar");return}
+  snap();G.oncourt=G.oncourt.concat([id]);if(started())addLog({t:"sub",id,out:""});if(G.oncourt.length===5){SEL=null;toast("Cinco inicial pronto. Podes iniciar o relógio")}store();render()}
+function takeOff(id){if(started()){toast("Durante o jogo, troca arrastando um atleta do banco para cima deste");return}snap();G.oncourt=G.oncourt.filter(x=>x!==id);if(SEL===id)SEL=null;store();render()}
+/* arrastar um atleta para cima de outro (rato, caneta ou dedo) */
+let DRAG_T=0;
+function bindDrag(){document.querySelectorAll(".live .pl[data-p]").forEach(el=>el.addEventListener("pointerdown",e=>{if(e.button>0||G.status==="fim")return;
+  const id=el.dataset.p,from=G.oncourt.includes(id)?"court":"bench",sx=e.clientX,sy=e.clientY;let gh=null,tgt=null;
+  const pick=(x,y)=>{const t=document.elementFromPoint(x,y);if(!t)return null;const pl=t.closest(".pl[data-p]");
+    if(pl&&pl!==el){const to=G.oncourt.includes(pl.dataset.p)?"court":"bench";if(to!==from)return {el:pl,kind:"swap",id:pl.dataset.p}}
+    if(!pl){const z=t.closest("[data-zone]");if(z&&z.dataset.zone!==from){if(from==="bench"&&G.oncourt.length<5)return {el:z,kind:"on"};if(from==="court"&&!started())return {el:z,kind:"off"}}}
+    return null};
+  const mv=ev=>{if(!gh){if(Math.hypot(ev.clientX-sx,ev.clientY-sy)<10)return;gh=el.cloneNode(true);gh.classList.add("dragghost");gh.style.width=el.offsetWidth+"px";document.body.appendChild(gh);el.classList.add("dragsrc");document.body.classList.add("dragging")}
+    ev.preventDefault();gh.style.transform=`translate(${ev.clientX-el.offsetWidth/2}px,${ev.clientY-28}px)`;
+    const n=pick(ev.clientX,ev.clientY);if((n&&n.el)!==(tgt&&tgt.el)){if(tgt)tgt.el.classList.remove("dropok");if(n)n.el.classList.add("dropok")}tgt=n};
+  const up=()=>{removeEventListener("pointermove",mv);removeEventListener("pointerup",up);removeEventListener("pointercancel",up);if(!gh)return;
+    gh.remove();el.classList.remove("dragsrc");document.body.classList.remove("dragging");if(tgt)tgt.el.classList.remove("dropok");DRAG_T=Date.now();
+    if(!tgt)return;if(tgt.kind==="swap"){from==="bench"?doSub(id,tgt.id):doSub(tgt.id,id)}else if(tgt.kind==="on")putOn(id);else takeOff(id)};
+  addEventListener("pointermove",mv,{passive:false});addEventListener("pointerup",up);addEventListener("pointercancel",up)}))}
 function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
   if(G.q>=G.np&&G.us!==G.them){confirmBox("Terminar o jogo?",()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render()});return}
   const ot=G.q>=G.np;confirmBox(ot?"Jogo empatado: começar prolongamento (5 min)?":"Passar ao "+qLabel(G.q+1)+"?",()=>{G.undo=[];G.q++;G.clock=(ot?5:G.per)*60;addLog({t:"iniq"});store();render()})}
@@ -623,7 +696,7 @@ const LBL={"2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3
  or:"Ressalto ofensivo",dr:"Ressalto defensivo",ast:"Assistência",stl:"Roubo de bola",blk:"Desarme de lançamento",tov:"Perda de bola",fp:"Falta pessoal",fu:"Falta antidesportiva",ft:"Falta técnica",fd:"Falta recebida",
  o1:"Adversário: lance livre",o2:"Adversário: 2 pontos",o3:"Adversário: 3 pontos",opf:"Adversário: falta",sub:"Substituição",fimq:"Fim do período",iniq:"Início do período",fim:"Fim do jogo"};
 function logText(e){if(e.side==="o")return "Adversário — "+(LBL[e.t]||e.t);const p=e.id?pById(e.id):null;
-  if(e.t==="sub"){const o=pById(e.out);return `Entra ${p?"#"+p.num+" "+p.name:""} · sai ${o?"#"+o.num+" "+o.name:""}`}
+  if(e.t==="sub"){const o=e.out?pById(e.out):null;return `Entra ${p?"#"+p.num+" "+p.name:""}${o?" · sai #"+o.num+" "+o.name:""}`}
   return (p?`#${p.num} ${p.name} — `:"")+(LBL[e.t]||e.t)}
 function totals(){const t=STAT0();Object.values(G.st).forEach(s=>Object.keys(t).forEach(k=>t[k]+=s[k]||0));return t}
 const pct=(m,a)=>a?Math.round(100*m/a)+"%":"–";
@@ -638,29 +711,26 @@ function render(){if(!G)return renderSetup();$("#b-new").hidden=false;const fin=
     ${fin?"":`<div class="opp"><button class="btn" data-o="o1">+1</button><button class="btn" data-o="o2">+2</button><button class="btn" data-o="o3">+3</button><button class="btn" data-o="opf">Falta</button></div>`}</div></div>`;
   const tabs=`<div class="tabs" role="tablist">${[["live","Jogo"],["bs","Estatísticas"],["pbp","Jogadas"]].map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
   let body="";
-  if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id));
-    const plb=(p,b)=>{const s=G.st[p.id];return `<button class="pl${b?" bench":""}${SEL===p.id?" sel":""}${SUB&&b?" subpick":""}${dq(s)?" out5":""}" data-p="${esc(p.id)}"><span class="nb">${esc(p.num||"–")}</span><span class="nm">${esc(p.name)}<span class="sm">${s.pts} pts · <span data-min="${esc(p.id)}">${fmtMin(s.sec)}</span></span></span><span class="fo f${Math.min(s.pf,5)}"><b>${s.pf}</b>${s.fu||s.ft?`<i>${s.fu?s.fu+"A":""}${s.ft?" "+s.ft+"T":""}</i>`:"faltas"}</span></button>`};
-    const opp=SIDE==="them";const sp=SEL?pById(SEL):null;const dis=!opp&&(!SEL||!G.oncourt.includes(SEL));const D=dis?" disabled":"";
+  if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id)),need=5-G.oncourt.length;
+    const av=p=>`<span class="av">${p.photo?`<img src="${esc(p.photo)}" alt="" loading="lazy" draggable="false" onerror="this.remove()">`:""}<span class="nb">${esc(p.num||"–")}</span></span>`;
+    const plb=(p,b)=>{const s=G.st[p.id];return `<button class="pl${b?" bench":""}${SEL===p.id?" sel":""}${SUB&&b?" subpick":""}${dq(s)?" out5":""}" data-p="${esc(p.id)}">${av(p)}<span class="nm">${esc(p.name)}<span class="sm">${s.pts} pts · <span data-min="${esc(p.id)}">${fmtMin(s.sec)}</span></span></span><span class="fo f${Math.min(s.pf,5)}"><b>${s.pf}</b>${s.fu||s.ft?`<i>${s.fu?s.fu+"A":""}${s.ft?" "+s.ft+"T":""}</i>`:"faltas"}</span></button>`};
+    const opp=SIDE==="them";const sp=SEL?pById(SEL):null;const dis=!opp&&(need>0||!SEL||!G.oncourt.includes(SEL));const D=dis?" disabled":"";
     const shots=G.log.filter(e=>e.x!=null&&e.q===G.q&&(opp?e.side==="o":e.side!=="o"));
+    const A=(a,t,sm,c)=>`<button class="act${c?" "+c:""}" data-a="${a}"${D}>${t}${sm?`<small>${sm}</small>`:""}</button>`;
+    const last=G.log.slice(-2).reverse();
     body=`<div class="live">
-     <div class="lcol"><div class="secth"><h3>Em campo</h3><button class="btn sm${SUB?" gold":""}" id="b-sub">${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div><div class="plist court5">${on.map(p=>plb(p,false)).join("")}<button class="btn sm${SUB?" gold":""} subm" data-subbtn>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
-      <div class="benchw"><h3>Banco</h3><div class="plist bench">${bench.map(p=>plb(p,true)).join("")}</div></div></div>
+     <div class="lcol"><div class="secth"><h3>Em campo${need>0?` <span class="cnt">${G.oncourt.length}/5</span>`:""}</h3><button class="btn sm${SUB?" gold":""}" id="b-sub"${need>0?" disabled":""}>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
+      <div class="plist court5${need>0?" need":""}" data-zone="court">${on.map(p=>plb(p,false)).join("")}${Array.from({length:Math.max(0,need)},()=>`<div class="pl slot" data-slot>Cinco inicial</div>`).join("")}<button class="btn sm${SUB?" gold":""} subm" data-subbtn${need>0?" disabled":""}>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
+      <div class="benchw" data-zone="bench"><h3>Banco</h3><div class="plist bench">${bench.map(p=>plb(p,true)).join("")}</div></div></div>
      <div class="ccol"><div class="sidebar"><div class="seg2" role="group" aria-label="Equipa"><button data-side="us" aria-pressed="${!opp}">FC Gaia</button><button data-side="them" aria-pressed="${opp}">${esc(G.opp)}</button></div>
-      <div class="selname${opp?" o":""}">${opp?"Adversário · ações de equipa":sp?"#"+esc(sp.num)+" "+esc(sp.name):"Escolhe um atleta em campo"}</div></div>
-      <div class="cwrap${opp?" o":""}">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${dis?`<div class="cmask">Escolhe um atleta para marcar lançamentos</div>`:""}</div>
-      <p class="chint">Toca no campo onde foi o lançamento ${opp?"do adversário":""} · ● convertido · ✕ falhado (${qLabel(G.q)})</p></div>
-     <div class="acol"><div class="acts">
-       <button class="act mk" data-a="1+"${D}>L. livre<small>Convertido</small></button><button class="act ms" data-a="1-"${D}>L. livre<small>Falhado</small></button>
-       <button class="act" data-a="or"${D}>Ressalto<small>Ofensivo</small></button><button class="act" data-a="dr"${D}>Ressalto<small>Defensivo</small></button>
-       <button class="act" data-a="ast"${D}>Assist.</button><button class="act" data-a="tov"${D}>Perda</button>
-       <button class="act" data-a="stl"${D}>Roubo</button><button class="act" data-a="blk"${D}>Desarme</button>
-       <p class="agrp">Faltas cometidas</p>
-       <button class="act fl wide" data-a="fp"${D}>Falta pessoal</button>
-       <button class="act fx" data-a="fu"${D}>Antidesp.<small>Falta</small></button><button class="act fx" data-a="ft"${D}>Técnica<small>Falta</small></button>
-       <p class="agrp">Falta sofrida</p>
-       <button class="act fr wide" data-a="fd"${D}>✋ Falta recebida</button></div>
-      <div class="bar"><button class="btn" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button><button class="btn" id="b-xls">Excel</button></div>
-      <ul class="pbp mini">${G.log.slice(-5).reverse().map(pbpLi).join("")||'<li><span></span><span></span><span class="q">Sem jogadas ainda.</span><span></span></li>'}</ul></div></div>`}
+      <div class="selname${opp?" o":""}">${opp?"Adversário · ações de equipa":need>0?"Escolhe o cinco inicial":sp?"#"+esc(sp.num)+" "+esc(sp.name):"Toca num atleta em campo"}</div>
+      <div class="sb-r"><button class="btn sm" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button><button class="btn sm" id="b-xls">Excel</button></div></div>
+      <div class="cgrid">
+       <div class="acts side al">${A("1+","L. livre","Convertido","mk")}${A("1-","L. livre","Falhado","ms")}${A("or","Ressalto","Ofensivo")}${A("dr","Ressalto","Defensivo")}${A("ast","Assist.")}${A("stl","Roubo")}</div>
+       <div class="cwrap${opp?" o":""}">${courtSVG(shots,true)}<div class="shotpop" id="shotpop" hidden></div>${need>0&&!opp?`<div class="cmask five"><b>Cinco inicial · ${G.oncourt.length}/5</b><span>Toca nos atletas do banco ou arrasta-os para “Em campo”.</span></div>`:dis?`<div class="cmask">Toca num atleta em campo para marcar lançamentos</div>`:""}</div>
+       <div class="acts side ar">${A("tov","Perda")}${A("blk","Desarme")}${A("fp","Falta","Pessoal","fl")}${A("fu","Antidesp.","Falta","fx")}${A("ft","Técnica","Falta","fx")}${A("fd","✋ Falta","Recebida","fr")}</div>
+      </div>
+      <ul class="pbp mini">${last.map(pbpLi).join("")||'<li><span></span><span></span><span class="q">Toca no campo onde foi o lançamento · arrasta um atleta do banco para cima de outro em campo para substituir.</span><span></span></li>'}</ul></div></div>`}
   else if(VIEW==="pbp"){body=`<ul class="pbp">${G.log.slice().reverse().map(pbpLi).join("")}</ul><div class="bar"><button class="btn gold" id="b-xls">Exportar Excel</button></div>`}
   else{const t=totals();
     body=`${fin?`<p class="hint">Jogo terminado e guardado neste dispositivo. Podes exportar o Excel agora ou mais tarde em “Jogos guardados”.</p>`:""}<div class="tblw"><table class="bs"><thead><tr><th class="l">Nº</th><th class="l">Atleta</th><th>MIN</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>RO</th><th>RD</th><th>RT</th><th>AST</th><th>ROU</th><th>DL</th><th>PER</th><th>FP</th><th>FA</th><th>FT</th><th>F</th><th>FR</th><th>+/-</th><th>VAL</th></tr></thead><tbody>
@@ -697,14 +767,17 @@ function bind(){
   document.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>{SIDE=b.dataset.side;render()});
   document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>act(b.dataset.a));
   document.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>oppAct(b.dataset.o));
-  document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{const id=b.dataset.p,onC=G.oncourt.includes(id);
+  document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{if(Date.now()-DRAG_T<400)return;const id=b.dataset.p,onC=G.oncourt.includes(id);
+    if(G.oncourt.length<5&&!SUB){if(onC)takeOff(id);else putOn(id);return}
     if(SUB){if(onC){SUB=id;toast("Sai #"+pById(id).num+": escolhe no banco quem entra");render();return}
       if(SUB==="?"){toast("Escolhe primeiro quem sai (em campo)");return}
       if(G.st[id].pf>=5){toast("Atleta excluído (5 faltas)");return}doSub(id,SUB);return}
-    if(onC){SEL=id;SIDE="us"}else toast("Está no banco — usa Substituição");render()});
+    if(onC){SEL=id;SIDE="us"}else toast("No banco: arrasta-o para cima de quem sai");render()});
+  bindDrag();
   const subClick=()=>{if(SUB){SUB=null}else{SUB=SEL&&G.oncourt.includes(SEL)?SEL:"?";if(SUB!=="?")toast("Sai #"+pById(SUB).num+": escolhe no banco quem entra");else toast("Escolhe quem sai")}render()};
   const bs=$("#b-sub");if(bs)bs.onclick=subClick;document.querySelectorAll("[data-subbtn]").forEach(b=>b.onclick=subClick);
-  const cr=$("#c-run");if(cr)cr.onclick=()=>{if(G.clock<=0){toast("Período terminado");return}G.running=!G.running;store();render()};
+  const cr=$("#c-run");if(cr)cr.onclick=()=>{if(G.clock<=0){toast("Período terminado");return}if(!G.running&&G.oncourt.length<5){toast("Escolhe primeiro o cinco inicial");return}
+    if(!G.running&&!G.start5)G.start5=G.oncourt.slice();G.running=!G.running;store();render()};
   const ca=$("#c-adj");if(ca)ca.onclick=()=>{if(G.running){toast("Pára o relógio primeiro");return}const v=prompt("Tempo que falta (mm:ss)",fmtT(G.clock));if(!v)return;const m=v.match(/^(\d{1,2}):(\d{2})$/);if(!m){toast("Formato mm:ss");return}G.clock=Math.min(+m[1]*60+ +m[2],(G.q>G.np?5:G.per)*60);store();render()};
   const cn=$("#c-next");if(cn)cn.onclick=nextQ;
   const bu=$("#b-undo");if(bu)bu.onclick=undo;
