@@ -1,5 +1,5 @@
 {
- "atualizado": 1792191850939,
+ "atualizado": 1792191878004,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -92,6 +92,17 @@
    "salt": "/nludnlt/YGPHdOzyMyPOQ==",
    "hash": "TH7hjswl3x4tPNX5m6reGmmXHEqatMzMsB9ICinjL0k=",
    "cargo": "Diretor"
+  },
+  {
+   "utilizador": "teste",
+   "nome": "teste",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-14 Masc B"
+   ],
+   "ativo": true,
+   "salt": "gF2LW/bRMd/xYjwxAA8dUA==",
+   "hash": "TgInVmlp5rIPDsyWdMY+krzAS19aDkLw7g1LohLIMK8="
   }
  ]
 }
