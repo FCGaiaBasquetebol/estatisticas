@@ -392,10 +392,116 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
 @media (max-width:600px){.plist.court5 .pl .pts{display:none}}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .ver{margin-top:22px;font-size:11px;color:var(--dim)}
+
+/* ===== v6: expulsão, terminar jogo, tema claro ===== */
+.sp-l{justify-content:center!important;display:flex;margin-top:8px}
+.clock .crow{align-items:stretch}.cside{display:flex;flex-direction:column;gap:6px}
+.cbtn.end{min-height:0!important;padding:6px 10px;font-size:13px!important;background:transparent;border-color:#5a2d2d;color:#ff9b91}
+.ej{max-width:560px!important}.ej h3{margin:2px 0 4px;font-size:24px}.ej-k{margin:0;color:var(--ko);font-weight:800;font-size:13px}
+.ej-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:50vh;overflow:auto;margin:6px 0}
+.ej-p{display:grid;grid-template-columns:40px 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px;color:var(--ink);font-weight:700}
+.ej-p .av{grid-row:1/3;width:40px;height:40px}.ej-p small{color:var(--dim);font-weight:600;font-size:11px}
+.endb{max-width:440px!important}.endsc{display:flex;align-items:baseline;justify-content:center;gap:12px;margin:0 0 14px;font-weight:700;color:var(--muted)}
+.endsc b{font-family:var(--f-disp);font-weight:400;font-size:44px;color:var(--ink)}
+.endg{display:grid;gap:8px}.endg .btn{display:flex;flex-direction:column;align-items:flex-start;padding:12px 14px;font-size:17px;text-align:left}
+.endg .btn small{font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:12px;font-weight:500;opacity:.8}
+.thm{background:transparent;border:1px solid #444;color:#f2f2ee;border-radius:999px;width:34px;height:34px;font-size:16px;line-height:1;flex:none;cursor:pointer}
+@media (max-width:1100px) and (orientation:portrait){body.fit .cbtn{min-width:96px}}
+
+/* tema claro: o marcador e o cabeçalho continuam pretos, como num pavilhão; o resto fica claro para ler à luz do dia */
+:root[data-theme=light]{--bg:#e6e8eb;--panel:#ffffff;--panel2:#f2f3f5;--line:#c7ccd2;--ink:#14161a;--muted:#4a5058;--dim:#79808a;--gold-ink:#7d6200;--ok:#1b8a3f;--ko:#c0352b}
+:root[data-theme=light] body{background:var(--bg)}
+:root[data-theme=light] main h2,:root[data-theme=light] .pl .nb,:root[data-theme=light] .prow .av .nb,:root[data-theme=light] .selname.has,:root[data-theme=light] .snav button[aria-pressed=true],:root[data-theme=light] .tabs button[aria-selected=true],:root[data-theme=light] .ghh summary,:root[data-theme=light] .warn,:root[data-theme=light] .lnk,:root[data-theme=light] .kpis b,:root[data-theme=light] table.bs.ep th.srt,:root[data-theme=light] .pp-g .btn.cur,:root[data-theme=light] .cmask.five b{color:var(--gold-ink)}
+:root[data-theme=light] .snav button[aria-pressed=true],:root[data-theme=light] .tabs button[aria-selected=true]{border-color:var(--gold)}
+:root[data-theme=light] .av img+.nb{background:#000;color:var(--gold)}
+:root[data-theme=light] label.f select,:root[data-theme=light] label.f input,:root[data-theme=light] .chk,:root[data-theme=light] .kpis div,:root[data-theme=light] .epgi,:root[data-theme=light] .demo,:root[data-theme=light] .ritem,:root[data-theme=light] .pcph{background:#fff;color:var(--ink)}
+:root[data-theme=light] .card{background:var(--panel)}
+:root[data-theme=light] .btn{background:var(--panel);color:var(--ink);border-color:var(--line)}
+:root[data-theme=light] .btn.gold{background:var(--gold);color:#000;border-color:var(--gold)}
+:root[data-theme=light] .btn.danger{color:var(--ko);border-color:#e0a39d}
+:root[data-theme=light] .top .btn,:root[data-theme=light] .board .btn{background:#1d1d1d;color:#f2f2ee;border-color:#3a3a3a}
+:root[data-theme=light] .top .btn.gold{background:var(--gold);color:#000}
+:root[data-theme=light] .board{border-color:#000}
+:root[data-theme=light] .pl{background:#fff;border-color:#d9dde2}
+:root[data-theme=light] .pl.sel{background:#fff6cf;border-color:var(--gold)}
+:root[data-theme=light] .pl.bench{background:#f4f5f7}
+:root[data-theme=light] .pl .pts b{color:var(--ink)}
+:root[data-theme=light] .pips i{background:#d3d7dc}
+:root[data-theme=light] .pips.f1 i.on,:root[data-theme=light] .pips.f2 i.on,:root[data-theme=light] .pips.f3 i.on{background:#c99a00}
+:root[data-theme=light] .av img{border-color:#c7ccd2}
+:root[data-theme=light] .act{background:#fff;color:var(--ink);border-color:#cfd4da}
+:root[data-theme=light] .act.mk{background:#e5f4e9;border-color:#8cc79c}
+:root[data-theme=light] .act.ms{background:#fbe9e7;border-color:#e4a59d}
+:root[data-theme=light] .act.fl{background:#fdf3cf;border-color:#d9b84a}
+:root[data-theme=light] .act.fx{background:#fbe4e1;border-color:#d9877e}
+:root[data-theme=light] .act.fr{background:#e7effc;border-color:#5b8fd9;color:#1d4f9a}
+:root[data-theme=light] .act small{color:var(--muted)}
+:root[data-theme=light] .act.mk small{color:var(--ok)}:root[data-theme=light] .act.ms small,:root[data-theme=light] .act.fx small{color:var(--ko)}
+:root[data-theme=light] .seg2{background:#fff;border-color:var(--line)}
+:root[data-theme=light] .seg2 button[data-side=them][aria-pressed=true]{background:#2f6fd6;color:#fff}
+:root[data-theme=light] .selname.o{color:#2f6fd6}
+:root[data-theme=light] .lastbar,:root[data-theme=light] .pbp{background:#fff;border-color:var(--line)}
+:root[data-theme=light] .pbp li{border-color:#e3e6ea}
+:root[data-theme=light] .undo{background:#fff;color:var(--ink);border-color:#b9bfc7}
+:root[data-theme=light] .prow{background:#fff;opacity:.75}:root[data-theme=light] .prow.on{background:#fff6cf;opacity:1;border-color:var(--gold)}
+:root[data-theme=light] .prow .ck{border-color:#9aa1aa}
+:root[data-theme=light] .pc.on{background:#fff6cf}
+:root[data-theme=light] .tag{background:#fff3c4;color:var(--gold-ink)}
+:root[data-theme=light] table.bs th{background:#eef0f3}
+:root[data-theme=light] table.bs th,:root[data-theme=light] table.bs td{border-color:#e1e4e8}
+:root[data-theme=light] table.bs tr.tot td{background:#fff6cf}
+:root[data-theme=light] table.bs tr.avgr td{background:#e7f4ea;color:#1b5e2c}
+:root[data-theme=light] table.bs tr.oppr td{color:#2f6fd6}
+:root[data-theme=light] table.bs.ep tbody tr:hover td{background:#fff9e0}
+:root[data-theme=light] body.fit .benchw{border-color:#b9bfc7}
+:root[data-theme=light] .pl.slot{border-color:#9aa1aa}
+:root[data-theme=light] .dropok{background:#dbe8fb!important}
+:root[data-theme=light] .modal{background:rgba(20,22,26,.55)}
+:root[data-theme=light] .modal .card{background:#fff;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+:root[data-theme=light] .ce-t{background:#f2f3f5;color:var(--ink)}
+:root[data-theme=light] .ej-p{background:#f4f5f7}
+:root[data-theme=light] .endsc b{color:var(--ink)}
+:root[data-theme=light] .shotpop{background:#fff;color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+:root[data-theme=light] .sync{border-color:#444}
+:root[data-theme=light] .hint{color:var(--muted)}
+:root[data-theme=light] .flash{border-color:#14161a}
+:root[data-theme=light] svg.court.live{box-shadow:0 0 0 3px #14161a}
+:root[data-theme=light] .toast{background:#14161a;color:#fff}
+:root[data-theme=light] .cbtn.end{color:#ff9b91}
+:root[data-theme=light] .top,:root[data-theme=light] .board{--ink:#f2f2ee;--muted:#a8a8a0;--dim:#6f6f68;--line:#383838;--panel:#1d1d1d;--panel2:#262626;--ok:#5fd27a;--ko:#ff7a6e;color:var(--ink)}
+
+/* ===== v7: ecrã de utilizadores ===== */
+.ugrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;margin-top:14px;align-items:start}
+.uform h3,.ulist h3{margin:0 0 12px}
+.uf{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:18px;align-items:start}
+.uf-fields{display:grid;gap:12px}.uf-fields label.f{display:grid;gap:5px}
+.fh{font-size:11px;color:var(--dim);font-weight:500;text-transform:none;letter-spacing:0}
+.pwrow{display:flex;gap:6px}.pwrow input{flex:1;min-width:0}
+.uf-esc{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start}
+.uf-esc legend{padding:0;margin-bottom:6px;font-family:var(--f-cond);font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.uf-esc .chk{display:flex;align-items:center;gap:8px;padding:10px;border-radius:8px;border:1px solid var(--line);cursor:pointer;font-weight:700}
+.uf-esc .chk:has(input:checked){border-color:var(--gold);background:rgba(226,184,18,.12)}
+.uf-esc .chk input{width:18px;height:18px;accent-color:var(--gold)}
+.uedit{display:flex;align-items:center;gap:12px}.uedit b{display:block;font-size:18px}.uedit small{color:var(--dim)}
+.uform.editing{border-color:var(--gold)}
+.ulist{display:grid;gap:8px}
+.urow{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.urow.cur{border-color:var(--gold)}.urow.off{opacity:.55}
+.uav{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);border:1px solid var(--line);font-family:var(--f-cond);font-weight:800;font-size:16px;color:var(--muted)}
+.uav.adm{background:var(--gold);border-color:var(--gold);color:#000}
+.ui{min-width:0}.ui b{display:block;font-size:16px}.ui>small{display:block;color:var(--dim);font-size:12px;margin-top:1px}.ui .me{color:var(--dim);font-weight:500}
+.ui .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;align-items:center}.ui .tags small{font-size:11px}
+.ua{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+@media (max-width:980px){.ugrid{grid-template-columns:1fr}}
+@media (max-width:620px){.uf{grid-template-columns:1fr}}
+:root[data-theme=light] .uf-esc .chk:has(input:checked){background:#fff6cf}
+:root[data-theme=light] .urow{background:#fff}
+.cend{margin-top:4px;background:transparent;border:1px solid #5a2d2d;border-radius:999px;color:#ff9b91;font-family:var(--f-cond);font-weight:700;font-size:13px;letter-spacing:.8px;text-transform:uppercase;padding:4px 14px;cursor:pointer}
+.cend:hover{background:#2a1412}
 </style></head>
 <body>
-<header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><div class="who" id="who"></div>
- <button class="btn ghost" id="b-new" hidden>Jogos</button><span class="gact" id="gact" hidden><button class="btn sm gold" id="b-save">💾 Gravar</button><button class="btn sm ghost" id="b-cancel">Cancelar jogo</button></span></header>
+<header class="top"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1><span class="sp"></span><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
+ <button class="btn ghost" id="b-new" hidden>Jogos</button><span class="gact" id="gact" hidden><button class="btn sm" id="b-save">Gravar e sair</button><button class="btn sm ghost" id="b-cancel" hidden>Cancelar jogo</button></span></header>
 <main id="app"></main>
 <div class="toast" id="toast" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -614,21 +720,35 @@ async function dbConnect(t,pw){const r=await fetch(`https://api.github.com/repos
   const j=await r.json();if(j.permissions&&!j.permissions.push)throw new Error("O token não tem permissão de escrita (Contents: Read and write).");
   if(!j.private&&!confirm("Atenção: o repositório é público e os jogos ficariam visíveis para todos. Continuar mesmo assim?"))throw new Error("Torna o repositório privado em Settings e tenta outra vez.");
   lsSet(DTK,t);const me=USERS.find(u=>u.utilizador===USER.utilizador);await Acc.updateUser(USER.utilizador,{dk:await wrapTok(t,pw,me.salt)})}
-function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||String(a.nome).localeCompare(b.nome));
-  const chk=(sel)=>ESC.map(([id,n])=>`<label class="chk"><input type="checkbox" value="${esc(id)}"${(sel||[]).includes(id)?" checked":""}> ${esc(n)}</label>`).join("");
-  const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();
+function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||(a.ativo===false)-(b.ativo===false)||String(a.nome).localeCompare(b.nome));
+  const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();const sel=ed?ed.escaloes||[]:[];
+  const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
   return `<h2>Utilizadores</h2>
   ${dbCard()}
   ${pubCard(pend)}
-  <div class="card" style="margin-top:14px"><h3 style="margin-top:0">${ed?"Escalões de "+esc(ed.nome):"Novo utilizador"}</h3>
-   ${ed?"":`<div class="row"><label class="f grow">Nome<input id="u-n" placeholder="Ex.: Rui Martins"></label><label class="f grow">Utilizador<input id="u-u" placeholder="Ex.: rui.martins" autocapitalize="none" spellcheck="false"></label><label class="f">Palavra-passe inicial<input id="u-p" type="text" placeholder="mín. ${PWMIN} caracteres" autocomplete="off" spellcheck="false"></label></div>`}
-   <div class="chks" id="u-esc"><span class="hint">Escalões (um ou mais):</span>${chk(ed?ed.escaloes:[])}</div>
-   <p class="err" id="u-err"></p>
-   <div class="bar">${ed?`<button class="btn gold" id="u-save">Guardar escalões</button><button class="btn" id="u-cancel">Cancelar</button>`:`<button class="btn gold" id="u-add">Criar utilizador</button>`}</div>
-   <p class="hint">Dá ao treinador o nome de utilizador e a palavra-passe em pessoa, nunca por escrito no repositório. Se alguém se esquecer da palavra-passe, usa “Palavra-passe” para definir uma nova. Os jogos ficam ligados ao escalão, por isso não se perdem.</p></div>
-  <div class="tblw" style="margin-top:14px"><table class="bs ul"><thead><tr><th class="l">Nome</th><th class="l">Utilizador</th><th class="l">Perfil</th><th class="l">Escalões</th><th>Estado</th><th></th></tr></thead><tbody>
-   ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador";return `<tr class="${u.ativo===false?"off":""}"><td class="l"><b>${esc(u.nome)}</b></td><td class="l">${esc(u.utilizador)}</td><td class="l">${adm?"Administrador":"Treinador"}</td><td class="l">${adm?"<small>todos</small>":(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join(" ")||"<small>nenhum</small>"}</td><td>${u.ativo===false?"Desativado":"Ativo"}${Sync.tok()&&!u.dk&&u.ativo!==false?`<br><small class="warn">sem base de dados</small>`:""}</td>
-    <td class="acts-u">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Escalões</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm ${u.ativo===false?"":"danger"}" data-ua="${esc(u.utilizador)}" data-on="${u.ativo===false?1:0}">${u.ativo===false?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}">Apagar</button>`}</td></tr>`}).join("")}</tbody></table></div>`}
+  <div class="ugrid">
+   <section class="card uform${ed?" editing":""}">
+    <h3>${ed?`Escalões de ${esc(ed.nome)}`:"Novo utilizador"}</h3>
+    <div class="uf">
+     <div class="uf-fields">${ed?`<div class="uedit"><span class="uav">${esc(ini(ed.nome))}</span><div><b>${esc(ed.nome)}</b><small>${esc(ed.utilizador)}</small></div></div>`:`
+      <label class="f">Nome<input id="u-n" placeholder="Ex.: Rui Martins" autocomplete="off"></label>
+      <label class="f">Utilizador<input id="u-u" placeholder="Ex.: rui.martins" autocapitalize="none" autocomplete="off" spellcheck="false"><small class="fh">Só minúsculas e números, sem espaços. É o que a pessoa escreve para entrar.</small></label>
+      <label class="f">Palavra-passe inicial<span class="pwrow"><input id="u-p" type="text" placeholder="Mínimo ${PWMIN} caracteres" autocomplete="off" spellcheck="false"><button class="btn sm" id="u-gen" type="button">Gerar</button></span></label>`}
+     </div>
+     <fieldset class="uf-esc" id="u-esc"><legend>Escalões</legend>${ESC.map(([id,n])=>`<label class="chk"><input type="checkbox" value="${esc(id)}"${sel.includes(id)?" checked":""}> ${esc(n)}</label>`).join("")}</fieldset>
+    </div>
+    <p class="err" id="u-err"></p>
+    <div class="bar">${ed?`<button class="btn gold" id="u-save">Guardar escalões</button><button class="btn" id="u-cancel">Cancelar</button>`:`<button class="btn gold" id="u-add">Criar utilizador</button>`}</div>
+    <p class="hint">Entrega o utilizador e a palavra-passe em pessoa. Se alguém se esquecer, usa “Palavra-passe” na lista para definir uma nova.</p>
+   </section>
+   <section class="ulist"><h3>Contas <span class="cnt">${rows.length}</span></h3>
+    ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador",off=u.ativo===false;return `<div class="urow${off?" off":""}${UEDIT===u.utilizador?" cur":""}">
+     <span class="uav${adm?" adm":""}">${esc(ini(u.nome))}</span>
+     <div class="ui"><b>${esc(u.nome)}${me?' <small class="me">(tu)</small>':""}</b><small>${esc(u.utilizador)} · ${adm?"Administrador":"Treinador"}${off?" · desativado":""}</small>
+      <div class="tags">${adm?`<span class="tag">Todos os escalões</span>`:(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join("")||`<small class="warn">Sem escalões</small>`}${Sync.tok()&&!u.dk&&!off?`<small class="warn">Sem acesso à base de dados: define nova palavra-passe</small>`:""}</div></div>
+     <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Escalões</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
+   </section>
+  </div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
     const go=async pw=>{dbo.disabled=true;try{await dbConnect(t,pw);toast("Base de dados ligada");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
@@ -639,6 +759,9 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
   const pb=$("#gh-pub");if(pb)pb.onclick=async()=>{try{await Acc.publish();toast("Publicado")}catch(e){}};
   const off=$("#gh-off");if(off)off.onclick=()=>confirmBox("Desligar o GitHub neste dispositivo? As alterações seguintes terão de ser publicadas à mão.",()=>{lsSet(GK,null);PUBST="";renderSetup()});
   const dc=$("#u-disc");if(dc)dc.onclick=()=>confirmBox("Descartar as alterações e voltar à lista publicada?",()=>{Acc.discard();const me=USER&&USERS.find(u=>u.utilizador===USER.utilizador&&u.ativo!==false);if(!me||!USERS.some(u=>u.perfil==="coordenador"&&u.hash)){Acc.logout();USER=null;location.reload();return}USER={...me};whoBar();renderSetup()});
+  const un=$("#u-n"),uu=$("#u-u");if(un&&uu){let touched=false;uu.oninput=()=>{touched=true;const v=uu.value.toLowerCase().replace(/\s+/g,"");if(v!==uu.value)uu.value=v};
+    un.oninput=()=>{if(touched)return;const w=un.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/g,"").split(/\s+/).filter(Boolean);uu.value=w.length>1?w[0]+"."+w[w.length-1]:(w[0]||"")}}
+  const gen=$("#u-gen");if(gen)gen.onclick=()=>{const A="abcdefghjkmnpqrstuvwxyz23456789";const r=crypto.getRandomValues(new Uint8Array(10));$("#u-p").value=[...r].map(x=>A[x%A.length]).join("")};
   const add=$("#u-add");if(add)add.onclick=async()=>{const o={nome:$("#u-n").value.trim(),utilizador:$("#u-u").value.trim().toLowerCase(),pw:$("#u-p").value,escaloes:sel()};
     if(!o.nome){err.textContent="Escreve o nome.";return}
     if(!validUser(o.utilizador)){err.textContent="Utilizador: 3 a 30 caracteres, só letras minúsculas, números, ponto, hífen ou _ (sem espaços nem acentos).";return}
@@ -655,7 +778,12 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
 
 
 /* ---------- arranque ---------- */
-async function boot(){$("#crest").src=CREST;
+/* tema: escuro (pavilhão com pouca luz) ou claro (dia); fica guardado neste dispositivo */
+const TK="fcgaia-stats-tema";
+function applyTheme(t){document.documentElement.dataset.theme=t;const b=$("#thm");if(b){b.textContent=t==="light"?"☾":"☀";b.title=t==="light"?"Mudar para tema escuro":"Mudar para tema claro";b.setAttribute("aria-label",b.title)}
+  const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content="#000000"}
+applyTheme(lsGet("fcgaia-stats-tema")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"));
+async function boot(){$("#thm").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";lsSet(TK,t);applyTheme(t);toast(t==="light"?"Tema claro":"Tema escuro")};applyTheme(document.documentElement.dataset.theme);$("#crest").src=CREST;
   if(!DATA){try{const r=await fetch("data/jogos.json?t="+Date.now(),{cache:"no-store"});if(r.ok)DATA=await r.json()}catch(e){}}
   if(!DATA)DATA={plantel:{},games:[]};
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
@@ -880,9 +1008,21 @@ function act(type,extra){if(SIDE==="them")return actOpp(type,extra);if(!SEL){toa
    case "fp":case "fu":case "ft":s[type]++;s.pf++;G.tfUs[tfKey()]=(G.tfUs[tfKey()]||0)+1;break;case "fd":s.fd++;break}
   if(pts){s.pts+=pts;G.us+=pts;G.oncourt.forEach(k=>G.st[k].pm+=pts)}
   addLog({t:type,id,...(extra||{})});if(FX[type]){FLASH={id,t:Date.now(),x:FX[type][0],c:FX[type][1]};setTimeout(()=>{if(FLASH&&Date.now()-FLASH.t>=1400){FLASH=null;document.querySelectorAll(".flash").forEach(e=>e.remove())}},1450)}
-  if(["fp","fu","ft"].includes(type)&&dq(s))toast(pById(id).name+" — desqualificado/excluído ("+(s.pf>=5?"5 faltas":"2 faltas antidesportivas/técnicas")+")");
+  const out=["fp","fu","ft"].includes(type)&&dq(s)&&s.pf-(type?1:0)>=0&&!s._dq;
+  if(out){s._dq=1;if(G.running){G.running=false;addLog({t:"pausa"})}}
   else if(type==="fu"||type==="ft")toast(pById(id).name+": "+LBL[type].toLowerCase());
-  store();render()}
+  store();render();if(out)ejectBox(id)}
+/* atleta excluído: relógio parado e escolha do substituto */
+function ejectBox(outId){const o=pById(outId),s=G.st[outId];if(!G.oncourt.includes(outId))return;
+  const why=s.pf>=5?"5 faltas":s.fu>=2?"2 faltas antidesportivas":s.ft>=2?"2 faltas técnicas":"falta antidesportiva e técnica";
+  const bench=G.roster.filter(p=>!G.oncourt.includes(p.id)&&!dq(G.st[p.id]));
+  const m=document.createElement("div");m.className="modal";
+  m.innerHTML=`<div class="card ej"><p class="ej-k">Atleta excluído · relógio parado</p><h3>#${esc(o.num)} ${esc(o.name)}</h3><p class="hint" style="margin-top:0">${why}. Escolhe quem entra.</p>
+   <div class="ej-g">${bench.map(p=>`<button class="ej-p" data-in="${esc(p.id)}"><span class="av">${p.photo?`<img src="${esc(p.photo)}" alt="" onerror="this.remove()">`:""}<span class="nb">${esc(p.num||"–")}</span></span><span>${esc(p.name)}</span><small>${G.st[p.id].pf} falta(s)</small></button>`).join("")||`<p class="hint">Não há ninguém no banco disponível.</p>`}</div>
+   <div class="bar"><button class="btn" id="ej-later">Escolher depois</button></div></div>`;
+  document.body.appendChild(m);
+  m.querySelectorAll("[data-in]").forEach(b=>b.onclick=()=>{m.remove();doSub(b.dataset.in,outId);toast("Entra #"+pById(b.dataset.in).num+" para o lugar de #"+o.num)});
+  m.querySelector("#ej-later").onclick=()=>{m.remove();toast("#"+o.num+" continua marcado como excluído. Arrasta alguém do banco para cima dele")}}
 function oppAct(type){actOpp({o1:"1+",o2:"2+",o3:"3+",opf:"fp"}[type])}
 function started(){return G.q>1||G.clock<G.per*60||G.log.some(e=>e.t!=="sub")}
 function doSub(inId,outId){if(G.st[inId].pf>=5&&dq(G.st[inId])){toast("Atleta excluído — não pode entrar");return}
@@ -917,7 +1057,14 @@ function periodPick(){if(G.running){G.running=false;store();render()}
   m.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{const q=+b.dataset.q;m.remove();if(q===G.q)return;
     if(q>G.q){G.undo=[];addLog({t:"fimq"});G.q=q;G.clock=(q>G.np?5:G.per)*60;addLog({t:"iniq"});store();render();toast(qLabel(q)+" · "+fmtT(G.clock))}
     else{G.q=q;store();render();toast("Voltaste ao "+qLabel(q)+". Acerta o tempo se precisares");clockEdit()}});
-  m.querySelector("#pp-end").onclick=()=>{m.remove();confirmBox(`Terminar o jogo? Resultado final ${G.us}–${G.them}.`,()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render();Sync.soon(0)})}}
+  m.querySelector("#pp-end").onclick=()=>{m.remove();endBox()}}
+function endBox(){if(G.running){G.running=false;store();render()}const m=document.createElement("div");m.className="modal";
+  m.innerHTML=`<div class="card endb"><h3 style="margin-top:0">Terminar o jogo</h3><p class="endsc"><span>FC Gaia</span><b>${G.us}–${G.them}</b><span>${esc(G.opp)}</span></p>
+   <div class="endg"><button class="btn gold" id="eb-save">Gravar<small>Fecha o jogo com este resultado</small></button><button class="btn danger" id="eb-del">Não gravar<small>Apaga o jogo e tudo o que foi registado</small></button><button class="btn" id="eb-x">Cancelar<small>Volta ao jogo</small></button></div></div>`;
+  document.body.appendChild(m);m.querySelector("#eb-x").onclick=()=>m.remove();
+  m.querySelector("#eb-save").onclick=()=>{m.remove();G.status="fim";G.running=false;addLog({t:"fim"});VIEW="bs";store();render();Sync.soon(0);toast("Jogo gravado")};
+  m.querySelector("#eb-del").onclick=()=>{m.remove();confirmBox("Apagar mesmo este jogo? Não dá para recuperar.",()=>{const g=G;G=null;stopTick();const all=readAll();delete all[g.id];writeAll(all);Sync.del(g);
+    try{localStorage.removeItem(KC)}catch(e){}SEL=null;SUB=null;SIDE="us";SETVIEW="novo";renderSetup();toast("Jogo apagado")})}}
 function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
   if(G.q>=G.np&&G.us!==G.them){confirmBox("Terminar o jogo?",()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render()});return}
   const ot=G.q>=G.np;confirmBox(ot?"Jogo empatado: começar prolongamento (5 min)?":"Passar ao "+qLabel(G.q+1)+"?",()=>{G.undo=[];G.q++;G.clock=(ot?5:G.per)*60;addLog({t:"iniq"});store();render()})}
@@ -937,13 +1084,13 @@ function fitCourt(){const g=document.querySelector(".fit .cgrid");if(!g)return;c
   const w=g.clientWidth-2*(side?side.offsetWidth:0)-2*parseFloat(cs.columnGap||0),h=g.clientHeight;const s=Math.max(200,Math.floor(Math.min(w,h*1500/1400)));g.style.setProperty("--cw",s+"px")}
 addEventListener("resize",()=>{if(G&&VIEW==="live"){document.body.classList.toggle("fit",G.status!=="fim"&&FITQ.matches);fitCourt()}});
 function render(){if(!G)return renderSetup();const fin=G.status==="fim";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
-  $("#b-save").textContent=fin?"‹ Voltar":"💾 Gravar";$("#b-cancel").hidden=fin;
+  $("#b-save").textContent=fin?"‹ Voltar":"Gravar e sair";$("#b-cancel").hidden=true;
   const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
-  const board=`<div class="board"><div class="tm"><span class="n">FC Gaia · ${esc(G.teamName)}</span><span class="s">${G.us}</span><span class="tf">Faltas equipa <b class="${tfU>=4?"bonus":""}">${tfU}</b></span></div>
+  const board=`<div class="board"><div class="tm"><span class="n">${esc(G.teamName)}</span><span class="s">${G.us}</span><span class="tf">Faltas equipa <b class="${tfU>=4?"bonus":""}">${tfU}</b></span></div>
    <div class="clock"><span class="p">${fin?"Final":qLabel(G.q)}</span>
     <div class="crow">${fin?"":`<button class="cbtn run${G.running?" on":""}" id="c-run">${G.running?"❚❚ Parar":"▶ Iniciar"}</button>`}
      <button class="t${G.running?" run":""}" id="clk" ${fin?"disabled":""} title="Toca para corrigir o tempo">${fmtT(G.clock)}</button>
-     ${fin?"":`<button class="cbtn" id="c-next">Período ›</button>`}</div></div>
+     ${fin?"":`<button class="cbtn" id="c-next">Período ›</button>`}</div>${fin?"":`<button class="cend" id="c-end">Terminar jogo</button>`}</div>
    <div class="tm r"><span class="n">${esc(G.opp)}</span><span class="s">${G.them}</span><span class="tf">Faltas equipa <b class="${tfT>=4?"bonus":""}">${tfT}</b></span>
     ${fin?"":`<div class="opp"><button class="btn" data-o="o1">+1</button><button class="btn" data-o="o2">+2</button><button class="btn" data-o="o3">+3</button><button class="btn" data-o="opf">Falta</button></div>`}</div></div>`;
   const tabs=`<div class="tabs" role="tablist">${[["live","Jogo"],["bs","Estatísticas"],["pbp","Jogadas"]].map(([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`).join("")}</div>`;
@@ -990,7 +1137,7 @@ function openShot(x,y){if(SIDE!=="them"&&(!SEL||!G.oncourt.includes(SEL))){toast
   const pop=$("#shotpop");const left=Math.min(Math.max(PEND.x/1500*100,22),78),top=PEND.y/1400*100;
   pop.style.left=left+"%";pop.style.top=(top>60?top-4:top+6)+"%";pop.style.transform=top>60?"translate(-50%,-100%)":"translate(-50%,0)";
   const pp=SIDE==="them"?{num:"ADV"}:pById(SEL);
-  pop.innerHTML=`<p>${SIDE==="them"?esc(G.opp):"#"+esc(pp.num)} · <b>${PEND.v} pts</b> · ${esc(shotZone(PEND.x,PEND.y))}</p><div class="sp-b"><button class="act mk" id="sp-ok">Convertido</button><button class="act ms" id="sp-ko">Falhado</button></div>
+  pop.innerHTML=`<p>${SIDE==="them"?esc(G.opp):"#"+esc(pp.num)} · <b>${PEND.v} pontos</b></p><div class="sp-b"><button class="act mk" id="sp-ok">Convertido</button><button class="act ms" id="sp-ko">Falhado</button></div>
    <div class="sp-l"><button class="btn sm ghost" id="sp-x">Cancelar</button></div>`;
   pop.hidden=false;
   $("#sp-ok").onclick=()=>{const P=PEND;PEND=null;act(P.v+"+",{x:P.x,y:P.y})};
@@ -1017,7 +1164,7 @@ function bind(){
   const cr=$("#c-run");if(cr)cr.onclick=()=>{if(G.clock<=0){toast("Período terminado");return}if(!G.running&&G.oncourt.length<5){toast("Escolhe primeiro o cinco inicial");return}
     if(!G.running&&!G.start5)G.start5=G.oncourt.slice();G.running=!G.running;store();render()};
   const ca=$("#clk");if(ca&&G.status!=="fim")ca.onclick=clockEdit;
-  const cn=$("#c-next");if(cn)cn.onclick=periodPick;
+  const cn=$("#c-next");if(cn)cn.onclick=periodPick;const ce=$("#c-end");if(ce)ce.onclick=endBox;
   const bu=$("#b-undo");if(bu)bu.onclick=undo;
   document.querySelectorAll("#b-xls").forEach(b=>b.onclick=exportXLS);
   const ro=$("#b-reopen");if(ro)ro.onclick=()=>{G.status="jogo";store();VIEW="live";render()};
