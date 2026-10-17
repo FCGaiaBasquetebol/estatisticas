@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253909871,
+ "atualizado": 1792253922842,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -27,8 +27,12 @@
     "*"
    ],
    "ativo": true,
-   "salt": "RzbQ+JLjb05faxlFOUlTjQ==",
-   "hash": "qmY9OFGLE/RuhX+JoGJneoOpx20bsCj8RBhG8cKalVI="
+   "salt": "zBuixg3ccyyFkLdmNorstg==",
+   "hash": "U0EOzv1kxqvT6ySJmW64VBXOu7rH8gRz4Hn38jH0SaM=",
+   "dk": {
+    "iv": "p1nE9uWnT0/N6xa4",
+    "ct": "c2pl+ipVpteOMG+TwNNEXI3cKFW6X+uJPqvJJEAsZKoFIoYL/IFbtP5QOKzXvH1YeeK9FWihMaM5Cb88"
+   }
   },
   {
    "utilizador": "samuel.moura",
