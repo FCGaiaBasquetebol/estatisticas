@@ -1,5 +1,5 @@
 {
- "atualizado": 1792247212269,
+ "atualizado": 1792247213650,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -29,17 +29,6 @@
    "ativo": true,
    "salt": "EY79qsCaq7eTHN6n/72dxw==",
    "hash": "cYxuJJH4ZM9ZR2iGrFYR49s0u8ojvHn0R+auMsaA3Ng="
-  },
-  {
-   "utilizador": "valgode",
-   "nome": "Gustavo Valgode",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-18 Masc B"
-   ],
-   "ativo": true,
-   "salt": "vk6xWm1ZkVmSjREvrPw99g==",
-   "hash": "fj+F6F5gPJ7P2BN5k/+BqFmZjDTwAwuZM5RT3sJzL08="
   },
   {
    "utilizador": "ivo.coutinho",
