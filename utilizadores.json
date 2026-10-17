@@ -1,5 +1,5 @@
 {
- "atualizado": 1792247210998,
+ "atualizado": 1792247212269,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -29,17 +29,6 @@
    "ativo": true,
    "salt": "EY79qsCaq7eTHN6n/72dxw==",
    "hash": "cYxuJJH4ZM9ZR2iGrFYR49s0u8ojvHn0R+auMsaA3Ng="
-  },
-  {
-   "utilizador": "duarte.oliveira",
-   "nome": "Duarte Oliveira",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-18 Masc A"
-   ],
-   "ativo": true,
-   "salt": "rp7WjxdX71P5VnFAFzPugw==",
-   "hash": "WhXVDpurXj3Seu44VMca/7+aM4m8b1vn3zWYGJG4/2k="
   },
   {
    "utilizador": "valgode",
