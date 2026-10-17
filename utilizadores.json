@@ -1,5 +1,5 @@
 {
- "atualizado": 1792251369593,
+ "atualizado": 1792251424161,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -59,6 +59,21 @@
    "dk": {
     "iv": "ah9ASFcIE1UFbo0V",
     "ct": "Jj8blY5YP8SK7X0AAGudumd4rgowKaasqn7H+rGEzF+jSkEta946dZSrO41Brv7qlFBowxilLFv7EcqIXR2Ye8m5vZNdileD/D9l4KhsRmqfz5kNvqGDVMJGH7Eo3zuZPNpmUUT/4X1HZd6faQ=="
+   }
+  },
+  {
+   "utilizador": "ivo.coutinho",
+   "nome": "Ivo COutinho",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-14 Masc B"
+   ],
+   "ativo": true,
+   "salt": "irm+rXr3seVYFmB4Qlvarg==",
+   "hash": "kJh8BdYgmvdNaBKePS7myIapfqk4YPMYEp/bXnqEfao=",
+   "dk": {
+    "iv": "QUu8Uwr6o5PYB58N",
+    "ct": "BtPvrA7uCUb1vcuix5R3poVHbdWKPsHPugTAeulhZadAQkkufLqcxILxPjBOuG6O53u9iob3uoPVUFUlWh3nLnJ5vLjkLLdFT3Qw1tTQBd2AO2i7Aj1SjDEdFgqUfxavBkiDVdrMGJfG1cEw1Q=="
    }
   }
  ]
