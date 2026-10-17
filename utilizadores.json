@@ -1,5 +1,5 @@
 {
- "atualizado": 1792251545500,
+ "atualizado": 1792251661014,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -104,6 +104,22 @@
    "dk": {
     "iv": "cq9cPWBLEN6JZoOR",
     "ct": "v3K5KJ7bML5qo2jhM8WxiaFSu3ZKkEjkwjlE02v9BKTZ9j6YA2aW3HaVOiEAnGQtAMQWY+lfpd8fZpEk3g06WfRj3DJ4UmLDlU+OGKLI+EFIJxUomUsnd5maoY/oe3chHNo67Git3Ax19POSmw=="
+   }
+  },
+  {
+   "utilizador": "miguel.costa",
+   "nome": "Miguel Costa",
+   "perfil": "consulta",
+   "cargo": "Diretor",
+   "escaloes": [
+    "*"
+   ],
+   "ativo": true,
+   "salt": "RzbQ+JLjb05faxlFOUlTjQ==",
+   "hash": "qmY9OFGLE/RuhX+JoGJneoOpx20bsCj8RBhG8cKalVI=",
+   "dk": {
+    "iv": "6GtJJJI9dtte31R0",
+    "ct": "Prr6ClYGV+m8dpMG1pghucUGIzJPbSDk6D8PgUhLWsDuu8mybpTmpvfli9hdfZ4n5tj5+9F8MrsGmj315E7Vp2eKPeBMwwymvbti5F44kcY+m+WxsMSuokmT1m7ak2ak431dGOitNlOAXEXbLg=="
    }
   }
  ]
