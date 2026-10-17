@@ -685,6 +685,9 @@ body.fit .acts.panel .act{min-height:0}
 .gsel{margin-top:12px;max-width:520px}.ojogo{margin-top:10px}
 @media (orientation:landscape) and (max-width:1100px){body.fit .lcol>.secth h3{font-size:11px;letter-spacing:.5px}body.fit .lcol>.secth .btn{padding:4px 7px;font-size:11px}.acts.panel .act:not(.mk):not(.ms):not(.fx){font-size:13px!important;letter-spacing:0}}
 @media (min-width:1101px),(orientation:landscape){body.fit .lcol>.secth{gap:6px}body.fit .lcol>.secth h3{white-space:nowrap}}
+
+.keep{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin:4px 0 0;cursor:pointer}.keep input{width:18px;height:18px;accent-color:var(--gold)}
+.cont{display:grid;justify-items:center}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -761,7 +764,7 @@ const Acc={
     if(okFile(loc)&&(loc.atualizado||0)>(UPUB.atualizado||0))UFILE=loc;else{UFILE=UPUB;lsSet(UK,null)}
     USERS=UFILE.utilizadores;
     if(!USERS.some(u=>u.perfil==="coordenador"&&u.hash&&u.ativo!==false)){renderFirst();return}
-    const s=lsGet(US);const u=s&&USERS.find(x=>x.hash&&sessKey(x)===s);cb(u&&u.ativo!==false?{...u}:null)},
+    const u=savedUser();cb(u?{...u}:null)},
   pending(){return UFILE!==UPUB},
   save(list){UFILE={atualizado:Date.now(),utilizadores:list};USERS=list;lsSet(UK,JSON.stringify(UFILE));if(lsGet(GK))this.publish().catch(()=>{})},
   /* envia utilizadores.json diretamente para o repositório (token só guardado neste dispositivo) */
@@ -778,9 +781,11 @@ const Acc={
     catch(e){PUBST=navigator.onLine?e.message:"Sem internet. Fica por publicar; carrega em Publicar quando houver ligação.";refreshPub();throw e}},
   async login(user,pw){user=String(user).trim().toLowerCase();const u=USERS.find(x=>x.utilizador===user);
     if(!u||!u.hash||await pwHash(pw,u.salt)!==u.hash)throw new Error("Utilizador ou palavra-passe errados.");
-    if(u.ativo===false)throw new Error("Conta desativada. Fala com o administrador.");lsSet(US,sessKey(u));PWMEM=pw;
+    if(u.ativo===false)throw new Error("Conta desativada. Fala com o administrador.");
+    if(LOGIN_KEEP){lsSet(US,sessKey(u));try{sessionStorage.removeItem(US)}catch(e){}}else{lsSet(US,null);try{sessionStorage.setItem(US,sessKey(u))}catch(e){}}
+    lsSet("fcgaia-stats-ultimo",u.utilizador);PWMEM=pw;
     if(u.dk){try{lsSet(DTK,await unwrapTok(u.dk,pw,u.salt))}catch(e){}}return {...u}},
-  async logout(){lsSet(US,null);lsSet(DTK,null);PWMEM=""},
+  async logout(){lsSet(US,null);try{sessionStorage.removeItem(US)}catch(e){}lsSet(DTK,null);PWMEM=""},
   async createUser(o){if(USERS.some(u=>u.utilizador===o.utilizador))throw new Error("Já existe esse nome de utilizador.");
     const c=await newCred(o.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",...(o.cargo?{cargo:o.cargo}:{}),escaloes:o.escaloes||[],ativo:true,...c}]))},
   async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),patch.pw,c.salt);Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
@@ -806,19 +811,28 @@ function renderFirst(){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who").
     if(!validUser(un)){err.textContent="Utilizador: 3 a 30 caracteres, só letras minúsculas, números, ponto, hífen ou _.";return}
     if(pw!==$("#f-r").value){err.textContent="As palavras-passe não coincidem.";return}
     try{await Acc.createUser({nome:$("#f-n").value.trim()||"Administrador",utilizador:un,pw,perfil:"coordenador",escaloes:[]});const u=await Acc.login(un,pw);SETVIEW="users";onUser(u)}catch(x){err.textContent=x.message}}}
-function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who").innerHTML="";
+/* sessão guardada neste dispositivo (até carregar em Sair) */
+let LOGIN_KEEP=true,LOGIN_FORM=false;
+function savedUser(){let s=lsGet(US);if(!s){try{s=sessionStorage.getItem(US)}catch(e){}}const u=s&&USERS.find(x=>x.hash&&sessKey(x)===s);return u&&u.ativo!==false?u:null}
+function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who").innerHTML="";const su=!msg&&!LOGIN_FORM?savedUser():null;const last=lsGet("fcgaia-stats-ultimo")||"";
   $("#app").innerHTML=`<div class="login"><div class="card lcard"><img src="${CREST}" alt=""><h2>Estatísticas</h2><p class="hint" style="margin:-6px 0 14px">FC Gaia Basquetebol · área privada</p>
-   <form id="lf"><label class="f">Utilizador<input id="l-e" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-   <label class="f">Palavra-passe<input id="l-p" type="password" autocomplete="current-password" required></label>
+   ${su?`<div class="cont"><button class="btn gold" id="l-cont" style="width:100%;padding:14px">Continuar como ${esc(su.nome)}</button><button class="lnk" id="l-other" style="margin-top:12px">Entrar com outro utilizador</button></div>`:`
+   <form id="lf" autocomplete="on"><label class="f">Utilizador<input id="l-e" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" value="${esc(last)}" required></label>
+   <label class="f">Palavra-passe<input id="l-p" name="password" type="password" autocomplete="current-password" required></label>
+   <label class="keep"><input type="checkbox" id="l-k"${LOGIN_KEEP?" checked":""}> Manter sessão iniciada neste tablet</label>
    <p class="err" id="l-err">${esc(msg||"")}</p>
-   <button class="btn gold" style="width:100%;padding:13px" type="submit">Entrar</button></form>
+   <button class="btn gold" style="width:100%;padding:13px" type="submit">Entrar</button></form>`}
    <p class="hint" style="margin-top:12px">Esqueceste-te da palavra-passe? Fala com o administrador.</p>
    <p class="hint" style="margin-top:14px">Funciona sem internet. Os jogos ficam guardados neste dispositivo.</p></div></div>`;
-  $("#lf").onsubmit=async e=>{e.preventDefault();$("#l-err").textContent="";try{onUser(await Acc.login($("#l-e").value,$("#l-p").value))}catch(x){$("#l-err").textContent=x.message}};
+  const lc=$("#l-cont");if(lc)lc.onclick=()=>{const u=savedUser();LOGIN_FORM=false;if(u)onUser({...u});else renderLogin()};
+  const lo=$("#l-other");if(lo)lo.onclick=()=>{LOGIN_FORM=true;renderLogin()};
+  const lf=$("#lf");if(lf){if(lsGet("fcgaia-stats-ultimo"))setTimeout(()=>{const p=$("#l-p");if(p)p.focus()},50);
+   lf.onsubmit=async e=>{e.preventDefault();$("#l-err").textContent="";LOGIN_KEEP=$("#l-k").checked;try{const u=await Acc.login($("#l-e").value,$("#l-p").value);LOGIN_FORM=false;
+    try{if(window.PasswordCredential&&navigator.credentials)navigator.credentials.store(new PasswordCredential({id:u.utilizador,password:$("#l-p").value,name:u.nome}))}catch(x){}onUser(u)}catch(x){$("#l-err").textContent=x.message}}}
 }
 function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":esc(roleLabel(USER).replace(" · consulta",""))+" · "+esc((USER.escaloes||[]).includes("*")?"todos os escalões":(USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
   const sy=$("#sync");if(sy){sy.onclick=()=>{Sync.soon(0);toast(Sync.tok()?(navigator.onLine?"A sincronizar…":"Sem internet: os jogos ficam guardados e seguem quando houver ligação"):"Base de dados não ligada (o administrador liga-a em Utilizadores)")};Sync.paint()}
-  const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo?",async()=>{await Acc.logout();USER=null;G=null;renderLogin()})}}
+  const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo? Da próxima vez será preciso a palavra-passe.",async()=>{await Acc.logout();USER=null;G=null;LOGIN_FORM=false;renderLogin()})}}
 function netState(){}
 function onUser(u){USER=u;stopTick();
   if(!u){renderLogin();return}
@@ -981,10 +995,9 @@ function applyTheme(t){document.documentElement.dataset.theme=t;const b=$("#thm"
   const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content="#000000"}
 applyTheme(lsGet("fcgaia-stats-tema")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"));
 function goLogin(){const go=async()=>{if(G){if(G.running)G.running=false;store()}G=null;stopTick();SEL=null;SUB=null;SIDE="us";SETVIEW="novo";try{localStorage.removeItem(KC)}catch(e){}
-    await Acc.logout();USER=null;document.body.classList.remove("fit");renderLogin()};
+    USER=null;LOGIN_FORM=false;document.body.classList.remove("fit");renderLogin()};
   if(!USER){renderLogin();return}
   if(G&&G.status!=="fim")confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
-  else if(Sync.tok()&&Sync.pending())confirmBox("Ainda há jogos por enviar. Ficam guardados neste tablet e seguem quando alguém entrar com internet. Ir para o início de sessão?",go);
   else go()}
 /* guia rápido */
 const HELP=[["Escolhe o jogo","Em Novo jogo, o escalão e o jogo de hoje (ou o próximo) já vêm escolhidos. Se for outro, abre “Outros jogos” ou “Outro jogo”.","1"],
