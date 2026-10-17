@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792252974070,
+ "atualizado": 1792253262067,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -74,17 +74,6 @@
    "ativo": true,
    "salt": "rzlmrT6NH4LUAANkM4EW4g==",
    "hash": "6lmsW3rafPU4SfiSww9+rB7Vem3pHxlsASEFKl8cyQo="
-  },
-  {
-   "utilizador": "davide.coelho",
-   "nome": "Davide Coelho",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-16 Masc B"
-   ],
-   "ativo": true,
-   "salt": "uG9dH9XjS83db5R94sUdFQ==",
-   "hash": "DfRzvridYLoNhwQizl2MeTDDia9ZHzjs0JWArtfrbsY="
   },
   {
    "utilizador": "miguel.costa",
