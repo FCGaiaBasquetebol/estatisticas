@@ -1,5 +1,5 @@
 {
- "atualizado": 1792247214930,
+ "atualizado": 1792247216124,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -29,18 +29,6 @@
    "ativo": true,
    "salt": "EY79qsCaq7eTHN6n/72dxw==",
    "hash": "cYxuJJH4ZM9ZR2iGrFYR49s0u8ojvHn0R+auMsaA3Ng="
-  },
-  {
-   "utilizador": "miguel.costa",
-   "nome": "Miguel Costa",
-   "perfil": "consulta",
-   "escaloes": [
-    "*"
-   ],
-   "ativo": true,
-   "salt": "/nludnlt/YGPHdOzyMyPOQ==",
-   "hash": "TH7hjswl3x4tPNX5m6reGmmXHEqatMzMsB9ICinjL0k=",
-   "cargo": "Diretor"
   }
  ]
 }
