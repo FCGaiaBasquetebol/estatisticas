@@ -859,7 +859,7 @@ function toast(t,ms,kind){const e=$("#toast");e.textContent=t;e.className="toast
 function saveNotice(){if(isRO())return;
   if(!Sync.tok()){toast("Jogo gravado só neste tablet. Pede ao administrador acesso à base de dados para o partilhar.",5000,"warn");return}
   if(!navigator.onLine){toast("Jogo gravado no tablet. Sem internet: liga o Wi-Fi ou os dados para enviar as estatísticas.",5000,"warn");return}
-  Sync.announce=true;toast("A enviar estatísticas…",15000,"busy");Sync.soon(0)}
+  Sync.announce="save";toast("A enviar estatísticas…",15000,"busy");Sync.soon(0)}
 const KJ="fcgaia-stats-jogos",KC="fcgaia-stats-atual";
 function readAll(){try{return JSON.parse(localStorage.getItem(KJ)||"{}")}catch(e){return {}}}
 function writeAll(m){try{localStorage.setItem(KJ,JSON.stringify(m));return true}catch(e){toast("Sem espaço para guardar! Exporta e apaga jogos antigos.");return false}}
@@ -994,7 +994,7 @@ function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who
     try{if(window.PasswordCredential&&navigator.credentials)navigator.credentials.store(new PasswordCredential({id:u.utilizador,password:$("#l-p").value,name:u.nome}))}catch(x){}onUser(u)}catch(x){$("#l-err").textContent=x.message}}}
 }
 function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":esc(roleLabel(USER).replace(" · consulta",""))+" · "+esc((USER.escaloes||[]).includes("*")?"todos os escalões":(USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
-  const sy=$("#sync");if(sy){sy.onclick=()=>{if(!Sync.tok()){toast("Os jogos ficam só neste tablet. Pede ao administrador acesso à base de dados.",4500,"warn");return}if(!navigator.onLine){toast("Sem internet. Liga o Wi-Fi ou os dados e os jogos seguem sozinhos.",4500,"warn");return}Sync.announce=true;toast("A enviar estatísticas…",15000,"busy");Sync.soon(0)};Sync.paint()}
+  const sy=$("#sync");if(sy){sy.onclick=()=>{if(!Sync.tok()){toast("Os jogos ficam só neste tablet. Pede ao administrador acesso à base de dados.",4500,"warn");return}if(!navigator.onLine){toast("Sem internet. Liga o Wi-Fi ou os dados e os jogos seguem sozinhos.",4500,"warn");return}Sync.announce="manual";toast(Sync.pending()?"A enviar estatísticas…":"A sincronizar…",15000,"busy");Sync.soon(0)};Sync.paint()}
   const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo? Da próxima vez será preciso a palavra-passe.",async()=>{await Acc.logout();USER=null;G=null;LOGIN_FORM=false;renderLogin()})}}
 function netState(){}
 function onUser(u){USER=u;stopTick();
@@ -1061,8 +1061,9 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     catch(e){console.warn("sync",e);if(this.st!=="erro")this.st=navigator.onLine?"falha":"offline"}
     this.busy=false;this.paint();const left=this.pending();
     if(this.announce&&left&&this.st==="ok"&&!this._again){this._again=true;this.soon(0);return}
-    if(this.announce){this.announce=false;this._again=false;if(this.st==="ok"&&!left)toast("✓ Estatísticas enviadas. Já estão disponíveis para o resto da equipa técnica.",3500,"ok");
-      else toast(this.st==="erro"?"Jogo gravado no tablet, mas o teu acesso à base de dados falhou. Fala com o administrador.":"Jogo gravado no tablet. Não deu para enviar agora — segue sozinho quando houver internet.",5000,"warn")}
+    if(this.announce){const ann=this.announce;this.announce=false;this._again=false;if(this.st==="ok"&&!left)toast(ann==="save"?"✓ Estatísticas enviadas. Já estão disponíveis para o resto da equipa técnica.":"✓ Tudo sincronizado",3500,"ok");
+      else{const sv=ann==="save",pre=sv?"Jogo gravado no tablet, mas ":"";
+        toast(this.st==="erro"?(isCoord()?pre+(sv?"o":"O")+" GitHub recusou o token da base de dados. Em Utilizadores → Ligações, usa “Trocar token” e cola o token atual.":pre+(sv?"o":"O")+" teu acesso à base de dados falhou. Fala com o administrador."):sv?"Jogo gravado no tablet. Não deu para enviar agora — segue sozinho quando houver internet.":"Não deu para sincronizar agora. Tenta daqui a pouco.",6000,"warn")}}
     else if(sent&&wasPending&&this.st==="ok"&&!(G&&G.running))toast(`✓ ${sent===1?"1 jogo enviado":sent+" jogos enviados"} para a base de dados`,3000,"ok");
     if(changed&&!G)renderSetup()},
   paint(){const e=$("#sync");if(!e)return;const n=this.pending(),tk=!!this.tok();
