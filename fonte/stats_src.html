@@ -805,6 +805,7 @@ body.fit .b2 .sc .s{font-size:60px}body.fit .b2 .clock .t{font-size:52px!importa
 :root[data-theme=light] .hic{background:#f3f0e0;color:var(--gold-ink)}:root[data-theme=light] .hgo,:root[data-theme=light] .hopen .htx small{color:var(--gold-ink)}:root[data-theme=light] .hopen{background:#fff6cf}
 
 /* ===== v20: avisos de envio ===== */
+.hb-ico{display:grid;place-items:center;font-size:44px;color:var(--gold);background:var(--panel2);border-radius:10px;min-height:90px}
 #toast.tk-ok{border-color:var(--ok)}#toast.tk-warn,#toast.tk-ok{max-width:min(560px,92vw);width:max-content;border-radius:14px;text-align:center;line-height:1.35}#toast.tk-warn{border-color:var(--gold)}#toast.tk-ok{color:#fff}#toast.tk-busy{border-color:var(--line)}
 #toast.tk-busy::before{content:"";display:inline-block;width:12px;height:12px;margin-right:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:tkspin .8s linear infinite}
 @keyframes tkspin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){#toast.tk-busy::before{animation:none}}
@@ -1139,17 +1140,18 @@ function goLogin(){const go=async()=>{if(G){if(G.running)G.running=false;store()
   if(G&&G.status!=="fim")confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
   else go()}
 /* guia rápido */
-const HELP=[["Escolhe o jogo","Em Novo jogo, o escalão e o jogo de hoje (ou o próximo) já vêm escolhidos. Se for outro, abre “Outros jogos” ou “Outro jogo”.","1"],
- ["Convoca os atletas","Toca nos atletas que vão a jogo. Confirma os números e carrega em Começar jogo.","2"],
+const HELP=[["Convoca no Plantel","No separador Plantel marca quem vai a jogo e carrega em “Convocar → escolher jogo”. O ✎ corrige nome e número; “+ Adicionar jogador” junta quem não está no plantel. A convocatória fica guardada para o jogo seguinte.","1"],
+ ["Escolhe o jogo","Em Novo jogo, o jogo de hoje (ou o próximo) já vem escolhido e os convocados também. Se for outro, abre “Escolher jogo de outra data…” ou “Outro jogo”. Carrega em Começar jogo.","2"],
  ["Escolhe o cinco inicial","Toca em 5 atletas do banco (ou arrasta-os para Em campo). O relógio só arranca com cinco em campo.","3"],
  ["Regista as jogadas","Toca no atleta e depois na ação dos lados do campo. Para um lançamento, toca no sítio do campo e escolhe Convertido ou Falhado. Depois de um cesto aparece “Assistência?” com os números dos colegas. Faltas: Pessoal e Recebida em destaque; Disruptiva, Flagrante e Técnica por baixo. Técnicas ao treinador ou ao banco: botão “Técnica banco”. Errado? ↶ Anular, em baixo.","4"],
  ["Adversário","Usa +1, +2, +3 e Falta no marcador, ou escolhe o adversário por cima do campo para marcar lançamentos e ações dele (o campo fica azul).","5"],
  ["Substitui a arrastar","Arrasta um atleta do banco para cima de quem sai. Se alguém for excluído, o relógio pára e a app pede logo quem entra.","6"],
  ["Relógio e períodos","▶ Iniciar e Parar ao lado do tempo. Toca no tempo para o corrigir. Período › mostra todos os períodos, com o seguinte em destaque.","7"],
- ["Termina e grava","Terminar jogo → Gravar abre a revisão: confirma os números com a ficha oficial, corrige o que for preciso e carrega em Gravar jogo. Jogadas erradas editam-se ou apagam-se no separador Jogadas. Para parar e continuar mais tarde, Gravar e sair. Os números ficam em Jogos e em Época · acumulado, com Excel.","8"]];
+ ["Termina e grava","Terminar jogo → Gravar abre a revisão: confirma os números com a ficha oficial, corrige o que for preciso e carrega em Gravar jogo. Jogadas erradas editam-se ou apagam-se no separador Jogadas. Para parar e continuar mais tarde, Gravar e sair: o jogo fica no Início com “Continuar”. Os números ficam em Estatísticas, com Excel.","8"],
+ ["Envio das estatísticas","Ao gravar, se houver internet aparece “A enviar estatísticas…” e depois “✓ Estatísticas enviadas”: ficam disponíveis para toda a equipa técnica do escalão. Sem internet, o jogo fica gravado no tablet e aparece “⚠ 1 jogo por enviar” no topo; basta abrir a app com Wi-Fi ou dados e segue sozinho (“✓ jogo enviado”). A app funciona sem internet no pavilhão, desde que tenha sido aberta antes com ligação. Se aparecer “⚠ Só neste tablet”, pede acesso ao administrador.",""]];
 function helpBox(){const m=document.createElement("div");m.className="modal help";
   m.innerHTML=`<div class="card hb"><div class="hb-h"><h3>Guia rápido</h3><button class="btn sm" id="hb-x">Fechar</button></div>
-   <ol class="hb-l">${HELP.map(([t,d,i])=>`<li><img src="ajuda/${i}.jpg" alt="" loading="lazy" onerror="this.remove()"><div><b>${esc(t)}</b><p>${esc(d)}</p></div></li>`).join("")}</ol>
+   <ol class="hb-l">${HELP.map(([t,d,i])=>`<li>${i?`<img src="ajuda/${i}.jpg" alt="" loading="lazy" onerror="this.remove()">`:`<span class="hb-ico">☁︎</span>`}<div><b>${esc(t)}</b><p>${esc(d)}</p></div></li>`).join("")}</ol>
    ${installHint()?`<div class="hb-i"><b>Instalar no tablet</b><p>${installHint()}</p></div>`:""}</div>`;
   document.body.appendChild(m);m.querySelector("#hb-x").onclick=()=>m.remove();m.onclick=e=>{if(e.target===m)m.remove()}}
 /* instalar como app */
