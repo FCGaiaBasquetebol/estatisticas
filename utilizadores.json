@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253835220,
+ "atualizado": 1792253909871,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -38,8 +38,12 @@
     "Masters"
    ],
    "ativo": true,
-   "salt": "VrIwfQ4xcpyDrJTj75Y3Jg==",
-   "hash": "lBLWBNJQt3kLA8hHFJbu9f9kAeB396917xe+j51yeqw="
+   "salt": "9IIH/jS9GRRFtLOL6D/xiw==",
+   "hash": "2jN0ZXRWSEt/T48tujVEUhb+miT8KafI44L7P6Lh/Ok=",
+   "dk": {
+    "iv": "uyqBwexQvhZhhxvn",
+    "ct": "ZUY9clwpA/hA2SvOG/O8iJWm5Jkm6s1jn6c3m1bTwbFBlOZHxKe4DOYMGjNwIDCwW5ROETY/6RNuH9Tz"
+   }
   },
   {
    "utilizador": "nuno.silva",
