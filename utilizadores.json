@@ -1,5 +1,5 @@
 {
- "atualizado": 1792192487200,
+ "atualizado": 1792247187769,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -8,7 +8,11 @@
    "escaloes": [],
    "ativo": true,
    "salt": "tldBaT0bBaWVI0CfxncfGg==",
-   "hash": "hkjb9UVH9oh1NB3hVEI3LLDL/85Dy5+FxL5xbZGaQPc="
+   "hash": "hkjb9UVH9oh1NB3hVEI3LLDL/85Dy5+FxL5xbZGaQPc=",
+   "dk": {
+    "iv": "/JlZ6hpFb8xzxjSc",
+    "ct": "AFNPNVASrA3yiqSI24slyc5+x0WPnFCnA0P0jQaWUh2gPA9xdxadNPLEdhfN2JvIEyyePi/qioXjrxUDqW4zzvqcspasqdHFIVY6imOH6JS+kguXqRj1rDpLCGuoTeIKxWV5QwdgobVvQZi1MQ=="
+   }
   },
   {
    "utilizador": "joaquim.oliveira",
