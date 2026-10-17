@@ -1009,7 +1009,7 @@ function pwPrompt(title,cb){const m=document.createElement("div");m.className="m
 /* ---------- base de dados dos jogos: repositório privado no GitHub ----------
    Cada jogo é um ficheiro jogos/<escalão>__<id>.json. Tudo é gravado primeiro no dispositivo;
    quando há internet, envia o que falta e recebe os jogos dos outros dispositivos. */
-const GD={owner:"andreferraz12",repo:"fcgaia-estatisticas-dados",branch:"main",dir:"jogos"},DTK="fcgaia-stats-dados-token",DQK="fcgaia-stats-apagar";
+const GD={owner:"FCGaiaBasquetebol",repo:"fcgaia-estatisticas-dados",branch:"main",dir:"jogos"},DTK="fcgaia-stats-dados-token",DQK="fcgaia-stats-apagar";
 let PWMEM="";               // palavra-passe da sessão (só em memória) para proteger o acesso à base de dados
 const slug=t=>String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const b64s=str=>{const b=new TextEncoder().encode(str);let o="";for(let i=0;i<b.length;i+=8192)o+=String.fromCharCode.apply(null,b.subarray(i,i+8192));return btoa(o)};
@@ -1024,7 +1024,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
   dirty(g){return !g._sup||(g.upd||0)>g._sup},
   pending(){return Object.values(readAll()).filter(g=>canSee(g)&&this.dirty(g)).length+this.dq().length},
   dq(){try{return JSON.parse(lsGet(DQK)||"[]")}catch(e){return []}},
-  async api(path,opt){opt=opt||{};const url=`https://api.github.com/repos/${GD.owner}/${GD.repo}/contents/${path}`+(opt.method?"":`?ref=${GD.branch}&t=${Date.now()}`);
+  async api(path,opt){opt=opt||{};const url=`https://api.github.com/repos/${GD.owner}/${GD.repo}`+(path===""?"":`/contents/${path}`)+(opt.method?"":`?ref=${GD.branch}&t=${Date.now()}`);
     const r=await fetch(url,{method:opt.method||"GET",cache:"no-store",headers:{Authorization:"Bearer "+this.tok(),Accept:"application/vnd.github+json",...(opt.body?{"Content-Type":"application/json"}:{})},body:opt.body?JSON.stringify(opt.body):undefined});
     if(r.status===401||r.status===403){this.st="erro";throw new Error("acesso")}return r},
   soon(ms){clearTimeout(this.t);this.t=setTimeout(()=>this.run(),ms||0)},
@@ -1041,7 +1041,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     this.busy=true;this.st="sync";this.paint();let changed=false,sent=0;const wasPending=this.pending();
     try{/* 1. apagar */const q=this.dq(),left=[];for(const d of q){const r=await this.api(d.path);if(r.ok){const j=await r.json();const x=await this.api(d.path,{method:"DELETE",body:{message:"Jogo apagado",sha:j.sha,branch:GD.branch}});if(!x.ok&&x.status!==404)left.push(d)}}lsSet(DQK,left.length?JSON.stringify(left):null);
       /* 2. enviar */for(const g of Object.values(readAll()).filter(g=>canSee(g)&&this.dirty(g))){if(G&&G.id===g.id&&G.running&&Date.now()-this.last<40000)continue;await this.push(g);sent++}
-      /* 3. receber */const r=await this.api(GD.dir);const list=r.status===404?[]:await r.json();if(!Array.isArray(list))throw new Error("lista");
+      /* 3. receber */const r=await this.api(GD.dir);if(r.status===404){const rr=await this.api("");if(!rr.ok&&rr.status===404){this.st="erro";throw new Error("repositório inacessível")}}const list=r.status===404?[]:await r.json();if(!Array.isArray(list))throw new Error("lista");
       const ok=new Set(allowed().map(slug)),seen=new Set(),m=readAll();
       for(const f of list){const mm=f.name.match(/^(.+)__(.+)\.json$/);if(!mm||!ok.has(mm[1]))continue;const id=mm[2];seen.add(id);const loc=m[id];
         if(loc&&loc._sha===f.sha)continue;if(loc&&this.dirty(loc)&&loc._sha)continue;
@@ -1089,7 +1089,7 @@ function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&
    <p class="hint" style="margin-top:0">${busy?"A enviar utilizadores.json para o GitHub.":err?esc(PUBST):pend?"Há alterações que ainda não foram enviadas.":"Cada alteração é enviada automaticamente para o GitHub e fica ativa nos outros dispositivos em 1 a 2 minutos."}</p>
    <div class="bar">${pend||err?`<button class="btn gold" id="gh-pub"${busy?" disabled":""}>Publicar agora</button><button class="btn" id="u-disc">Descartar alterações</button>`:""}<button class="btn sm ghost" id="gh-off">Desligar GitHub neste dispositivo</button></div></div>`}
 function dbCard(){const tk=!!Sync.tok(),sem=USERS.filter(u=>u.ativo!==false&&!u.dk);
-  if(tk)return `<div class="card pub"><h3 style="margin-top:0">☁︎ Base de dados dos jogos ligada</h3><p class="hint" style="margin-top:0">Os jogos são enviados para o repositório privado <b>${GD.repo}</b> sempre que há internet, e cada pessoa recebe os jogos dos seus escalões.${sem.length?` <b>Sem acesso ainda:</b> ${sem.map(u=>esc(u.nome)).join(", ")}. Para ativar, carrega em “Palavra-passe” e define uma nova para essa pessoa.`:""}</p></div>`;
+  if(tk)return `<div class="card pub"><h3 style="margin-top:0">☁︎ Base de dados dos jogos ligada</h3><p class="hint" style="margin-top:0">Os jogos são enviados para o repositório privado <b>${GD.repo}</b> sempre que há internet, e cada pessoa recebe os jogos dos seus escalões.${sem.length?` <b>Sem acesso ainda:</b> ${sem.map(u=>esc(u.nome)).join(", ")}. Para ativar, carrega em “Palavra-passe” e define uma nova para essa pessoa.`:""}</p><div class="bar" style="margin-bottom:0"><button class="btn sm" id="db-swap">Trocar token</button></div></div>`;
   return `<div class="card pub on"><h3 style="margin-top:0">☁︎ Ligar a base de dados dos jogos</h3>
    <p class="hint" style="margin-top:0">Sem isto, cada jogo fica só no tablet onde foi feito. Faz-se uma vez:</p>
    <details class="ghh" open><summary>Como preparar (5 minutos)</summary><ol class="hint">
@@ -1102,7 +1102,10 @@ async function dbConnect(t,pw){const r=await fetch(`https://api.github.com/repos
   if(r.status===404)throw new Error(`Não encontrei o repositório ${GD.repo} (ou o token não tem acesso a ele).`);if(!r.ok)throw new Error("O token não é válido.");
   const j=await r.json();if(j.permissions&&!j.permissions.push)throw new Error("O token não tem permissão de escrita (Contents: Read and write).");
   if(!j.private&&!confirm("Atenção: o repositório é público e os jogos ficariam visíveis para todos. Continuar mesmo assim?"))throw new Error("Torna o repositório privado em Settings e tenta outra vez.");
-  lsSet(DTK,t);const me=USERS.find(u=>u.utilizador===USER.utilizador);await Acc.updateUser(USER.utilizador,{dk:await wrapTok(t,pw,me.salt)})}
+  lsSet(DTK,t);const me=USERS.find(u=>u.utilizador===USER.utilizador);let old=null;if(me.dk){try{old=await unwrapTok(me.dk,pw,me.salt)}catch(e){}}
+  const mine=await wrapTok(t,pw,me.salt);
+  if(old&&old!==t){Acc.save(USERS.map(u=>{if(u.utilizador===USER.utilizador)return {...u,dk:mine};const {dk,...r}=u;return r}))}
+  else await Acc.updateUser(USER.utilizador,{dk:mine})}
 function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||(a.ativo===false)-(b.ativo===false)||String(a.nome).localeCompare(b.nome));
   const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();const sel=ed?ed.escaloes||[]:[];
   const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
@@ -1136,6 +1139,7 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
   <div class="usec"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
    <div class="lgrid">${pubCard(pend)}${dbCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
+  const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox("Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso com o token antigo vai precisar de uma palavra-passe nova.",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
     const go=async pw=>{dbo.disabled=true;try{await dbConnect(t,pw);toast("Base de dados ligada");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
     if(PWMEM)return go(PWMEM);askPw(async pw=>{const me=USERS.find(u=>u.utilizador===USER.utilizador);if(await pwHash(pw,me.salt)!==me.hash)throw new Error("Palavra-passe errada.");PWMEM=pw;go(pw)})};
