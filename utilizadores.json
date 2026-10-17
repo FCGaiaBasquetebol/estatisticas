@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792254044831,
+ "atualizado": 1792254146796,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -108,6 +108,21 @@
    "dk": {
     "iv": "taY7ioEiqTmFa1qx",
     "ct": "iuCdECCeeBKNw9NGvjTmk+cQlDlSyCiC6BViSYYF6Md3lZDWxNVZer0WSIcOT04NtWZpU3+8duhNfvOs"
+   }
+  },
+  {
+   "utilizador": "henrique.pereira",
+   "nome": "Henrique Pereira",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-14 Masc B"
+   ],
+   "ativo": true,
+   "salt": "fNTIoUseUyIn/vaCucnFXg==",
+   "hash": "XTG8VL9rpYuk5IAPA/Zi+mBlPPA3sfd2EA477wVkdHg=",
+   "dk": {
+    "iv": "WWvNabl7zAidor9+",
+    "ct": "lPvI2S5UPzewzlId7KP75cvAk0Q8AE0Cj/p2AHgCZV3j+Y1rBg5gB76eWAhM+ygoPOQ4SyhbBq7q0vUd"
    }
   }
  ]
