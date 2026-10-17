@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253262067,
+ "atualizado": 1792253621439,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -17,63 +17,6 @@
     "iv": "OX/B8dNfmAQuYklI",
     "ct": "PS3hkvHflpHRcDPynGEL4jqwJD/4fzdaUzLEb2QebRPE/LzaflgVTiPQjJJrZ3tj2guBRLbV5lkOTiAA"
    }
-  },
-  {
-   "utilizador": "duarte.oliveira",
-   "nome": "Duarte Oliveira",
-   "perfil": "treinador",
-   "escaloes": [
-    "Esperanças",
-    "Sub-18 Masc A"
-   ],
-   "ativo": true,
-   "salt": "nsA2/ZWjRJUzlqpgS8DC/Q==",
-   "hash": "cS8oBhQwtjmKSSo4za7t9iVFpgB6EuH5iPQBu5gj/9k="
-  },
-  {
-   "utilizador": "joaquim.coordenacao",
-   "nome": "Joaquim Oliveira (Coordenação)",
-   "perfil": "consulta",
-   "cargo": "Coordenador",
-   "escaloes": [
-    "*"
-   ],
-   "ativo": true,
-   "salt": "tAEmn4CteWS43IrBoSCyrw==",
-   "hash": "lH2z5aWKJZiBk5wj3I8kDdA16yvQJ/OCzFJTb2uHNd8="
-  },
-  {
-   "utilizador": "joaquim.oliveira",
-   "nome": "Joaquim Oliveira",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-14 Masc A"
-   ],
-   "ativo": true,
-   "salt": "mP30tDzcdr0YCRchirjjNA==",
-   "hash": "QguLr0Cn+KpAjdrvmfCZPiAaYqu3w7ogE7AMwClRCuE="
-  },
-  {
-   "utilizador": "ivo.coutinho",
-   "nome": "Ivo COutinho",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-14 Masc B"
-   ],
-   "ativo": true,
-   "salt": "irm+rXr3seVYFmB4Qlvarg==",
-   "hash": "kJh8BdYgmvdNaBKePS7myIapfqk4YPMYEp/bXnqEfao="
-  },
-  {
-   "utilizador": "ruimartins",
-   "nome": "Rui.Martins",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-16 Masc A"
-   ],
-   "ativo": true,
-   "salt": "rzlmrT6NH4LUAANkM4EW4g==",
-   "hash": "6lmsW3rafPU4SfiSww9+rB7Vem3pHxlsASEFKl8cyQo="
   },
   {
    "utilizador": "miguel.costa",
