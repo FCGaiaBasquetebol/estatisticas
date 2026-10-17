@@ -220,6 +220,7 @@ function linhasJogo(g) {
     ["Equipa", "FC Gaia · " + (g.teamName || g.team)],
     ["Data", g.date], ["Competição", g.comp || ""], ["Jogo n.º", g.gameNum || ""], ["Pavilhão", g.venue || ""],
     ["Local", g.home ? "Casa" : "Fora"], ["Períodos", `${np} × ${g.per || 10} min`],
+    ["Registado por", g.by ? g.by.n : ""], ["Última alteração por", g.ed ? g.ed.n : ""],
     [],
     CAB,
     ...roster.map(p => { const s = z(g.st && g.st[p.id]); return linhaStat(num(p.num), p.name, s, r1(s.sec / 60)); }),

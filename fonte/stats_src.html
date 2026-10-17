@@ -880,7 +880,7 @@ function saveNotice(){if(isRO())return;
 const KJ="fcgaia-stats-jogos",KC="fcgaia-stats-atual";
 function readAll(){try{return JSON.parse(localStorage.getItem(KJ)||"{}")}catch(e){return {}}}
 function writeAll(m){try{localStorage.setItem(KJ,JSON.stringify(m));return true}catch(e){toast("Sem espaço para guardar! Exporta e apaga jogos antigos.");return false}}
-function store(){if(!G)return;if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);Sync.soon(G.running?45000:6000);
+function store(){if(!G)return;if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();if(USER&&!isRO()){const me={u:USER.utilizador,n:USER.nome||USER.utilizador};if(!G.by)G.by=me;else if(G.by.u!==me.u)G.ed={...me,t:Date.now()}}const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);Sync.soon(G.running?45000:6000);
   try{if(G.status==="fim")localStorage.removeItem(KC);else localStorage.setItem(KC,G.id)}catch(e){}}
 function load(){try{const old=localStorage.getItem(KEY);if(old){const g=JSON.parse(old);if(g){g.id=g.id||"j"+(g.created||Date.now());const m=readAll();m[g.id]=g;writeAll(m);localStorage.setItem(KC,g.id)}localStorage.removeItem(KEY)}}catch(e){}
   try{const id=localStorage.getItem(KC);return id?readAll()[id]||null:null}catch(e){return null}}
@@ -1450,7 +1450,7 @@ function playerBox(p,keepY){const S=SETUP,isNew=!p;const m=document.createElemen
 /* ---------- jogos guardados ---------- */
 function savedList(list){const all=(list||visGames()).slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0));
   return `<h3 class="jhd">Jogos</h3>
-  ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
+  ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${g.by?` · por ${esc(g.by.n)}`:""}${g.ed?` · editado por ${esc(g.ed.n)}`:""}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
     <div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"||isRO()?"Ver":"Continuar"}</button><button class="btn sm gold" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div></div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
   ${isCoord()?`<div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button><label class="btn" for="bk-in">Importar cópia</label><input type="file" id="bk-in" accept=".json,application/json" hidden></div>`:""}
   <p class="hint">${Sync.tok()?"Os jogos ficam gravados neste dispositivo e são enviados para a base de dados do clube sempre que há internet. Aparecem nos tablets de quem tem o mesmo escalão.":"Os jogos ficam gravados só neste tablet, porque ainda não tens acesso à base de dados. Fala com o administrador."}</p>`}
@@ -1665,7 +1665,7 @@ function courtSVG(shots,live,zs,ps){const m=shots.map(e=>{const ok=e.t.endsWith(
    <line x1="660" y1="120" x2="840" y2="120" class="c-board"/><circle cx="${BX}" cy="${BY}" r="23" class="c-rim"/>
    <path class="c-line" d="M570 1400A180 180 0 0 1 930 1400"/>
    <rect x="0" y="0" width="1500" height="1400" class="c-out"/>${zs?zoneSeps()+zonesLabels(zs):ps?ptsLabels(ps):""}${m}<g id="tmpmk"></g></svg>`}
-function newGame(o){const now=Date.now();G={...o,id:"j"+now,status:"jogo",q:1,clock:o.per*60,running:false,us:0,them:0,tfUs:{},tfThem:{},st:Object.fromEntries(o.roster.map(p=>[p.id,STAT0()])),ost:STAT0(),log:[],undo:[],created:now};
+function newGame(o){const now=Date.now();G={...o,id:"j"+now,status:"jogo",q:1,clock:o.per*60,running:false,us:0,them:0,tfUs:{},tfThem:{},st:Object.fromEntries(o.roster.map(p=>[p.id,STAT0()])),ost:STAT0(),log:[],undo:[],created:now,by:USER?{u:USER.utilizador,n:USER.nome||USER.utilizador}:null};
   SEL=null;SUB=null;SIDE="us";VIEW="live";store();render();startTick()}
 function qLabel(q){return q<=G.np?(G.np===2?q+".ª parte":q+".º período"):"Prol. "+(q-G.np)}
 function startTick(){stopTick();let last=Date.now();tick=setInterval(()=>{const now=Date.now(),dt=(now-last)/1000;last=now;
@@ -1941,7 +1941,7 @@ function exportXLS(){const t=totals(),fn=`fcgaia-${G.team.toLowerCase().normaliz
   const row=(n,nm,s,min)=>[n,nm,min,s.pts,s.m2,s.a2,s.a2?+(s.m2/s.a2).toFixed(3):"",s.m3,s.a3,s.a3?+(s.m3/s.a3).toFixed(3):"",s.mf,s.af,s.af?+(s.mf/s.af).toFixed(3):"",s.or,s.dr,s.or+s.dr,s.ast,s.stl,s.blk,s.tov,s.fp,s.di||0,s.fl||0,s.ft,s.pf,s.fd,s.pm,eff(s)];
   const bs=[head,...bsRows().map(({p,s})=>row(/^\d+$/.test(p.num)?+p.num:p.num,p.name,s,+(s.sec/60).toFixed(1))),row("","TOTAL",t,""),[],row("",G.opp+" (equipa)",G.ost,"")];
   const pbp=[["Período","Tempo","Equipa","Jogada","Atleta","Nº","FC Gaia","Adversário"],...G.log.map(e=>{const p=e.id&&e.side!=="o"?pById(e.id):null;return [e.q>G.np?"Prol. "+(e.q-G.np):e.q,fmtT(e.c),e.side==="o"||/^o/.test(e.t)&&e.t!=="or"?G.opp:["fimq","iniq","fim"].includes(e.t)?"":"FC Gaia",e.t==="sub"?"Substituição (sai "+(pById(e.out)||{}).name+")":LBL[e.t]||e.t,p?p.name:"",p&&/^\d+$/.test(p.num)?+p.num:"",e.us,e.them]})];
-  const info=[["Equipa","FC Gaia · "+G.teamName],["Adversário",G.opp],["Data",G.date],["Competição",G.comp||""],["Jogo n.º",G.gameNum||""],["Pavilhão",G.venue||""],["Local",G.home?"Casa":"Fora"],["Resultado",`FC Gaia ${G.us} – ${G.them} ${G.opp}`],["Períodos",`${G.np} × ${G.per} min`],["Exportado",new Date().toLocaleString("pt-PT")]];
+  const info=[["Equipa","FC Gaia · "+G.teamName],["Adversário",G.opp],["Data",G.date],["Competição",G.comp||""],["Jogo n.º",G.gameNum||""],["Pavilhão",G.venue||""],["Local",G.home?"Casa":"Fora"],["Resultado",`FC Gaia ${G.us} – ${G.them} ${G.opp}`],["Períodos",`${G.np} × ${G.per} min`],["Registado por",G.by?G.by.n:""],["Última alteração por",G.ed?G.ed.n:""],["Exportado",new Date().toLocaleString("pt-PT")]];
   if(window.XLSX){const wb=XLSX.utils.book_new();
     const ws1=XLSX.utils.aoa_to_sheet(bs);ws1["!cols"]=head.map((h,i)=>({wch:i===1?24:h.length>6?12:7}));XLSX.utils.book_append_sheet(wb,ws1,"Estatísticas");
     const ws2=XLSX.utils.aoa_to_sheet(pbp);ws2["!cols"]=[{wch:8},{wch:7},{wch:20},{wch:34},{wch:24},{wch:5},{wch:8},{wch:10}];XLSX.utils.book_append_sheet(wb,ws2,"Jogadas");
