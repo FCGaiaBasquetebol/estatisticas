@@ -836,6 +836,21 @@ body.fit .tsw-b{min-height:48px}body.fit .tsw-b b{font-size:18px}
 :root[data-theme=light] .ualert{background:#fff6cf}
 
 .ucargo{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}.ucargo span{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* ===== v23: pessoas do clube ===== */
+.ppl{margin-bottom:16px}.ppl-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.ppl-g h4{margin:12px 0 6px;font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.ppl-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.pp{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font:inherit;cursor:pointer;min-width:0}
+.pp>span:last-child{min-width:0}.pp b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pp small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp .ck{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-weight:900;font-size:13px}
+.pp.on{border-color:var(--gold);background:rgba(226,184,18,.12)}.pp.on .ck{background:var(--gold);border-color:var(--gold);color:#111}
+.pp.done{opacity:.55;cursor:default}.pp.done .ck{border-color:var(--ok);color:var(--ok)}
+.crdl{max-width:520px!important;max-height:88vh;display:flex;flex-direction:column}.crdl-l{overflow:auto;display:grid;gap:12px;padding-right:4px}
+:root[data-theme=light] .pp{background:#fff}:root[data-theme=light] .pp.on{background:#fff6cf}
+
+.ulh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.ulh h3{margin:0}
+.uav.usel{border:2px dashed var(--line);cursor:pointer;font:inherit;font-weight:800}.uav.usel.on{background:var(--ko);border:2px solid var(--ko);color:#fff;font-size:20px}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1075,6 +1090,48 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     if(!S&&isCoord()){const A=this.busy||this.st==="sync"?["A sincronizar…","on"]:!navigator.onLine?["Offline","off"]:["Sincronizado","ok"];e.hidden=false;e.textContent="☁︎ "+A[0];e.className="sync "+A[1];e.title="Base de dados dos jogos: toca para sincronizar agora";return}
     e.hidden=!S;if(!S)return;e.textContent="⚠ "+S[0];e.className="sync "+S[1];e.title=S[2]}};
 /* cartão com os dados de acesso, para fazer print ou copiar (a palavra-passe só existe neste momento) */
+/* pessoas do clube (do calendário): treinadores, team managers, coordenação e direção, para dar acesso com um toque */
+const nrm=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+function clubPeople(){const D=DATA||{},esc=new Set(ESC.map(e=>e[0])),P={};
+  const add=(name,kind,meta,teams)=>{if(!name)return;const k=nrm(name);const x=P[k]=P[k]||{name,kinds:[],metas:[],teams:new Set()};x.kinds.push(kind);if(meta)x.metas.push(meta);(teams||[]).forEach(t=>esc.has(t)&&x.teams.add(t))};
+  Object.entries(D.staff||{}).forEach(([t,ns])=>ns.forEach(n=>add(n,"treinador",TN[t]||t,[t])));
+  Object.entries(D.tm||{}).forEach(([t,ns])=>ns.forEach(n=>add(n,"tm",(TN[t]||t),[t])));
+  (D.coord||[]).forEach(c=>add(c.name,"coord",c.role));(D.dirs||[]).forEach(c=>add(c.name,"dir",c.role));
+  return Object.values(P).map(x=>{const k=x.kinds;
+    const role=k.includes("dir")?{perfil:"consulta",cargo:"Diretor",escaloes:["*"]}:k.includes("coord")?{perfil:"consulta",cargo:"Coordenador",escaloes:["*"]}
+      :k.includes("treinador")?{perfil:"consulta",cargo:"Treinador",escaloes:[...x.teams]}:{perfil:"treinador",escaloes:[...x.teams]};
+    const grp=k.includes("dir")?"Direção":k.includes("coord")?"Coordenação":k.includes("treinador")?"Treinadores":"Team managers";
+    return {...x,grp,role,meta:[...new Set(x.metas)].join(" · ")}}).filter(x=>x.role.escaloes.length)
+   .sort((a,b)=>a.name.localeCompare(b.name))}
+function sugUser(name){const w=nrm(name).replace(/[^a-z0-9 ]/g,"").split(" ").filter(Boolean);let b=w.length>1?w[0]+"."+w[w.length-1]:(w[0]||"user"),u=b,i=2;while(USERS.some(x=>x.utilizador===u))u=b+(i++);return u}
+function genPw(){const A="abcdefghjkmnpqrstuvwxyz23456789";return [...crypto.getRandomValues(new Uint8Array(10))].map(x=>A[x%A.length]).join("")}
+let PSEL={},USELM=false,USEL={};
+function peopleCard(){const ps=clubPeople();if(!ps.length)return "";const has=new Set(USERS.map(u=>nrm(u.nome)));
+  const grps=["Treinadores","Team managers","Coordenação","Direção"];const n=Object.keys(PSEL).length;
+  const lab=r=>r.perfil==="treinador"?"Estatístico":r.cargo+" · visualização";
+  return `<section class="card ppl"><div class="ppl-h"><div><h3 style="margin:0">Pessoas do clube</h3><p class="hint" style="margin:2px 0 0">Do calendário. Escolhe a quem dar acesso: o perfil e os escalões já vêm sugeridos.</p></div>
+    <div class="bar" style="margin:0">${n===1?`<button class="btn sm" id="pp-one">Ajustar antes de criar</button>`:""}<button class="btn gold" id="pp-go"${n?"":" disabled"}>Dar acesso${n?` a ${n}`:""}</button></div></div>
+   ${grps.map(g=>{const l=ps.filter(p=>p.grp===g);return l.length?`<div class="ppl-g"><h4>${g}</h4><div class="ppl-l">${l.map(p=>{const ok=has.has(nrm(p.name)),on=!!PSEL[nrm(p.name)];
+     return `<button type="button" class="pp${on?" on":""}${ok?" done":""}" data-pp="${esc(nrm(p.name))}"${ok?" disabled":""} title="${esc(lab(p.role))}${p.role.escaloes[0]==="*"?" · todos os escalões":" · "+p.role.escaloes.map(t=>TN[t]||t).join(", ")}"><span class="ck">${ok?"✓":on?"✓":""}</span><span><b>${esc(p.name)}</b><small>${ok?"Já tem acesso":esc(p.meta)}</small></span></button>`}).join("")}</div></div>`:""}).join("")}</section>`}
+function bindPeople(){const ps=clubPeople(),by=k=>ps.find(p=>nrm(p.name)===k);
+  document.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const k=b.dataset.pp;if(PSEL[k])delete PSEL[k];else PSEL[k]=1;const y=scrollY;renderSetup();scrollTo(0,y)});
+  const one=$("#pp-one");if(one)one.onclick=()=>{const p=by(Object.keys(PSEL)[0]);if(!p)return;PSEL={};UEDIT=null;UROLE=p.role.perfil==="treinador"?"estat":p.role.cargo;renderSetup();
+    $("#u-n").value=p.name;$("#u-u").value=sugUser(p.name);$("#u-p").value=genPw();document.querySelectorAll("#u-esc input").forEach(i=>i.checked=p.role.escaloes.includes(i.value));$(".uform").scrollIntoView({behavior:"smooth",block:"start"})};
+  const go=$("#pp-go");if(go)go.onclick=async()=>{const list=Object.keys(PSEL).map(by).filter(Boolean);if(!list.length)return;go.disabled=true;go.textContent="A criar…";
+    const out=[],novos=[];
+    for(const p of list){const pw=genPw(),un=sugUser(p.name);USERS.push({utilizador:un});   // reserva o nome durante o ciclo
+      const c=await newCred(pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),pw,c.salt);
+      novos.push({utilizador:un,nome:p.name,perfil:p.role.perfil,...(p.role.cargo?{cargo:p.role.cargo}:{}),escaloes:p.role.escaloes,ativo:true,...c});out.push({un,pw})}
+    const base=USERS.filter(u=>u.hash);Acc.save(base.concat(novos));PSEL={};renderSetup();credList(out)}}
+function credList(items){const m=document.createElement("div");m.className="modal";const url=(location.host+location.pathname).replace(/index\.html$/,"").replace(/\/$/,"");
+  const row=({un,pw})=>{const u=USERS.find(x=>x.utilizador===un)||{};const e=(u.escaloes||[]).includes("*")?"Todos os escalões":(u.escaloes||[]).map(t=>TN[t]||t).join(", ");return {u,e,txt:`FC Gaia · Estatísticas de jogo\nNome: ${u.nome}\nUtilizador: ${un}\nPalavra-passe: ${pw}\nPerfil: ${roleLabel(u)}\nEscalões: ${e}\nEntrar em: https://${url}/`}};
+  m.innerHTML=`<div class="card crd crdl"><h3 style="margin-top:0">${items.length} ${items.length===1?"acesso criado":"acessos criados"}</h3><p class="hint" style="margin-top:0"><b>Faz print ou copia agora:</b> as palavras-passe não ficam guardadas e não voltam a aparecer.</p>
+   <div class="crdl-l">${items.map((it,i)=>{const r=row(it);return `<div class="crd-c"><div class="crd-h"><img src="${CREST}" alt=""><div><b>FC Gaia</b><small>Estatísticas de jogo · dados de acesso</small></div></div>
+    <dl><dt>Nome</dt><dd>${esc(r.u.nome||"")}</dd><dt>Perfil</dt><dd>${esc(roleLabel(r.u))}</dd><dt>Utilizador</dt><dd class="mono">${esc(it.un)}</dd><dt>Palavra-passe</dt><dd class="mono pw">${esc(it.pw)}</dd><dt>Escalões</dt><dd>${esc(r.e)}</dd><dt>Entrar em</dt><dd class="mono sm">${esc(url)}</dd></dl>
+    <div class="bar" style="margin:10px 0 0"><button class="btn sm" data-cp="${i}">Copiar</button></div></div>`}).join("")}</div>
+   <div class="bar"><button class="btn" id="cl-all">Copiar tudo</button><button class="btn gold" id="cl-x">Fechar</button></div></div>`;
+  document.body.appendChild(m);const cp=async t=>{try{await navigator.clipboard.writeText(t);toast("Copiado")}catch(e){toast("Não deu para copiar: faz print")}};
+  m.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>cp(row(items[+b.dataset.cp]).txt));m.querySelector("#cl-all").onclick=()=>cp(items.map(it=>row(it).txt).join("\n\n"));m.querySelector("#cl-x").onclick=()=>m.remove()}
 function credBox(un,pw,isNew){const u=USERS.find(x=>x.utilizador===un)||{utilizador:un};const url=(location.host+location.pathname).replace(/index\.html$/,"").replace(/\/$/,"");
   const esc2=(u.escaloes||[]).includes("*")?"Todos os escalões":(u.escaloes||[]).map(t=>TN[t]||t).join(", ")||"—";
   const txt=`FC Gaia · Estatísticas de jogo\nNome: ${u.nome||""}\nUtilizador: ${un}\nPalavra-passe: ${pw}\nEscalões: ${esc2}\nEntrar em: https://${url}/`;
@@ -1128,6 +1185,7 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
   const miss=[!lsGet(GK)?"a <b>publicação de utilizadores</b> (sem ela, o que crias aqui só fica neste computador)":"",!Sync.tok()?"a <b>base de dados dos jogos</b>":""].filter(Boolean);
   return `<div class="uhead"><h2>Utilizadores</h2><p class="hint">Quem pode entrar na área privada e em que escalões.</p></div>
   ${miss.length?`<div class="ualert"><span>⚠️ Falta ligar ${miss.join(" e ")}.</span><button class="btn sm gold" id="u-golig">Ir para Ligações ↓</button></div>`:""}
+  ${ed?"":peopleCard()}
   <div class="ugrid">
    <section class="card uform${ed?" editing":""}">
     <h3>${ed?`Editar ${esc(ed.nome)}`:"Novo utilizador"}</h3>
@@ -1146,10 +1204,10 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
     <div class="bar">${ed?`<button class="btn gold" id="u-save">Guardar alterações</button><button class="btn" id="u-cancel">Cancelar</button>`:`<button class="btn gold" id="u-add">Criar utilizador</button>`}</div>
     <p class="hint">Entrega o utilizador e a palavra-passe em pessoa. Se alguém se esquecer, usa “Palavra-passe” na lista para definir uma nova.</p>
    </section>
-   <section class="ulist"><h3>Contas <span class="cnt">${rows.length}</span></h3>
+   <section class="ulist"><div class="ulh"><h3>Contas <span class="cnt">${rows.length}</span></h3><div class="bar" style="margin:0">${USELM?`<button class="btn sm danger" id="us-del"${Object.keys(USEL).length?"":" disabled"}>Apagar ${Object.keys(USEL).length||""}</button><button class="btn sm" id="us-x">Cancelar</button>`:rows.length>1?`<button class="btn sm" id="us-on">Selecionar várias</button>`:""}</div></div>
     <div class="uth"><span></span><span>Nome</span><span>Escalões</span><span></span></div>
     ${rows.map(u=>{const me=USER&&u.utilizador===USER.utilizador,adm=u.perfil==="coordenador",off=u.ativo===false;return `<div class="urow${off?" off":""}${UEDIT===u.utilizador?" cur":""}">
-     <span class="uav${adm?" adm":""}">${esc(ini(u.nome))}</span>
+     ${USELM&&!me&&!adm?`<button type="button" class="uav usel${USEL[u.utilizador]?" on":""}" data-us="${esc(u.utilizador)}" aria-pressed="${!!USEL[u.utilizador]}">${USEL[u.utilizador]?"✓":esc(ini(u.nome))}</button>`:`<span class="uav${adm?" adm":""}">${esc(ini(u.nome))}</span>`}
      <div class="ui"><b>${esc(u.nome)}${me?' <small class="me">(tu)</small>':""}</b><small>${esc(u.utilizador)} · ${esc(roleLabel(u))}${off?" · desativado":""}</small>
       <div class="tags">${adm||(u.escaloes||[]).includes("*")?`<span class="tag">Todos os escalões</span>`:(u.escaloes||[]).map(t=>`<span class="tag">${esc(TN[t]||t)}</span>`).join("")||`<small class="warn">Sem escalões</small>`}${Sync.tok()&&!u.dk&&!off?`<small class="warn">Sem acesso à base de dados: define nova palavra-passe</small>`:""}</div></div>
      <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Editar</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
@@ -1158,6 +1216,7 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
   <div class="usec" id="ligacoes"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
    <div class="lgrid">${pubCard(pend)}${dbCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
+  bindPeople();
   const gl=$("#u-golig");if(gl)gl.onclick=()=>$("#ligacoes").scrollIntoView({behavior:"smooth",block:"start"});
   const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox(UFILE.tk?"Trocar o token da base de dados (por exemplo, quando expira)? Colas o novo a seguir e todos os utilizadores continuam com acesso.":"Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso vai precisar de uma palavra-passe nova (só desta vez).",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
@@ -1188,6 +1247,10 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
   document.querySelectorAll("[data-ue]").forEach(b=>b.onclick=()=>{UEDIT=b.dataset.ue;const u=USERS.find(x=>x.utilizador===UEDIT);UROLE=u&&u.perfil==="consulta"?(["Treinador","Coordenador","Diretor"].includes(u.cargo)?u.cargo:"Coordenador"):"estat";renderSetup();window.scrollTo(0,0)});
   document.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const u=USERS.find(x=>x.utilizador===b.dataset.up);pwPrompt("Nova palavra-passe · "+(u?u.nome:""),async n=>{await Acc.updateUser(b.dataset.up,{pw:n});toast("Palavra-passe alterada");renderSetup();credBox(b.dataset.up,n,false)})});
   document.querySelectorAll("[data-ua]").forEach(b=>b.onclick=()=>{const on=b.dataset.on==="1";confirmBox(on?"Reativar esta conta?":"Desativar esta conta? A pessoa deixa de conseguir entrar.",async()=>{await Acc.updateUser(b.dataset.ua,{ativo:on});renderSetup()})});
+  const keepY=f=>{const y=scrollY;f();renderSetup();scrollTo(0,y)};
+  const uo=$("#us-on");if(uo)uo.onclick=()=>keepY(()=>{USELM=true;USEL={}});const ux=$("#us-x");if(ux)ux.onclick=()=>keepY(()=>{USELM=false;USEL={}});
+  document.querySelectorAll("[data-us]").forEach(b=>b.onclick=()=>keepY(()=>{const k=b.dataset.us;if(USEL[k])delete USEL[k];else USEL[k]=1}));
+  const ud=$("#us-del");if(ud)ud.onclick=()=>{const ks=Object.keys(USEL);confirmBox(`Apagar ${ks.length} ${ks.length===1?"conta":"contas"}? Essas pessoas deixam de conseguir entrar. Os jogos não são apagados.`,()=>{Acc.save(USERS.filter(u=>!ks.includes(u.utilizador)));USELM=false;USEL={};renderSetup();toast(`${ks.length} ${ks.length===1?"conta apagada":"contas apagadas"}`)})};
   document.querySelectorAll("[data-ux]").forEach(b=>b.onclick=()=>confirmBox("Apagar esta conta da lista? Os jogos não são apagados.",()=>{Acc.removeUser(b.dataset.ux);renderSetup()}))}
 
 
