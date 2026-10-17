@@ -887,6 +887,10 @@ const validUser=u=>/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u);
 const ESC=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Masters","Masters"],["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"]];
 const PBK=150000,PWMIN=8;
 // repositório da app: deduzido do endereço (funciona em andreferraz12.github.io/fcgaia-estatisticas e em fcgaiaestatisticas.github.io)
+// calendário (jogos e planteis): endereço novo primeiro, o antigo como recurso durante a mudança
+const CALURLS=["https://fcgaiabasquetebol.github.io/data/jogos.json","https://andreferraz12.github.io/Fcgaiacalendario/data/jogos.json"];
+async function calFetch(){if(!/^https?:$/.test(location.protocol)||/^(localhost|127\.)/.test(location.hostname)&&!window.__REMOTE_CAL)return fetch("data/jogos.json?t="+Date.now(),{cache:"no-store"});
+  for(const u of CALURLS){try{const r=await fetch(u,{cache:"no-store"});if(r.ok)return r}catch(e){}}return {ok:false}}
 const GH=(()=>{const h=location.hostname,seg=location.pathname.split("/").filter(Boolean)[0];
   if(/\.github\.io$/i.test(h)){const owner=h.split(".")[0];const root=owner+".github.io";return {owner,repo:seg&&!/\.html?$/.test(seg)&&seg.toLowerCase()!==root.toLowerCase()?seg:root,branch:"main",path:"utilizadores.json"}}
   return {owner:"fcgaiaestatisticas",repo:"fcgaiaestatisticas.github.io",branch:"main",path:"utilizadores.json"}})(),GK="fcgaia-stats-github-token";
@@ -1201,7 +1205,7 @@ function bindInstall(){const g=$("#in-go");if(g)g.onclick=async()=>{INSTP.prompt
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-shv]");if(!b)return;SHOTV=b.dataset.shv;lsSet("fcgaia-stats-mapa",SHOTV);
   const y=scrollY;if(G)render();else renderSetup();scrollTo(0,y)});
 async function boot(){$("#help").onclick=helpBox;$("#brand").onclick=e=>{e.preventDefault();goLogin()};$("#thm").onclick=()=>{const t=document.documentElement.dataset.theme==="light"?"dark":"light";lsSet(TK,t);applyTheme(t);toast(t==="light"?"Tema claro":"Tema escuro")};applyTheme(document.documentElement.dataset.theme);$("#crest").src=CREST;
-  if(!DATA){try{const r=await fetch("data/jogos.json?t="+Date.now(),{cache:"no-store"});if(r.ok)DATA=await r.json()}catch(e){}}
+  if(!DATA){try{const r=await calFetch();if(r.ok)DATA=await r.json()}catch(e){}}
   if(!DATA)DATA={plantel:{},games:[]};
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   Acc.init(onUser);
