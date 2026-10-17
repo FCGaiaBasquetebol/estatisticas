@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792254892740,
+ "atualizado": 1792254959820,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -169,6 +169,23 @@
    "dk": {
     "iv": "cD7xSbKm8607ioEc",
     "ct": "qddVDFHH3xPx0MH1Gx4TulixLLsx4SflTos53h8QkoF74AaHRS3ak4gy3kq6m8X9c91CO0F4+MIA6qyJ"
+   }
+  },
+  {
+   "utilizador": "duarte.oliveira",
+   "nome": "Duarte Oliveira",
+   "perfil": "consulta",
+   "cargo": "Treinador",
+   "escaloes": [
+    "Esperanças",
+    "Sub-18 Masc A"
+   ],
+   "ativo": true,
+   "salt": "H+SdBOomBXaqcYaSWIIWng==",
+   "hash": "BFI0lrH+3E4BQKdBdG7AjDfRUp4qYrxd/IrMZDu7btM=",
+   "dk": {
+    "iv": "gH1TtJLzFQwC+zU1",
+    "ct": "MjQKm3N5yKWf2L0V26oOiSEg+KY5J6+X3HD1me8C1Wvbwc/7iXMbFjYQ0DSQk49NW8ccFzmDtCsXbS6U"
    }
   }
  ]
