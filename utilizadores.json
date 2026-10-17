@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792254010699,
+ "atualizado": 1792254015000,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -78,6 +78,21 @@
    "dk": {
     "iv": "V81UkzSQhOZ8kfnV",
     "ct": "5/MrN2kS0NYr2Uc3yKTdoB9tVYGVADwlU70JijA3sI5fXZJaQv8OhK7Q19nrPTGBocvU/Pu8UUTIgG3q"
+   }
+  },
+  {
+   "utilizador": "stephanie.nascimento",
+   "nome": "Stephanie Nascimento",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-16 Masc B"
+   ],
+   "ativo": true,
+   "salt": "FSKXDHs9rxUhfKA6QeU5iw==",
+   "hash": "nuFf40g2j331WRTlI3yfzKJpxm9So9o/6S5DIw9+jgk=",
+   "dk": {
+    "iv": "Euzb7617VuRRwq+t",
+    "ct": "DlTMC9Y3ONkxHpX+Vhs340Wto1wWvZ9xP3MdWoCmlzrUyTjBaQDUc3YJLbcRHy5/U+X2Cdxku5rmhA/d"
    }
   }
  ]
