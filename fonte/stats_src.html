@@ -924,9 +924,9 @@ const Acc={
     if(okFile(loc)&&(loc.atualizado||0)>(UPUB.atualizado||0))UFILE=loc;else{UFILE=UPUB;lsSet(UK,null)}
     USERS=UFILE.utilizadores;
     if(!USERS.some(u=>u.perfil==="coordenador"&&u.hash&&u.ativo!==false)){renderFirst();return}
-    const u=savedUser();cb(u?{...u}:null)},
+    const u=savedUser();if(u)await refreshTok();cb(u?{...u}:null)},
   pending(){return UFILE!==UPUB},
-  save(list){UFILE={atualizado:Date.now(),utilizadores:list};USERS=list;lsSet(UK,JSON.stringify(UFILE));if(lsGet(GK))this.publish().catch(()=>{})},
+  save(list,extra){UFILE={...(UFILE&&UFILE.tk?{tk:UFILE.tk}:{}),...(extra||{}),atualizado:Date.now(),utilizadores:list};USERS=list;lsSet(UK,JSON.stringify(UFILE));if(lsGet(GK))this.publish().catch(()=>{})},
   /* envia utilizadores.json diretamente para o repositório (token só guardado neste dispositivo) */
   async publish(){const tk=lsGet(GK);if(!tk)throw new Error("Falta ligar ao GitHub.");const f=UFILE;
     const url=`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${GH.path}`,h={Authorization:"Bearer "+tk,Accept:"application/vnd.github+json"};
@@ -944,11 +944,11 @@ const Acc={
     if(u.ativo===false)throw new Error("Conta desativada. Fala com o administrador.");
     if(LOGIN_KEEP){lsSet(US,sessKey(u));try{sessionStorage.removeItem(US)}catch(e){}}else{lsSet(US,null);try{sessionStorage.setItem(US,sessKey(u))}catch(e){}}
     lsSet("fcgaia-stats-ultimo",u.utilizador);PWMEM=pw;
-    if(u.dk){try{lsSet(DTK,await unwrapTok(u.dk,pw,u.salt))}catch(e){}}return {...u}},
-  async logout(){lsSet(US,null);try{sessionStorage.removeItem(US)}catch(e){}lsSet(DTK,null);PWMEM=""},
+    if(u.dk){try{const x=await unwrapTok(u.dk,pw,u.salt);if(UFILE&&UFILE.tk){lsSet(KK,x);lsSet(DTK,await decK(UFILE.tk,x))}else lsSet(DTK,x)}catch(e){}}return {...u}},
+  async logout(){lsSet(US,null);try{sessionStorage.removeItem(US)}catch(e){}lsSet(DTK,null);lsSet(KK,null);PWMEM=""},
   async createUser(o){if(USERS.some(u=>u.utilizador===o.utilizador))throw new Error("Já existe esse nome de utilizador.");
-    const c=await newCred(o.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",...(o.cargo?{cargo:o.cargo}:{}),escaloes:o.escaloes||[],ativo:true,...c}]))},
-  async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(Sync.tok())c.dk=await wrapTok(Sync.tok(),patch.pw,c.salt);Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
+    const c=await newCred(o.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",...(o.cargo?{cargo:o.cargo}:{}),escaloes:o.escaloes||[],ativo:true,...c}]))},
+  async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),patch.pw,c.salt);Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
     this.save(USERS.map(u=>u.utilizador===un?{...u,...patch}:u));
     if(USER&&USER.utilizador===un){USER={...USER,...patch};if(patch.hash)lsSet(US,sessKey(USER))}},
   removeUser(un){this.save(USERS.filter(u=>u.utilizador!==un))},
@@ -1017,6 +1017,13 @@ const unb64s=s=>new TextDecoder().decode(Uint8Array.from(atob(String(s).replace(
 async function wrapKey(pw,salt){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]);
   return crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt:new TextEncoder().encode("dados|"+salt),iterations:PBK},k,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 async function wrapTok(tok,pw,salt){const iv=crypto.getRandomValues(new Uint8Array(12));return {iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:"AES-GCM",iv},await wrapKey(pw,salt),new TextEncoder().encode(tok)))}}
+const KK="fcgaia-stats-chave";
+async function kKey(K){return crypto.subtle.importKey("raw",unb64(K),{name:"AES-GCM"},false,["encrypt","decrypt"])}
+async function encK(str,K){const iv=crypto.getRandomValues(new Uint8Array(12));return {iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:"AES-GCM",iv},await kKey(K),new TextEncoder().encode(str)))}}
+async function decK(w,K){return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(w.iv)},await kKey(K),unb64(w.ct)))}
+/* o que se cifra com a palavra-passe de cada pessoa: a chave do clube (esquema novo) ou o próprio token (antigo) */
+const dkSecret=()=>{const K=lsGet(KK);return UFILE&&UFILE.tk&&K?K:Sync.tok()};
+async function refreshTok(){const K=lsGet(KK);if(K&&UFILE&&UFILE.tk){try{const t=await decK(UFILE.tk,K);if(t&&t!==lsGet(DTK)){lsSet(DTK,t);Sync.st="";Sync.soon(300)}}catch(e){}}}
 async function unwrapTok(w,pw,salt){return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(w.iv)},await wrapKey(pw,salt),unb64(w.ct)))}
 const Sync={st:"",busy:false,t:null,last:0,announce:false,
   tok(){return lsGet(DTK)},
@@ -1057,7 +1064,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     if(changed&&!G)renderSetup()},
   paint(){const e=$("#sync");if(!e)return;const n=this.pending(),tk=!!this.tok();
     const S=!tk?["Só neste tablet","off","Não tens acesso à base de dados: os jogos ficam só neste tablet."]
-      :this.st==="erro"?["Sem acesso à base de dados","bad","Fala com o administrador."]
+      :this.st==="erro"?["Sem acesso à base de dados","bad",isCoord()?"O token pode ter expirado: Utilizadores → Ligações → Trocar token.":"Fala com o administrador."]
       :n&&!this.busy?[`${n===1?"1 jogo":n+" jogos"} por enviar`,"off",navigator.onLine?"Toca para tentar enviar agora.":"Sem internet. Seguem sozinhos quando houver ligação."]:null;
     e.hidden=!S;if(!S)return;e.textContent="⚠ "+S[0];e.className="sync "+S[1];e.title=S[2]}};
 /* cartão com os dados de acesso, para fazer print ou copiar (a palavra-passe só existe neste momento) */
@@ -1102,10 +1109,12 @@ async function dbConnect(t,pw){const r=await fetch(`https://api.github.com/repos
   if(r.status===404)throw new Error(`Não encontrei o repositório ${GD.repo} (ou o token não tem acesso a ele).`);if(!r.ok)throw new Error("O token não é válido.");
   const j=await r.json();if(j.permissions&&!j.permissions.push)throw new Error("O token não tem permissão de escrita (Contents: Read and write).");
   if(!j.private&&!confirm("Atenção: o repositório é público e os jogos ficariam visíveis para todos. Continuar mesmo assim?"))throw new Error("Torna o repositório privado em Settings e tenta outra vez.");
-  lsSet(DTK,t);const me=USERS.find(u=>u.utilizador===USER.utilizador);let old=null;if(me.dk){try{old=await unwrapTok(me.dk,pw,me.salt)}catch(e){}}
-  const mine=await wrapTok(t,pw,me.salt);
-  if(old&&old!==t){Acc.save(USERS.map(u=>{if(u.utilizador===USER.utilizador)return {...u,dk:mine};const {dk,...r}=u;return r}))}
-  else await Acc.updateUser(USER.utilizador,{dk:mine})}
+  const me=USERS.find(u=>u.utilizador===USER.utilizador);let K=null;
+  if(me.dk&&UFILE.tk){try{K=await unwrapTok(me.dk,pw,me.salt);await decK(UFILE.tk,K)}catch(e){K=null}}   // chave do clube já existente: os outros mantêm o acesso
+  const keep=!!K;if(!K)K=b64(crypto.getRandomValues(new Uint8Array(32)));
+  const tk=await encK(t,K),mine=await wrapTok(K,pw,me.salt);
+  Acc.save(USERS.map(u=>{if(u.utilizador===USER.utilizador)return {...u,dk:mine};if(keep)return u;const {dk,...r}=u;return r}),{tk});
+  lsSet(KK,K);lsSet(DTK,t);return keep}
 function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||(a.ativo===false)-(b.ativo===false)||String(a.nome).localeCompare(b.nome));
   const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();const sel=ed?ed.escaloes||[]:[];
   const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
@@ -1139,9 +1148,9 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
   <div class="usec"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
    <div class="lgrid">${pubCard(pend)}${dbCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
-  const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox("Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso com o token antigo vai precisar de uma palavra-passe nova.",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
+  const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox(UFILE.tk?"Trocar o token da base de dados (por exemplo, quando expira)? Colas o novo a seguir e todos os utilizadores continuam com acesso.":"Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso vai precisar de uma palavra-passe nova (só desta vez).",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
-    const go=async pw=>{dbo.disabled=true;try{await dbConnect(t,pw);toast("Base de dados ligada");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
+    const go=async pw=>{dbo.disabled=true;try{const keep=await dbConnect(t,pw);toast(keep?"Token trocado. Todos mantêm o acesso.":"Base de dados ligada",3000,"ok");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
     if(PWMEM)return go(PWMEM);askPw(async pw=>{const me=USERS.find(u=>u.utilizador===USER.utilizador);if(await pwHash(pw,me.salt)!==me.hash)throw new Error("Palavra-passe errada.");PWMEM=pw;go(pw)})};
   const dl=$("#u-dl");if(dl)dl.onclick=()=>{Acc.download();toast("utilizadores.json descarregado")};
   const on=$("#gh-on");if(on)on.onclick=async()=>{const t=$("#gh-t").value.trim();if(!t){$("#gh-e").textContent="Cola o token.";return}
