@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253655731,
+ "atualizado": 1792253687767,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -42,54 +42,6 @@
    "hash": "lBLWBNJQt3kLA8hHFJbu9f9kAeB396917xe+j51yeqw="
   },
   {
-   "utilizador": "helder.almeida",
-   "nome": "Helder Almeida",
-   "perfil": "consulta",
-   "cargo": "Treinador",
-   "escaloes": [
-    "Sub-14 Masc A"
-   ],
-   "ativo": true,
-   "salt": "MN46wdGOWvZg9liOpulxjg==",
-   "hash": "7Fp4c65e9hAzz7vgTM36Wtlce07GtAS+4VW1g6DIFsI=",
-   "dk": {
-    "iv": "Jz17vqDPKUEm6qyd",
-    "ct": "3KRjGdgnFsv75UI1TU3PxQ4y1icPRSXmwEX1L0PU42wz1Luwk8Msifcjmjw1HLZMrZ25WzJm4RCuEjmE"
-   }
-  },
-  {
-   "utilizador": "ivo.coutinho",
-   "nome": "Ivo Coutinho",
-   "perfil": "consulta",
-   "cargo": "Treinador",
-   "escaloes": [
-    "Sub-14 Masc B"
-   ],
-   "ativo": true,
-   "salt": "j9DUdt1DwT3UErCaL4Ohlg==",
-   "hash": "FHpAqUm42bp0vmfQORR79BjLU1AbL5Ndrp6gI46uJ4c=",
-   "dk": {
-    "iv": "zgKr+nmzz9FBv6le",
-    "ct": "oWpQSBka1//BOfpSuV4uruguiWx6NyW+OXjfqYkC1LXsuv8MwWiCFbAw+UyDSWOzUHlRT8p0K7x5pKTE"
-   }
-  },
-  {
-   "utilizador": "rui.martins",
-   "nome": "Rui Martins",
-   "perfil": "consulta",
-   "cargo": "Treinador",
-   "escaloes": [
-    "Sub-16 Masc A"
-   ],
-   "ativo": true,
-   "salt": "td9f/wTV7THaNFtvpagPqw==",
-   "hash": "a3daLIrNl2SVKZWbNR0q42GRgC66BslfUOyF8ZtE9nQ=",
-   "dk": {
-    "iv": "2igWsheeWAfB1Cyn",
-    "ct": "ESloFIfhgLQsk0zAlhIoDsfQIsraSXOVXIirutrDj0mtpKxOCukoB9HW6/ST51LdRnK6yUUtTPWgm1xU"
-   }
-  },
-  {
    "utilizador": "gustavo.valgode",
    "nome": "Gustavo Valgode",
    "perfil": "consulta",
@@ -103,39 +55,6 @@
    "dk": {
     "iv": "6GSwu6bC9yTmola+",
     "ct": "Vf3UMqUtSPlaVluPMVs5ruN1Ly08wOxiq/aUWq2/HRzho9doMgAMvEBUNLqbyHfmtziuHevV5Jrfc280"
-   }
-  },
-  {
-   "utilizador": "davide.coelho",
-   "nome": "Davide Coelho",
-   "perfil": "consulta",
-   "cargo": "Treinador",
-   "escaloes": [
-    "Sub-16 Masc B"
-   ],
-   "ativo": true,
-   "salt": "pVsYTaYfiHX7h9ReN9YWqA==",
-   "hash": "97dBwXt4aqGUT5mt3ZcVYuIZrYJaQ/+T9z8AsIqLIQQ=",
-   "dk": {
-    "iv": "sPimhgMX99iQ6TMZ",
-    "ct": "YKg7k9ULcSRs06feFv8HWN1W2zLoTtHOxEqrD4j44Gn8aHvAyWOIvzV1BRfXMsfwgoiUZQvEBDkDsElx"
-   }
-  },
-  {
-   "utilizador": "duarte.oliveira",
-   "nome": "Duarte Oliveira",
-   "perfil": "consulta",
-   "cargo": "Treinador",
-   "escaloes": [
-    "Esperanças",
-    "Sub-18 Masc A"
-   ],
-   "ativo": true,
-   "salt": "ZCBcIGuBDB+f4nmpXHdu5Q==",
-   "hash": "5sw1+AwxYW4qmE5LuXR2i/++harLiEikNUI/IxRXMv8=",
-   "dk": {
-    "iv": "hg+OM4K06gKmxwNG",
-    "ct": "t0+V2PekI65CimS0PzouublpWSsEpdcwFboN8vmwb98ISXS+2YbM912QR2GbA9xT89XkTEKAOBbdvMOS"
    }
   }
  ]
