@@ -113,3 +113,4 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Novo jogo: "jogo de outra data" abre uma janela (Próximos / Já jogados / Outro jogo); jogos por terminar aparecem no topo com Continuar.
 - Equipas Seniores, Esperanças e Masters (OPEN_TEAMS) ficam disponíveis para todos os utilizadores, além dos escalões de cada um.
 - v18: separador Plantel (marcar convocados, ✎ editar nome/número, + Adicionar jogador, "Convocar → escolher jogo"). Convocados, números, nomes e última equipa ficam guardados por equipa (localStorage `fcgaia-stats-conv`) e vêm predefinidos em Novo jogo. Número grande com a foto em marca de água.
+- v19: página Início (vista por defeito após login): jogo por terminar, botões grandes (Novo jogo, Plantel, Estatísticas, Utilizadores, Ajuda) e próximos jogos com "Preparar".
