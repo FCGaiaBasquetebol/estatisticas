@@ -810,6 +810,20 @@ body.fit .b2 .sc .s{font-size:60px}body.fit .b2 .clock .t{font-size:52px!importa
 #toast.tk-busy::before{content:"";display:inline-block;width:12px;height:12px;margin-right:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:tkspin .8s linear infinite}
 @keyframes tkspin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){#toast.tk-busy::before{animation:none}}
 .sync[hidden]{display:none!important}
+
+/* ===== v21: seletor de equipa em destaque ===== */
+.tsw{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px}
+.tsw-b{position:relative;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:1px;min-height:54px;min-width:0;padding:6px 12px 6px 16px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--muted);font:inherit;text-align:left;cursor:pointer;overflow:hidden}
+.tsw-b::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--gold)}.tsw-b.them::before{background:#5aa0ff}
+.tsw-b b{font-family:var(--f-disp);font-weight:400;font-size:20px;line-height:1.05;text-transform:uppercase;letter-spacing:.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tsw-b small{font-size:13px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.85}.tsw-b small em{font-style:normal;font-family:var(--f-disp);font-size:17px}
+.tsw-b.us[aria-pressed=true]{background:var(--gold);border-color:var(--gold);color:#111}.tsw-b.us[aria-pressed=true]::before{background:#111;opacity:.25}
+.tsw-b.them[aria-pressed=true]{background:#5aa0ff;border-color:#5aa0ff;color:#04121f}.tsw-b.them[aria-pressed=true]::before{background:#04121f;opacity:.25}
+.tsw-b.them[aria-pressed=false]{border-color:rgba(90,160,255,.55);color:#9cc6ff}
+.tsw-b:active{transform:scale(.98)}
+body.fit .tsw-b{min-height:48px}body.fit .tsw-b b{font-size:18px}
+:root[data-theme=light] .tsw-b{background:#fff}:root[data-theme=light] .tsw-b.them[aria-pressed=false]{color:#2f6fd6;border-color:#9dbcf0}
+:root[data-theme=light] .tsw-b.them[aria-pressed=true]{background:#2f6fd6;border-color:#2f6fd6;color:#fff}:root[data-theme=light] .tsw-b.us[aria-pressed=true]{color:#111}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1144,7 +1158,7 @@ const HELP=[["Convoca no Plantel","No separador Plantel marca quem vai a jogo e 
  ["Escolhe o jogo","Em Novo jogo, o jogo de hoje (ou o próximo) já vem escolhido e os convocados também. Se for outro, abre “Escolher jogo de outra data…” ou “Outro jogo”. Carrega em Começar jogo.","2"],
  ["Escolhe o cinco inicial","Toca em 5 atletas do banco (ou arrasta-os para Em campo). O relógio só arranca com cinco em campo.","3"],
  ["Regista as jogadas","Toca no atleta e depois na ação dos lados do campo. Para um lançamento, toca no sítio do campo e escolhe Convertido ou Falhado. Depois de um cesto aparece “Assistência?” com os números dos colegas. Faltas: Pessoal e Recebida em destaque; Disruptiva, Flagrante e Técnica por baixo. Técnicas ao treinador ou ao banco: botão “Técnica banco”. Errado? ↶ Anular, em baixo.","4"],
- ["Adversário","Usa +1, +2, +3 e Falta no marcador, ou escolhe o adversário por cima do campo para marcar lançamentos e ações dele (o campo fica azul).","5"],
+ ["Adversário","Usa +1, +2, +3 e Falta no marcador, ou toca no botão azul do adversário, por cima do campo, para marcar lançamentos e ações dele (o campo fica azul). Para voltar, toca em FC Gaia ou num atleta.","5"],
  ["Substitui a arrastar","Arrasta um atleta do banco para cima de quem sai. Se alguém for excluído, o relógio pára e a app pede logo quem entra.","6"],
  ["Relógio e períodos","▶ Iniciar e Parar ao lado do tempo. Toca no tempo para o corrigir. Período › mostra todos os períodos, com o seguinte em destaque.","7"],
  ["Termina e grava","Terminar jogo → Gravar abre a revisão: confirma os números com a ficha oficial, corrige o que for preciso e carrega em Gravar jogo. Jogadas erradas editam-se ou apagam-se no separador Jogadas. Para parar e continuar mais tarde, Gravar e sair: o jogo fica no Início com “Continuar”. Os números ficam em Estatísticas, com Excel.","8"],
@@ -1678,8 +1692,9 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||isRO()|
      <div class="lcol"><div class="secth"><h3>Em campo${need>0?` <span class="cnt">${G.oncourt.length}/5</span>`:""}</h3><button class="btn sm${SUB?" gold":""}" id="b-sub"${need>0?" disabled":""}>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
       <div class="plist court5${need>0?" need":""}" data-zone="court">${on.map(p=>plb(p,false)).join("")}${Array.from({length:Math.max(0,need)},()=>`<div class="pl slot" data-slot>Cinco inicial</div>`).join("")}<button class="btn sm${SUB?" gold":""} subm" data-subbtn${need>0?" disabled":""}>${SUB?(SUB==="?"?"Quem sai?":"Quem entra?"):"Substituir"}</button></div>
       <div class="benchw" data-zone="bench"><h3>Banco</h3><div class="plist bench">${bench.map(p=>plb(p,true)).join("")}</div></div></div>
-     <div class="ccol"><div class="sidebar"><div class="seg2" role="group" aria-label="Equipa"><button data-side="us" aria-pressed="${!opp}">FC Gaia</button><button data-side="them" aria-pressed="${opp}">${esc(G.opp)}</button></div>
-      <div class="selname${opp?" o":""}${sp&&!opp&&!need?" has":""}">${opp?`Ações da equipa adversária`:need>0?"Escolhe o cinco inicial":sp?`${av(sp)}<span>${esc(sp.name)}</span>`:"Toca num atleta em campo"}</div>
+     <div class="ccol"><div class="sidebar"><div class="tsw" role="group" aria-label="A quem se atribuem as ações">
+       <button class="tsw-b us" data-side="us" aria-pressed="${!opp}"><b>FC Gaia</b><small>${need>0?"Escolhe o cinco inicial":sp?`<em>${esc(sp.num||"–")}</em> ${esc(sp.name)}`:"Toca num atleta em campo"}</small></button>
+       <button class="tsw-b them" data-side="them" aria-pressed="${opp}"><b>${esc(G.opp)}</b><small>${opp?"A marcar para o adversário":"Toca para marcar o adversário"}</small></button></div>
       <button class="tbtn" id="b-tb" title="Falta técnica ao treinador ou ao banco"><i>T</i>Técnica banco${(()=>{const c=coachF();const n=c.us.c+c.us.b+c.them.c+c.them.b;return n?` <b>${n}</b>`:""})()}</button></div>
       <div class="cgrid">
 
