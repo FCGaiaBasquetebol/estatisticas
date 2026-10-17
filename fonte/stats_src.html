@@ -1200,7 +1200,7 @@ function seasonView(){const teams=[...new Set(visGames().map(g=>g.team))];
    <div class="seg2 big" role="group" aria-label="Mostrar"><button data-epm="tot" aria-pressed="${!avg}">Totais</button><button data-epm="avg" aria-pressed="${avg}">Médias por jogo</button></div>
    <button class="btn gold" id="ep-xls"${games.length?"":" disabled"}>Exportar Excel</button></div>
    <div class="eps"><span><b>${games.length}</b> jogos</span><span><b>${w}V</b> · <b>${l}D</b></span><span>Marcados <b>${pf}</b> (${games.length?(pf/games.length).toFixed(1):0}/jogo)</span><span>Sofridos <b>${pa}</b> (${games.length?(pa/games.length).toFixed(1):0}/jogo)</span></div></div>
-  ${games.length>1?seasonChart(games):""}
+  ${seasonShots(games,ath)}
   <h3>Jogos incluídos</h3><div class="epg">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<label class="epgi${EP.excl[g.id]?"":" on"}"><input type="checkbox" data-epx="${esc(g.id)}"${EP.excl[g.id]?"":" checked"}><span>${d?d.getDate()+" "+MSH[d.getMonth()]:""} · ${esc(TN[g.team]||"")} vs ${esc(g.opp)} <b class="${g.us>g.them?"w":g.us<g.them?"l":""}">${g.us}–${g.them}</b></span><button class="lnk" data-open="${esc(g.id)}" title="Abrir jogo">ver jogo ›</button></label>`}).join("")}</div>
   <h3>Atletas · ${avg?"médias por jogo":"totais"} <small class="hint">(toca no cabeçalho para ordenar · toca num atleta para ver jogo a jogo)</small></h3>
   <div class="tblw"><table class="bs ep"><thead><tr>${cols.map(([k,l])=>`<th class="${k==="name"||k==="num"?"l":""}${EP.sort===k?" srt":""}" data-eps="${k}">${l}</th>`).join("")}</tr></thead><tbody>${rows||'<tr><td class="l" colspan="19">Sem dados nos jogos escolhidos.</td></tr>'}</tbody></table></div>
@@ -1214,7 +1214,6 @@ function athSeason(a){if(!a)return "";const shots=a.games.flatMap(({g})=>g.log.f
    <tr class="tot"><td></td><td class="l">Total (${a.gp} jogos)</td><td>${fmtMin(a.sec)}</td><td>${a.pts}</td><td>${a.m2}/${a.a2}</td><td>${a.m3}/${a.a3}</td><td>${a.mf}/${a.af}</td><td>${a.or+a.dr}</td><td>${a.ast}</td><td>${a.stl}</td><td>${a.tov}</td><td>${a.pf}</td><td>${a.pm>0?"+":""}${a.pm}</td><td>${eff(a)}</td></tr>
    <tr class="avgr"><td></td><td class="l">Média por jogo</td><td>${fmtMin(a.sec/n)}</td><td><b>${av(a.pts)}</b></td><td>${av(a.m2)}/${av(a.a2)} <small>${pct(a.m2,a.a2)}</small></td><td>${av(a.m3)}/${av(a.a3)} <small>${pct(a.m3,a.a3)}</small></td><td>${av(a.mf)}/${av(a.af)} <small>${pct(a.mf,a.af)}</small></td><td>${av(a.or+a.dr)}</td><td>${av(a.ast)}</td><td>${av(a.stl)}</td><td>${av(a.tov)}</td><td>${av(a.pf)}</td><td>${a.pm>0?"+":""}${av(a.pm)}</td><td>${av(eff(a))}</td></tr></tbody></table></div>
    <div class="kpis"><div><b>${av(a.pts)}</b><span>pontos/jogo</span></div><div><b>${fmtMin(a.sec/n)}</b><span>minutos/jogo</span></div><div><b>${pct(a.m2+a.m3,a.a2+a.a3)}</b><span>lançamentos de campo</span></div><div><b>${pct(a.m3,a.a3)}</b><span>triplos</span></div><div><b>${pct(a.mf,a.af)}</b><span>lances livres</span></div><div><b>${av(a.or+a.dr)}</b><span>ressaltos/jogo</span></div></div>
-   ${a.games.length>1?athChart(a):""}
    <h3>Mapa de lançamentos da época</h3>${zoneBlock(shots,false)}</div>`}
 /* gráficos da época: linha de pontos por jogo (FC Gaia vs adversário) e barras de pontos do atleta */
 function chartFrame(n,maxV){const W=720,H=230,L=34,R=14,T=14,B=34,iw=W-L-R,ih=H-T-B,step=n>1?iw/(n-1):0,y=v=>T+ih-(v/maxV)*ih;
@@ -1248,7 +1247,11 @@ function bindCharts(){document.querySelectorAll(".ch-w").forEach(w=>{const tip=w
     tip.style.left=Math.min(Math.max(bb.left-wb.left+bb.width/2,80),wb.width-80)+"px";if(xh&&r.dataset.x){xh.setAttribute("x1",r.dataset.x);xh.setAttribute("x2",r.dataset.x);xh.setAttribute("visibility","visible")}};
   w.querySelectorAll(".hit").forEach(r=>{r.addEventListener("mouseenter",()=>show(r));r.addEventListener("click",()=>show(r))});
   svg.addEventListener("mouseleave",()=>{tip.hidden=true;if(xh)xh.setAttribute("visibility","hidden")})})}
-function bindSeason(){bindCharts();
+/* mapa de lançamentos da época (equipa, um atleta ou o adversário), nos jogos escolhidos */
+function seasonShots(games,ath){const k=EP.shotA||"";const sh=games.flatMap(g=>g.log.filter(e=>e.x!=null&&(k==="_o"?e.side==="o":e.side!=="o"&&(!k||e.id===k))));
+  const opts=ath.slice().sort((a,b)=>(+a.num||999)-(+b.num||999)).map(a=>`<option value="${esc(a.id)}"${k===a.id?" selected":""}>${esc(a.num||"–")} · ${esc(a.name)}</option>`).join("");
+  return `<h3>Mapa de lançamentos da época</h3>`+zoneBlock(sh,k==="_o",`<label class="f">Mostrar<select id="ep-shot"><option value="">FC Gaia (equipa)</option>${opts}<option value="_o"${k==="_o"?" selected":""}>Adversários</option></select></label><p class="hint" style="margin:6px 0 10px">${sh.length} lançamentos em ${games.length} jogo${games.length===1?"":"s"}.</p>`)}
+function bindSeason(){bindCharts();const es=$("#ep-shot");if(es)es.onchange=()=>{EP.shotA=es.value;const y=scrollY;renderSetup();scrollTo(0,y)};
   const t=$("#ep-team");if(t)t.onchange=e=>{EP.team=e.target.value;EP.ath=null;renderSetup()};
   document.querySelectorAll("[data-epm]").forEach(b=>b.onclick=()=>{EP.mode=b.dataset.epm;renderSetup()});
   document.querySelectorAll("[data-eps]").forEach(h=>h.onclick=()=>{EP.sort=h.dataset.eps;renderSetup()});

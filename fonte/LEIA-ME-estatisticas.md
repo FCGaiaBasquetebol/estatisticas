@@ -103,6 +103,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - **Gravar jogo:** fecha o jogo.
 - **Jogos terminados:** botão "Corrigir estatística".
 
-## Gráficos
+## Mapa de lançamentos da época
 - **Época:** pontos por jogo, FC Gaia contra adversário, em linhas.
 - **Ficha do atleta:** pontos por jogo, em barras, com a média.
