@@ -1,5 +1,5 @@
 {
- "atualizado": 1792247213650,
+ "atualizado": 1792247214930,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -29,17 +29,6 @@
    "ativo": true,
    "salt": "EY79qsCaq7eTHN6n/72dxw==",
    "hash": "cYxuJJH4ZM9ZR2iGrFYR49s0u8ojvHn0R+auMsaA3Ng="
-  },
-  {
-   "utilizador": "ivo.coutinho",
-   "nome": "Ivo Coutinho",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-14 Masc B"
-   ],
-   "ativo": true,
-   "salt": "gprQ5j8+FR+FSI0eBc4arw==",
-   "hash": "NiS7ay+ZjuWzqRabfOBYXvw3np/WmUmBPJoZw/03WIY="
   },
   {
    "utilizador": "miguel.costa",
