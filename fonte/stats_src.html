@@ -1187,7 +1187,7 @@ function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];co
    ${tile("ajuda","ajuda","Ajuda","Como usar a app no jogo")}
   </div>
   ${ng.length?`<div class="hnext"><h3>Próximos jogos</h3>${ng.map(g=>{const home=g.home.startsWith("FC Gaia");return `<button class="hng" data-ng="${esc(g.team)}|${esc(g.num)}"><span class="hd"><b>${dl(g.d)}</b><small>${esc(g.time||"")}</small></span><span class="htx"><b>${esc(home?g.away:g.home)}</b><small>${esc(TN[g.team]||g.team)} · ${home?"Em casa":"Fora"}</small></span><span class="hgo">Preparar ›</span></button>`}).join("")}</div>`:""}
-</section>`}
+  <p class="ver">Versão ${esc(VER||"local")}</p></section>`}
 function bindHome(){document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{const k=b.dataset.home;if(k==="ajuda"){helpBox();return}SETVIEW=k;renderSetup();scrollTo(0,0)});
   document.querySelectorAll(".hopen[data-open]").forEach(b=>b.onclick=()=>{G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW="live";store();render();startTick()});
   document.querySelectorAll("[data-ng]").forEach(b=>b.onclick=()=>{const [t,n]=b.dataset.ng.split("|");const S=SETUP;S.team=t;S.game=n;S.np=4;S.per=10;SETVIEW="novo";renderSetup();scrollTo(0,0)})}
@@ -1335,10 +1335,10 @@ function seasonView(){const vg=visGames();const teams=TEAMS.map(t=>t[0]).filter(
    <button class="btn" id="ep-xls"${games.length?"":" disabled"}>Excel</button>
   </div>
   <div class="eps tiles"><div><b>${games.length}</b><span>jogos</span></div><div><b>${w}–${l}</b><span>vitórias–derrotas</span></div><div><b>${avg?pg(pf):pf}</b><span>pontos marcados${avg?" por jogo":""}</span></div><div><b>${avg?pg(pa):pa}</b><span>pontos sofridos${avg?" por jogo":""}</span></div></div>
-  ${!games.length?`<p class="hint">Escolhe pelo menos um jogo em “Jogos”.</p>`:selA?athSeason(selA):athTable(ath,avg)}
+  ${!games.length?`<p class="hint">Escolhe pelo menos um jogo em “Jogos”.</p>`:selA?athSeason(selA):athTable(ath,avg,games.length)}
   ${games.length?seasonShots(games,ath):""}
   ${savedList(all)}`}
-function athTable(ath,avg){const v=(a,k)=>avg?(a[k]/a.gp):a[k];const f1=x=>avg?(Math.round(x*10)/10).toFixed(1):x;
+function athTable(ath,avg,ng){const v=(a,k)=>avg?(a[k]/a.gp):a[k];const f1=x=>avg?(Math.round(x*10)/10).toFixed(1):x;
   const cols=[["num","Nº"],["name","Atleta"],["gp","J"],["sec","MIN"],["pts","PTS"],["s2","2PT"],["s3","3PT"],["sf","LL"],["or","RO"],["dr","RD"],["rt","RT"],["ast","AST"],["stl","ROU"],["blk","DL"],["tov","PER"],["pf","F"],["fd","FR"],["pm","+/-"],["val","VAL"]];
   const key=(a,k)=>k==="rt"?a.or+a.dr:k==="val"?eff(a):k==="s2"?a.m2:k==="s3"?a.m3:k==="sf"?a.mf:k==="name"?a.name:k==="num"?(+a.num||999):(a[k]||0);
   const so=EP.sort,desc=!["name","num"].includes(so);
@@ -1346,7 +1346,9 @@ function athTable(ath,avg){const v=(a,k)=>avg?(a[k]/a.gp):a[k];const f1=x=>avg?(
   const sh=(a,m,t)=>`${f1(avg?a[m]/a.gp:a[m])}/${f1(avg?a[t]/a.gp:a[t])} <small>${pct(a[m],a[t])}</small>`;
   return `<h3>Atletas <small class="hint">toca num atleta para ver a ficha dele</small></h3>
   <div class="tblw"><table class="bs ep"><thead><tr>${cols.map(([k,l])=>`<th class="${k==="name"||k==="num"?"l":""}${EP.sort===k?" srt":""}" data-eps="${k}">${l}</th>`).join("")}</tr></thead><tbody>
-   ${ath.map(a=>`<tr data-ath="${esc(a.id)}"><td class="l">${esc(a.num)}</td><td class="l"><b>${esc(a.name)}</b></td><td>${a.gp}</td><td>${avg?fmtMin(a.sec/a.gp):fmtMin(a.sec)}</td><td><b>${f1(v(a,"pts"))}</b></td><td>${sh(a,"m2","a2")}</td><td>${sh(a,"m3","a3")}</td><td>${sh(a,"mf","af")}</td><td>${f1(v(a,"or"))}</td><td>${f1(v(a,"dr"))}</td><td>${f1(avg?(a.or+a.dr)/a.gp:a.or+a.dr)}</td><td>${f1(v(a,"ast"))}</td><td>${f1(v(a,"stl"))}</td><td>${f1(v(a,"blk"))}</td><td>${f1(v(a,"tov"))}</td><td>${f1(v(a,"pf"))}</td><td>${f1(v(a,"fd"))}</td><td>${f1(v(a,"pm"))}</td><td>${f1(avg?eff(a)/a.gp:eff(a))}</td></tr>`).join("")||'<tr><td class="l" colspan="19">Sem dados nos jogos escolhidos.</td></tr>'}</tbody></table></div>
+   ${ath.map(a=>`<tr data-ath="${esc(a.id)}"><td class="l">${esc(a.num)}</td><td class="l"><b>${esc(a.name)}</b></td><td>${a.gp}</td><td>${avg?fmtMin(a.sec/a.gp):fmtMin(a.sec)}</td><td><b>${f1(v(a,"pts"))}</b></td><td>${sh(a,"m2","a2")}</td><td>${sh(a,"m3","a3")}</td><td>${sh(a,"mf","af")}</td><td>${f1(v(a,"or"))}</td><td>${f1(v(a,"dr"))}</td><td>${f1(avg?(a.or+a.dr)/a.gp:a.or+a.dr)}</td><td>${f1(v(a,"ast"))}</td><td>${f1(v(a,"stl"))}</td><td>${f1(v(a,"blk"))}</td><td>${f1(v(a,"tov"))}</td><td>${f1(v(a,"pf"))}</td><td>${f1(v(a,"fd"))}</td><td>${f1(v(a,"pm"))}</td><td>${f1(avg?eff(a)/a.gp:eff(a))}</td></tr>`).join("")||'<tr><td class="l" colspan="19">Sem dados nos jogos escolhidos.</td></tr>'}</tbody>${ath.length?(()=>{const n=ng||1,T={};["sec","pts","m2","a2","m3","a3","mf","af","or","dr","ast","stl","blk","tov","pf","fd","pm"].forEach(k=>T[k]=ath.reduce((t,a)=>t+(a[k]||0),0));T.pm=0;
+   const d=x=>avg?(Math.round(x/n*10)/10).toFixed(1):x,sh=(m,t)=>`${d(T[m])}/${d(T[t])} <small>${pct(T[m],T[t])}</small>`;
+   return `<tfoot><tr class="tot"><td></td><td class="l">${avg?"Equipa · por jogo":"Total equipa"}</td><td>${n}</td><td>${avg?fmtMin(T.sec/n):fmtMin(T.sec)}</td><td>${d(T.pts)}</td><td>${sh("m2","a2")}</td><td>${sh("m3","a3")}</td><td>${sh("mf","af")}</td><td>${d(T.or)}</td><td>${d(T.dr)}</td><td>${d(T.or+T.dr)}</td><td>${d(T.ast)}</td><td>${d(T.stl)}</td><td>${d(T.blk)}</td><td>${d(T.tov)}</td><td>${d(T.pf)}</td><td>${d(T.fd)}</td><td>–</td><td>${d(eff(T))}</td></tr></tfoot>`})():""}</table></div>
   <p class="hint">J jogos · MIN minutos · 2PT/3PT/LL convertidos/tentados e % · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas · FR faltas recebidas · VAL valorização.</p>`}
 function gamesSheet(){const all=seasonData().all.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));const m=document.createElement("div");m.className="modal";
   const draw=()=>{m.innerHTML=`<div class="card gsh"><div class="gsh-h"><h3 style="margin:0">Jogos a incluir</h3><div class="bar" style="margin:0"><button class="btn sm" id="gs-all">Todos</button><button class="btn sm" id="gs-none">Nenhum</button></div></div>
