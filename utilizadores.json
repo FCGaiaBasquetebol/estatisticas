@@ -1,5 +1,5 @@
 {
- "atualizado": 1792247203452,
+ "atualizado": 1792247205196,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -51,17 +51,6 @@
    "ativo": true,
    "salt": "vk6xWm1ZkVmSjREvrPw99g==",
    "hash": "fj+F6F5gPJ7P2BN5k/+BqFmZjDTwAwuZM5RT3sJzL08="
-  },
-  {
-   "utilizador": "rui.martins",
-   "nome": "Rui Martins",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-16 Masc A"
-   ],
-   "ativo": true,
-   "salt": "DmP9S/fa4LNcCzcMWThUTg==",
-   "hash": "JWKA5H3ORqZX7cC1W1lxiZgRNmB0lcAiyFsGTleC9GE="
   },
   {
    "utilizador": "davide",
