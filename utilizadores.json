@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253973522,
+ "atualizado": 1792253978131,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -63,21 +63,6 @@
    "dk": {
     "iv": "1odtb2oFNOFenZmz",
     "ct": "wGDNxNRh2BfPuo3/HLvDWSAmEFtiX+3dC+890cWhZQZAaYyoyabofx5tQPEh/zbZ7b880A98FCtQ17Cb"
-   }
-  },
-  {
-   "utilizador": "carla.dias",
-   "nome": "Carla Dias",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-16 Masc B"
-   ],
-   "ativo": true,
-   "salt": "gxGKm5RjtO+Y92wDOaKo4g==",
-   "hash": "hTI2NclWpa4c+VGRwDQK7FORt1QmxxP3WjL12G8arN4=",
-   "dk": {
-    "iv": "RowbSGlZm4QBl0hP",
-    "ct": "UXEPF3rIwgFES+UhQv7HbuvkQD1p2aDDHCEME5OODJcnp4PJWqb44C0D1dfxDwRG+x1EdWV6tpv9sEz4"
    }
   }
  ]
