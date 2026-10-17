@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253687767,
+ "atualizado": 1792253734434,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -40,22 +40,6 @@
    "ativo": true,
    "salt": "VrIwfQ4xcpyDrJTj75Y3Jg==",
    "hash": "lBLWBNJQt3kLA8hHFJbu9f9kAeB396917xe+j51yeqw="
-  },
-  {
-   "utilizador": "gustavo.valgode",
-   "nome": "Gustavo Valgode",
-   "perfil": "consulta",
-   "cargo": "Treinador",
-   "escaloes": [
-    "Sub-18 Masc B"
-   ],
-   "ativo": true,
-   "salt": "N08PgBseyt5wypZTLy2LwA==",
-   "hash": "YAsj3p7HHX3TW08MbvJFB0aZTkHMiyIENv5zqzSNJJ0=",
-   "dk": {
-    "iv": "6GSwu6bC9yTmola+",
-    "ct": "Vf3UMqUtSPlaVluPMVs5ruN1Ly08wOxiq/aUWq2/HRzho9doMgAMvEBUNLqbyHfmtziuHevV5Jrfc280"
-   }
   }
  ]
 }
