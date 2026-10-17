@@ -90,3 +90,19 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - **Aviso "Instala a app neste tablet":** só aparece em ecrãs táteis e se a app ainda não estiver instalada.
   - Pode ser dispensado por 14 dias.
   - No Chrome/Android/Edge aparece o botão Instalar; no iPad aparecem as instruções do Safari.
+
+## Faltas e desqualificação (FIBA 2026/27)
+- Tipos: pessoal (`fp`), disruptiva (`di`), flagrante (`fl`), técnica (`ft`) e recebida (`fd`). A `fu` (antidesportiva) só existe em jogos antigos.
+- Desqualificação com 5 faltas, 2 técnicas, 2 flagrantes, ou 1 técnica + 1 flagrante. A disruptiva não conta.
+- Técnicas ao treinador ou banco (`tc`/`tb`): não contam para as faltas de equipa. O treinador é desqualificado com 2 técnicas suas, ou 3 no total.
+
+## Jogadas, revisão e correções
+- A estatística é recalculada a partir de `log` (`rebuild()`). Cada jogada guarda `on`, os 5 em campo, para o +/-.
+- **Separador Jogadas:** "Editar" muda a equipa, o atleta e o tipo de jogada, ou apaga a jogada.
+- **Terminar jogo → Gravar:** abre a revisão (`G.review`). A tabela de Atletas fica editável e as correções guardam-se em `G.adj` como diferenças.
+- **Gravar jogo:** fecha o jogo.
+- **Jogos terminados:** botão "Corrigir estatística".
+
+## Gráficos
+- **Época:** pontos por jogo, FC Gaia contra adversário, em linhas.
+- **Ficha do atleta:** pontos por jogo, em barras, com a média.
