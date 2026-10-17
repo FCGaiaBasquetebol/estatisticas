@@ -1,5 +1,5 @@
 {
- "atualizado": 1792252200038,
+ "atualizado": 1792252262705,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -7,11 +7,11 @@
    "perfil": "coordenador",
    "escaloes": [],
    "ativo": true,
-   "salt": "tldBaT0bBaWVI0CfxncfGg==",
-   "hash": "hkjb9UVH9oh1NB3hVEI3LLDL/85Dy5+FxL5xbZGaQPc=",
+   "salt": "x2h/AAZghp1uZoChkD6LIw==",
+   "hash": "EP1EgxlffCzJZigWusF9tWGq38FhTZUD8yDIxB5W844=",
    "dk": {
-    "iv": "/JlZ6hpFb8xzxjSc",
-    "ct": "AFNPNVASrA3yiqSI24slyc5+x0WPnFCnA0P0jQaWUh2gPA9xdxadNPLEdhfN2JvIEyyePi/qioXjrxUDqW4zzvqcspasqdHFIVY6imOH6JS+kguXqRj1rDpLCGuoTeIKxWV5QwdgobVvQZi1MQ=="
+    "iv": "ICR0vw9oqIAACMGp",
+    "ct": "KvXaG9AFl60PSRoxI5TyUBA3qu7au19lbO5YNqlHNL2DsJKSlRbzmluqynN/GvE+jvLcDBtgsWhTVI/5xzRKEWLyGbzrXi99jOjzQx9ncXBOD100lAdsrq0SQZbq9MVWrD7BbggNc1vubRqhMA=="
    }
   },
   {
