@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792254015000,
+ "atualizado": 1792254044831,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -93,6 +93,21 @@
    "dk": {
     "iv": "Euzb7617VuRRwq+t",
     "ct": "DlTMC9Y3ONkxHpX+Vhs340Wto1wWvZ9xP3MdWoCmlzrUyTjBaQDUc3YJLbcRHy5/U+X2Cdxku5rmhA/d"
+   }
+  },
+  {
+   "utilizador": "catia.silva",
+   "nome": "Cátia Silva",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-14 Masc B"
+   ],
+   "ativo": true,
+   "salt": "pq4MiYLcpdBRA1IW6y26Nw==",
+   "hash": "HWUrBpTaaDIYrj8PP+77RHuNJH5RfFaLw/ZPgXAjpGA=",
+   "dk": {
+    "iv": "taY7ioEiqTmFa1qx",
+    "ct": "iuCdECCeeBKNw9NGvjTmk+cQlDlSyCiC6BViSYYF6Md3lZDWxNVZer0WSIcOT04NtWZpU3+8duhNfvOs"
    }
   }
  ]
