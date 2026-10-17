@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792254246413,
+ "atualizado": 1792254840378,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -138,6 +138,21 @@
    "dk": {
     "iv": "dpIs8DEqPT/cQxDM",
     "ct": "uGtz3BHBCykECKMXMwzLsTYsoUJF8fyKGYIMuc89u+vuR8HNdmzuZ1VZS+UDqtVcHvtLzTuZX3ReBHKg"
+   }
+  },
+  {
+   "utilizador": "nuno.oliveira",
+   "nome": "Nuno Oliveira",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-14 Masc A"
+   ],
+   "ativo": true,
+   "salt": "GnwD891kbz2xE76WQ7Mm2w==",
+   "hash": "e+57eOIw543LMBWImX4FQCtIK07zxQdpfA5iMJJ8iTs=",
+   "dk": {
+    "iv": "m4+PXHlJBQfa2cBa",
+    "ct": "gwapPdr1wIKeQYckba38UElgczIBBCewewcDt/6VZEoS7bWha4RxuCrR2UFD1erIhLmteM+M/GYOHfvL"
    }
   }
  ]
