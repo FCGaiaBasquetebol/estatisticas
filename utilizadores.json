@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253922842,
+ "atualizado": 1792253944530,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -54,6 +54,7 @@
    "nome": "Nuno Silva",
    "perfil": "treinador",
    "escaloes": [
+    "Esperanças",
     "Sub-18 Masc A"
    ],
    "ativo": true,
