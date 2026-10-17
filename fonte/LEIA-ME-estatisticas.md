@@ -112,3 +112,4 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Estatísticas: barra de filtros única (Escalão, Jogos — janela com escolha múltipla, Mostrar — equipa/atleta/adversários, Totais/Médias, Excel). O mapa de lançamentos segue o "Mostrar".
 - Novo jogo: "jogo de outra data" abre uma janela (Próximos / Já jogados / Outro jogo); jogos por terminar aparecem no topo com Continuar.
 - Equipas Seniores, Esperanças e Masters (OPEN_TEAMS) ficam disponíveis para todos os utilizadores, além dos escalões de cada um.
+- v18: separador Plantel (marcar convocados, ✎ editar nome/número, + Adicionar jogador, "Convocar → escolher jogo"). Convocados, números, nomes e última equipa ficam guardados por equipa (localStorage `fcgaia-stats-conv`) e vêm predefinidos em Novo jogo. Número grande com a foto em marca de água.
