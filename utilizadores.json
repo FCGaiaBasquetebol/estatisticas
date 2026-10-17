@@ -1,5 +1,5 @@
 {
- "atualizado": 1792251424161,
+ "atualizado": 1792251508427,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -74,6 +74,21 @@
    "dk": {
     "iv": "QUu8Uwr6o5PYB58N",
     "ct": "BtPvrA7uCUb1vcuix5R3poVHbdWKPsHPugTAeulhZadAQkkufLqcxILxPjBOuG6O53u9iob3uoPVUFUlWh3nLnJ5vLjkLLdFT3Qw1tTQBd2AO2i7Aj1SjDEdFgqUfxavBkiDVdrMGJfG1cEw1Q=="
+   }
+  },
+  {
+   "utilizador": "ruimartins",
+   "nome": "Rui.Martins",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-16 Masc A"
+   ],
+   "ativo": true,
+   "salt": "rzlmrT6NH4LUAANkM4EW4g==",
+   "hash": "6lmsW3rafPU4SfiSww9+rB7Vem3pHxlsASEFKl8cyQo=",
+   "dk": {
+    "iv": "ZKsmXauMmuCD2/Xf",
+    "ct": "gedbPZ3P/Hxw8LQVTpNrRvQ9PPpQAopA7dNpiBVKLXq6vXQBlqgQjc+ndzECuSYsLfnt0Gsj77CrR2Bb8LmaSI9n2pyogmTtn9PG7nkjgvljFzp9bpXhVyJ7iq57GI051WtfQCQZgy3RHZFqdA=="
    }
   }
  ]
