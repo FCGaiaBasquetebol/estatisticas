@@ -111,7 +111,7 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Menu: Novo jogo | Estatísticas | Utilizadores (o separador "Jogos" desapareceu; a lista de jogos está no fundo de Estatísticas).
 - Estatísticas: barra de filtros única (Escalão, Jogos — janela com escolha múltipla, Mostrar — equipa/atleta/adversários, Totais/Médias, Excel). O mapa de lançamentos segue o "Mostrar".
 - Novo jogo: "jogo de outra data" abre uma janela (Próximos / Já jogados / Outro jogo); jogos por terminar aparecem no topo com Continuar.
-- Equipas Seniores, Esperanças e Masters (OPEN_TEAMS) ficam disponíveis para todos os utilizadores, além dos escalões de cada um.
+- Seniores, Esperanças e Masters escolhem-se por utilizador (lista ESC). OPEN_TEAMS está vazio.
 - v18: separador Plantel (marcar convocados, ✎ editar nome/número, + Adicionar jogador, "Convocar → escolher jogo"). Convocados, números, nomes e última equipa ficam guardados por equipa (localStorage `fcgaia-stats-conv`) e vêm predefinidos em Novo jogo. Número grande com a foto em marca de água.
 - v19: página Início (vista por defeito após login): jogo por terminar, botões grandes (Novo jogo, Plantel, Estatísticas, Utilizadores, Ajuda) e próximos jogos com "Preparar".
 - v20: indicador de sincronização só aparece quando há algo a resolver (jogos por enviar / sem acesso). Ao gravar: "A enviar estatísticas…" → "✓ Estatísticas enviadas"; sem internet: "Jogo gravado no tablet… liga o Wi-Fi"; quando a rede volta: "✓ N jogos enviados". Cópia de segurança só para o administrador.

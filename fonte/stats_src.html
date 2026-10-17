@@ -863,14 +863,14 @@ let SIDE="us";          // us | them — a quem se atribuem as ações
 const USERS_EMB=/*USERS*/null;      // cópia de utilizadores.json embutida quando a app é gerada
 const UK="fcgaia-stats-utilizadores-local",US="fcgaia-stats-sessao";
 const validUser=u=>/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u);
-const ESC=[["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"]];
+const ESC=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Masters","Masters"],["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"]];
 const PBK=150000,PWMIN=8;
 const GH={owner:"andreferraz12",repo:"fcgaia-estatisticas",branch:"main",path:"utilizadores.json"},GK="fcgaia-stats-github-token";
 let USER=null,USERS=[],UFILE=null,UPUB=null,PUBST="";
 function refreshPub(){if(SETVIEW==="users"&&isCoord()&&!G&&document.querySelector(".pub")){const y=scrollY;renderSetup();scrollTo(0,y)}}
 const isCoord=()=>USER&&USER.perfil==="coordenador";
 const isRO=()=>USER&&USER.perfil==="consulta";   // coordenador técnico / diretor: só consulta
-const OPEN_TEAMS=["Seniores Masc","Esperanças","Masters"];   // equipas adultas: qualquer utilizador pode registar e ver
+const OPEN_TEAMS=[];   // equipas abertas a todos (vazio: cada utilizador só vê os escalões que lhe foram dados)
 const allowed=()=>isCoord()||(isRO()&&(USER.escaloes||[]).includes("*"))?TEAMS.map(t=>t[0]):TEAMS.map(t=>t[0]).filter(t=>((USER&&USER.escaloes)||[]).includes(t)||OPEN_TEAMS.includes(t));
 const roleLabel=u=>u.perfil==="coordenador"?"Administrador":u.perfil==="consulta"?(u.cargo||"Consulta")+" · consulta":"Treinador";
 let UROLE="treinador";
