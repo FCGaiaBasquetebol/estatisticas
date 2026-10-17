@@ -1,5 +1,5 @@
 {
- "atualizado": 1792251146893,
+ "atualizado": 1792251291866,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -28,6 +28,22 @@
    "dk": {
     "iv": "c/R1CM0RTH94+5o0",
     "ct": "YqzHjy5+czM/YAgdjMnp5SVPwwtTcidUJeFWlCXi3tARBT+KrGMqyyTq4FrThkILaqLMUmaGQiVziMbZ4/jReyiwF7qIoaYPUFMpm7/QYDyN9SgvCXHwCx8UmfQmpWmuPGlHZp1VY6TxoYRL7A=="
+   }
+  },
+  {
+   "utilizador": "joaquim.coordenacao",
+   "nome": "Joaquim Oliveira (Coordenação)",
+   "perfil": "consulta",
+   "cargo": "Coordenador",
+   "escaloes": [
+    "*"
+   ],
+   "ativo": true,
+   "salt": "tAEmn4CteWS43IrBoSCyrw==",
+   "hash": "lH2z5aWKJZiBk5wj3I8kDdA16yvQJ/OCzFJTb2uHNd8=",
+   "dk": {
+    "iv": "aruuO1jTwOsDSApF",
+    "ct": "7Xr3IUB5fxxgM32TJ9aM9aoa8bdmUll80Uzg6HWNH2Lwa6Fi3smvmL6CbnNNEKp0eAAwvEWta0fOt0zBhl7H/sEm1k/28hvUuEaRJHL0QUPiGj9dOo9epXBtAosds9hq6tznZbxrddYmEDciCw=="
    }
   }
  ]
