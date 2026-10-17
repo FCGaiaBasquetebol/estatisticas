@@ -803,6 +803,12 @@ body.fit .b2 .sc .s{font-size:60px}body.fit .b2 .clock .t{font-size:52px!importa
 .hng .hd b{display:block;font-weight:800}.hng .hd small{color:var(--muted)}.hng .htx b{font-size:20px}
 :root[data-theme=light] .htile,:root[data-theme=light] .hng{background:#fff}:root[data-theme=light] .htile.main{background:var(--gold);color:#111}
 :root[data-theme=light] .hic{background:#f3f0e0;color:var(--gold-ink)}:root[data-theme=light] .hgo,:root[data-theme=light] .hopen .htx small{color:var(--gold-ink)}:root[data-theme=light] .hopen{background:#fff6cf}
+
+/* ===== v20: avisos de envio ===== */
+#toast.tk-ok{border-color:var(--ok)}#toast.tk-warn,#toast.tk-ok{max-width:min(560px,92vw);width:max-content;border-radius:14px;text-align:center;line-height:1.35}#toast.tk-warn{border-color:var(--gold)}#toast.tk-ok{color:#fff}#toast.tk-busy{border-color:var(--line)}
+#toast.tk-busy::before{content:"";display:inline-block;width:12px;height:12px;margin-right:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-1px;animation:tkspin .8s linear infinite}
+@keyframes tkspin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){#toast.tk-busy::before{animation:none}}
+.sync[hidden]{display:none!important}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -823,7 +829,12 @@ const p2=n=>String(n).padStart(2,"0");
 const fmtT=s=>{s=Math.max(0,Math.ceil(s));return p2(Math.floor(s/60))+":"+p2(s%60)};
 const fmtMin=s=>{s=Math.round(s);return Math.floor(s/60)+":"+p2(s%60)};
 const MSH=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-function toast(t){const e=$("#toast");e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,1600)}
+function toast(t,ms,kind){const e=$("#toast");e.textContent=t;e.className="toast"+(kind?" tk-"+kind:"");e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,ms||1600)}
+/* aviso ao gravar: diz claramente se as estatísticas seguiram ou ficaram no tablet */
+function saveNotice(){if(isRO())return;
+  if(!Sync.tok()){toast("Jogo gravado só neste tablet. Pede ao administrador acesso à base de dados para o partilhar.",5000,"warn");return}
+  if(!navigator.onLine){toast("Jogo gravado no tablet. Sem internet: liga o Wi-Fi ou os dados para enviar as estatísticas.",5000,"warn");return}
+  Sync.announce=true;toast("A enviar estatísticas…",15000,"busy");Sync.soon(0)}
 const KJ="fcgaia-stats-jogos",KC="fcgaia-stats-atual";
 function readAll(){try{return JSON.parse(localStorage.getItem(KJ)||"{}")}catch(e){return {}}}
 function writeAll(m){try{localStorage.setItem(KJ,JSON.stringify(m));return true}catch(e){toast("Sem espaço para guardar! Exporta e apaga jogos antigos.");return false}}
@@ -951,7 +962,7 @@ function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who
     try{if(window.PasswordCredential&&navigator.credentials)navigator.credentials.store(new PasswordCredential({id:u.utilizador,password:$("#l-p").value,name:u.nome}))}catch(x){}onUser(u)}catch(x){$("#l-err").textContent=x.message}}}
 }
 function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":esc(roleLabel(USER).replace(" · consulta",""))+" · "+esc((USER.escaloes||[]).includes("*")?"todos os escalões":(USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
-  const sy=$("#sync");if(sy){sy.onclick=()=>{Sync.soon(0);toast(Sync.tok()?(navigator.onLine?"A sincronizar…":"Sem internet: os jogos ficam guardados e seguem quando houver ligação"):"Base de dados não ligada (o administrador liga-a em Utilizadores)")};Sync.paint()}
+  const sy=$("#sync");if(sy){sy.onclick=()=>{if(!Sync.tok()){toast("Os jogos ficam só neste tablet. Pede ao administrador acesso à base de dados.",4500,"warn");return}if(!navigator.onLine){toast("Sem internet. Liga o Wi-Fi ou os dados e os jogos seguem sozinhos.",4500,"warn");return}Sync.announce=true;toast("A enviar estatísticas…",15000,"busy");Sync.soon(0)};Sync.paint()}
   const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo? Da próxima vez será preciso a palavra-passe.",async()=>{await Acc.logout();USER=null;G=null;LOGIN_FORM=false;renderLogin()})}}
 function netState(){}
 function onUser(u){USER=u;stopTick();
@@ -978,7 +989,7 @@ async function wrapKey(pw,salt){const k=await crypto.subtle.importKey("raw",new 
   return crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt:new TextEncoder().encode("dados|"+salt),iterations:PBK},k,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 async function wrapTok(tok,pw,salt){const iv=crypto.getRandomValues(new Uint8Array(12));return {iv:b64(iv),ct:b64(await crypto.subtle.encrypt({name:"AES-GCM",iv},await wrapKey(pw,salt),new TextEncoder().encode(tok)))}}
 async function unwrapTok(w,pw,salt){return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(w.iv)},await wrapKey(pw,salt),unb64(w.ct)))}
-const Sync={st:"",busy:false,t:null,last:0,
+const Sync={st:"",busy:false,t:null,last:0,announce:false,
   tok(){return lsGet(DTK)},
   file(g){return `${GD.dir}/${slug(g.team)}__${g.id}.json`},
   dirty(g){return !g._sup||(g.upd||0)>g._sup},
@@ -998,9 +1009,9 @@ const Sync={st:"",busy:false,t:null,last:0,
   adopt(rem,sha){const m=readAll(),loc=m[rem.id];if(G&&G.id===rem.id&&G.status!=="fim"&&loc&&this.dirty(loc))return false;
     m[rem.id]={...rem,undo:(loc&&loc.undo)||[],_sha:sha,_sup:rem.upd};writeAll(m);if(G&&G.id===rem.id&&!G.running){G=fixGame(m[rem.id])}return true},
   async run(){if(this.busy||!USER)return this.paint();if(!this.tok()){this.st="semtoken";return this.paint()}if(!navigator.onLine){this.st="offline";return this.paint()}
-    this.busy=true;this.st="sync";this.paint();let changed=false;
+    this.busy=true;this.st="sync";this.paint();let changed=false,sent=0;const wasPending=this.pending();
     try{/* 1. apagar */const q=this.dq(),left=[];for(const d of q){const r=await this.api(d.path);if(r.ok){const j=await r.json();const x=await this.api(d.path,{method:"DELETE",body:{message:"Jogo apagado",sha:j.sha,branch:GD.branch}});if(!x.ok&&x.status!==404)left.push(d)}}lsSet(DQK,left.length?JSON.stringify(left):null);
-      /* 2. enviar */for(const g of Object.values(readAll()).filter(g=>canSee(g)&&this.dirty(g))){if(G&&G.id===g.id&&G.running&&Date.now()-this.last<40000)continue;await this.push(g)}
+      /* 2. enviar */for(const g of Object.values(readAll()).filter(g=>canSee(g)&&this.dirty(g))){if(G&&G.id===g.id&&G.running&&Date.now()-this.last<40000)continue;await this.push(g);sent++}
       /* 3. receber */const r=await this.api(GD.dir);const list=r.status===404?[]:await r.json();if(!Array.isArray(list))throw new Error("lista");
       const ok=new Set(allowed().map(slug)),seen=new Set(),m=readAll();
       for(const f of list){const mm=f.name.match(/^(.+)__(.+)\.json$/);if(!mm||!ok.has(mm[1]))continue;const id=mm[2];seen.add(id);const loc=m[id];
@@ -1009,9 +1020,17 @@ const Sync={st:"",busy:false,t:null,last:0,
       const m2=readAll();Object.values(m2).forEach(g=>{if(g._sha&&!seen.has(g.id)&&canSee(g)&&!(G&&G.id===g.id)){delete m2[g.id];changed=true}});if(changed)writeAll(m2);
       this.st="ok";this.last=Date.now()}
     catch(e){console.warn("sync",e);if(this.st!=="erro")this.st=navigator.onLine?"falha":"offline"}
-    this.busy=false;this.paint();if(changed&&!G)renderSetup()},
-  paint(){const e=$("#sync");if(!e)return;const n=this.pending();const S={semtoken:["Só neste dispositivo","off"],offline:[n?`Offline · ${n} por enviar`:"Offline","off"],sync:["A sincronizar…","on"],ok:[n?`${n} por enviar`:"Sincronizado","ok"],falha:[`Falhou · ${n} por enviar`,"off"],erro:["Sem acesso à base de dados","bad"]}[this.st]||[n?`${n} por enviar`:"…","on"];
-    e.textContent=(S[1]==="ok"&&!n?"☁︎ ":"")+S[0];e.className="sync "+S[1];e.title=this.st==="semtoken"?"Base de dados não ligada: os jogos ficam neste dispositivo":"Os jogos são gravados no dispositivo e enviados para a base de dados quando há internet"}};
+    this.busy=false;this.paint();const left=this.pending();
+    if(this.announce&&left&&this.st==="ok"&&!this._again){this._again=true;this.soon(0);return}
+    if(this.announce){this.announce=false;this._again=false;if(this.st==="ok"&&!left)toast("✓ Estatísticas enviadas. Já estão disponíveis para o resto da equipa técnica.",3500,"ok");
+      else toast(this.st==="erro"?"Jogo gravado no tablet, mas o teu acesso à base de dados falhou. Fala com o administrador.":"Jogo gravado no tablet. Não deu para enviar agora — segue sozinho quando houver internet.",5000,"warn")}
+    else if(sent&&wasPending&&this.st==="ok"&&!(G&&G.running))toast(`✓ ${sent===1?"1 jogo enviado":sent+" jogos enviados"} para a base de dados`,3000,"ok");
+    if(changed&&!G)renderSetup()},
+  paint(){const e=$("#sync");if(!e)return;const n=this.pending(),tk=!!this.tok();
+    const S=!tk?["Só neste tablet","off","Não tens acesso à base de dados: os jogos ficam só neste tablet."]
+      :this.st==="erro"?["Sem acesso à base de dados","bad","Fala com o administrador."]
+      :n&&!this.busy?[`${n===1?"1 jogo":n+" jogos"} por enviar`,"off",navigator.onLine?"Toca para tentar enviar agora.":"Sem internet. Seguem sozinhos quando houver ligação."]:null;
+    e.hidden=!S;if(!S)return;e.textContent="⚠ "+S[0];e.className="sync "+S[1];e.title=S[2]}};
 /* gestão de utilizadores */
 let UEDIT=null;
 function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&&PUBST!=="ok"&&!busy;
@@ -1151,7 +1170,7 @@ async function boot(){$("#help").onclick=helpBox;$("#brand").onclick=e=>{e.preve
   Acc.init(onUser);
   $("#b-new").onclick=()=>{if(G&&G.running){toast("Pára o relógio primeiro");return}store();G=null;stopTick();SIDE="us";renderSetup()};
   $("#b-save").onclick=()=>{if(!G)return;if(isRO()){G=null;stopTick();SETVIEW="epoca";renderSetup();return}const fin=G.status==="fim";if(G.running){G.running=false;addLog({t:"pausa"})}store();const n=G.opp;G=null;stopTick();SIDE="us";SEL=null;SUB=null;
-    try{localStorage.removeItem(KC)}catch(e){}SETVIEW="epoca";renderSetup();if(!fin)toast("Jogo gravado. Continuas no Início quando quiseres");Sync.soon(0)};
+    try{localStorage.removeItem(KC)}catch(e){}SETVIEW="epoca";renderSetup();saveNotice()};
   $("#b-cancel").onclick=()=>{if(!G)return;confirmBox(`Cancelar o jogo vs ${G.opp}? Tudo o que foi registado neste jogo é apagado.`,()=>{const g=G;G=null;stopTick();
     const m=readAll();delete m[g.id];writeAll(m);Sync.del(g);try{localStorage.removeItem(KC)}catch(e){}SEL=null;SUB=null;SIDE="us";SETVIEW="novo";renderSetup();toast("Jogo cancelado")})};
   addEventListener("online",()=>Sync.soon(0));addEventListener("offline",()=>Sync.paint());
@@ -1304,8 +1323,8 @@ function savedList(list){const all=(list||visGames()).slice().sort((a,b)=>(b.dat
   return `<h3 class="jhd">Jogos</h3>
   ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
     <div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"||isRO()?"Ver":"Continuar"}</button><button class="btn sm gold" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div></div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
-  <div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button>${isRO()?"":`<label class="btn" for="bk-in">Importar cópia</label>`}<input type="file" id="bk-in" accept=".json,application/json" hidden></div>
-  <p class="hint">${Sync.tok()?"Os jogos ficam gravados neste dispositivo e são enviados para a base de dados do clube sempre que há internet. Aparecem nos tablets de quem tem o mesmo escalão.":"Os jogos ficam gravados só neste dispositivo, porque a base de dados ainda não está ligada. Para os passar para outro tablet, exporta a cópia de segurança e importa-a no outro."}</p>`}
+  ${isCoord()?`<div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button><label class="btn" for="bk-in">Importar cópia</label><input type="file" id="bk-in" accept=".json,application/json" hidden></div>`:""}
+  <p class="hint">${Sync.tok()?"Os jogos ficam gravados neste dispositivo e são enviados para a base de dados do clube sempre que há internet. Aparecem nos tablets de quem tem o mesmo escalão.":"Os jogos ficam gravados só neste tablet, porque ainda não tens acesso à base de dados. Fala com o administrador."}</p>`}
 function bindSaved(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"||isRO()?"team":"live";if(G.status!=="fim"&&!isRO())store();render();if(!isRO())startTick()});
   document.querySelectorAll("[data-xls]").forEach(b=>b.onclick=()=>{const keep=G;G=fixGame(readAll()[b.dataset.xls]);exportXLS();G=keep});
