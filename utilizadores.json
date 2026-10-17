@@ -1,5 +1,5 @@
 {
- "atualizado": 1792251661014,
+ "atualizado": 1792252200038,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -120,6 +120,21 @@
    "dk": {
     "iv": "6GtJJJI9dtte31R0",
     "ct": "Prr6ClYGV+m8dpMG1pghucUGIzJPbSDk6D8PgUhLWsDuu8mybpTmpvfli9hdfZ4n5tj5+9F8MrsGmj315E7Vp2eKPeBMwwymvbti5F44kcY+m+WxsMSuokmT1m7ak2ak431dGOitNlOAXEXbLg=="
+   }
+  },
+  {
+   "utilizador": "samuel.moura",
+   "nome": "Samuel Moura",
+   "perfil": "treinador",
+   "escaloes": [
+    "Masters"
+   ],
+   "ativo": true,
+   "salt": "VrIwfQ4xcpyDrJTj75Y3Jg==",
+   "hash": "lBLWBNJQt3kLA8hHFJbu9f9kAeB396917xe+j51yeqw=",
+   "dk": {
+    "iv": "3CgzMyD2/FvfBfUT",
+    "ct": "8e54WoOV+9XLLjc6gAkr8hzlC+Apg9yPlfb8EjGup+Nvz3ljpx27beSZHkskM7M3bA1mMVaJ3Gu26kD4bykegWB+LWzQiZnptr/zVRzhco3Zgr+NzD8BIoBlP1vOrj20pdyuN8qvENqfHK/Hiw=="
    }
   }
  ]
