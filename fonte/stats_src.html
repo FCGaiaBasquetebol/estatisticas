@@ -1200,11 +1200,11 @@ function seasonView(){const teams=[...new Set(visGames().map(g=>g.team))];
    <div class="seg2 big" role="group" aria-label="Mostrar"><button data-epm="tot" aria-pressed="${!avg}">Totais</button><button data-epm="avg" aria-pressed="${avg}">Médias por jogo</button></div>
    <button class="btn gold" id="ep-xls"${games.length?"":" disabled"}>Exportar Excel</button></div>
    <div class="eps"><span><b>${games.length}</b> jogos</span><span><b>${w}V</b> · <b>${l}D</b></span><span>Marcados <b>${pf}</b> (${games.length?(pf/games.length).toFixed(1):0}/jogo)</span><span>Sofridos <b>${pa}</b> (${games.length?(pa/games.length).toFixed(1):0}/jogo)</span></div></div>
-  ${seasonShots(games,ath)}
   <h3>Jogos incluídos</h3><div class="epg">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<label class="epgi${EP.excl[g.id]?"":" on"}"><input type="checkbox" data-epx="${esc(g.id)}"${EP.excl[g.id]?"":" checked"}><span>${d?d.getDate()+" "+MSH[d.getMonth()]:""} · ${esc(TN[g.team]||"")} vs ${esc(g.opp)} <b class="${g.us>g.them?"w":g.us<g.them?"l":""}">${g.us}–${g.them}</b></span><button class="lnk" data-open="${esc(g.id)}" title="Abrir jogo">ver jogo ›</button></label>`}).join("")}</div>
   <h3>Atletas · ${avg?"médias por jogo":"totais"} <small class="hint">(toca no cabeçalho para ordenar · toca num atleta para ver jogo a jogo)</small></h3>
   <div class="tblw"><table class="bs ep"><thead><tr>${cols.map(([k,l])=>`<th class="${k==="name"||k==="num"?"l":""}${EP.sort===k?" srt":""}" data-eps="${k}">${l}</th>`).join("")}</tr></thead><tbody>${rows||'<tr><td class="l" colspan="19">Sem dados nos jogos escolhidos.</td></tr>'}</tbody></table></div>
   <p class="hint">J jogos em que participou · MIN minutos · PTS pontos · 2PT/3PT/LL convertidos/tentados e % · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas cometidas · FR faltas recebidas · VAL valorização.</p>
+  ${games.length?seasonShots(games,ath):""}
   ${EP.ath?athSeason(ath.find(a=>a.id===EP.ath)):""}`}
 function athSeason(a){if(!a)return "";const shots=a.games.flatMap(({g})=>g.log.filter(e=>e.x!=null&&e.side!=="o"&&e.id===a.id));
   const n=a.gp,av=x=>(Math.round(x/n*10)/10).toFixed(1);
