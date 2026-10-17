@@ -831,6 +831,9 @@ body.fit .tsw-b{min-height:48px}body.fit .tsw-b b{font-size:18px}
 .crd-h b{display:block;font-family:var(--f-disp);font-weight:400;font-size:24px;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;line-height:1}.crd-h small{color:#aaa;font-weight:600}
 .crd dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin:0;align-items:baseline}.crd dt{color:#999;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}.crd dd{margin:0;font-weight:700;font-size:16px;overflow-wrap:anywhere}
 .crd .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.crd .pw{font-size:24px;color:var(--gold);letter-spacing:1px}.crd .sm{font-size:13px;color:#ccc}
+
+.ualert{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:2px solid var(--gold);background:rgba(226,184,18,.1);border-radius:12px;padding:12px 16px;margin:0 0 16px;font-weight:600}
+:root[data-theme=light] .ualert{background:#fff6cf}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1085,7 +1088,7 @@ function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&
    <p class="hint" style="margin-top:0">Liga a área privada ao GitHub <b>uma vez neste dispositivo</b>. A partir daí, cada utilizador que crias ou alteras é enviado logo para o site e fica ativo em todos os dispositivos em 1 a 2 minutos.</p>
    <details class="ghh"><summary>Como obter o token (5 minutos)</summary><ol class="hint">
     <li>No GitHub, abre o teu perfil e vai a <b>Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</b>.</li>
-    <li>Em Nome escreve “Área privada FC Gaia” e em Expiração escolhe 1 ano.</li>
+    <li>Em <b>Resource owner</b> escolhe <b>${esc(GH.owner)}</b>, em Nome escreve “fcgaia-utilizadores” e em Expiração o prazo mais longo que o GitHub aceitar.</li>
     <li>Em <b>Repository access</b> escolhe <b>Only select repositories → ${GH.repo}</b>.</li>
     <li>Em <b>Permissions → Repository permissions → Contents</b> escolhe <b>Read and write</b>.</li>
     <li>Carrega em <b>Generate token</b>, copia-o e cola-o aqui. Não o envies a ninguém.</li></ol></details>
@@ -1118,7 +1121,9 @@ async function dbConnect(t,pw){const r=await fetch(`https://api.github.com/repos
 function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0:a.perfil==="coordenador"?-1:1)||(a.ativo===false)-(b.ativo===false)||String(a.nome).localeCompare(b.nome));
   const ed=UEDIT&&USERS.find(u=>u.utilizador===UEDIT);const pend=Acc.pending();const sel=ed?ed.escaloes||[]:[];
   const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+  const miss=[!lsGet(GK)?"a <b>publicação de utilizadores</b> (sem ela, o que crias aqui só fica neste computador)":"",!Sync.tok()?"a <b>base de dados dos jogos</b>":""].filter(Boolean);
   return `<div class="uhead"><h2>Utilizadores</h2><p class="hint">Quem pode entrar na área privada e em que escalões.</p></div>
+  ${miss.length?`<div class="ualert"><span>⚠️ Falta ligar ${miss.join(" e ")}.</span><button class="btn sm gold" id="u-golig">Ir para Ligações ↓</button></div>`:""}
   <div class="ugrid">
    <section class="card uform${ed?" editing":""}">
     <h3>${ed?`Editar ${esc(ed.nome)}`:"Novo utilizador"}</h3>
@@ -1145,9 +1150,10 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
      <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Editar</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
    </section>
   </div>
-  <div class="usec"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
+  <div class="usec" id="ligacoes"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
    <div class="lgrid">${pubCard(pend)}${dbCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
+  const gl=$("#u-golig");if(gl)gl.onclick=()=>$("#ligacoes").scrollIntoView({behavior:"smooth",block:"start"});
   const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox(UFILE.tk?"Trocar o token da base de dados (por exemplo, quando expira)? Colas o novo a seguir e todos os utilizadores continuam com acesso.":"Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso vai precisar de uma palavra-passe nova (só desta vez).",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
     const go=async pw=>{dbo.disabled=true;try{const keep=await dbConnect(t,pw);toast(keep?"Token trocado. Todos mantêm o acesso.":"Base de dados ligada",3000,"ok");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
