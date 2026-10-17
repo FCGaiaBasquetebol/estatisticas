@@ -775,7 +775,12 @@ body.fit .b2 .sc .s{font-size:60px}body.fit .b2 .clock .t{font-size:52px!importa
 
 /* ===== v19: página inicial ===== */
 .home{max-width:900px;margin:0 auto}
-.hhello{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 14px}.hhello h2{margin:0;font-size:40px}.hhello p{margin:0;color:var(--muted);font-weight:600}
+.hhello{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:6px 0 14px}.hhello h2{margin:0;font-size:34px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hhello p{margin:0;justify-self:end;text-align:right;color:var(--ink);font-family:var(--f-disp);font-size:28px;line-height:1.1;text-transform:uppercase;letter-spacing:.5px}
+.hhelp{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:6px 18px 6px 6px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.hhelp:hover,.hhelp:focus-visible{border-color:var(--gold)}.hhelp .hic{width:40px;height:40px;border-radius:50%}.hhelp .hic svg{width:26px;height:26px}
+@media (max-width:560px){.hhello{grid-template-columns:1fr auto}.hhello p{grid-column:1/-1;justify-self:start;text-align:left;font-size:20px}}
+:root[data-theme=light] .hhelp{background:#fff}
 .hgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
 @media (max-width:560px){.hgrid{grid-template-columns:1fr}}
 .htile{display:grid;grid-template-columns:64px minmax(0,1fr) 20px;align-items:center;gap:16px;min-height:112px;padding:16px 20px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s,transform .1s}
@@ -1177,14 +1182,13 @@ function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];co
   const conv=(()=>{try{return JSON.parse(localStorage.getItem(KCV)||"{}")}catch(e){return {}}})();const nConv=Object.values(conv).reduce((t,c)=>t+Object.values(c.picked||{}).filter(Boolean).length,0);
   const tile=(k,ic,t,sub,cls)=>`<button class="htile${cls?" "+cls:""}" data-home="${k}"><span class="hic">${ICO[ic]}</span><span class="htx"><b>${t}</b><small>${sub}</small></span><span class="har">›</span></button>`;
   return `<section class="home">
-  <div class="hhello"><h2>Olá${first?", "+esc(first):""}</h2><p>${["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][now.getDay()]}, ${now.getDate()} ${MSH[now.getMonth()]}</p></div>
+  <div class="hhello"><h2>Olá${first?", "+esc(first):""}</h2><button class="hhelp" data-home="ajuda"><span class="hic">${ICO.ajuda}</span>Ajuda</button><p>${["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][now.getDay()]}, ${now.getDate()} ${MSH[now.getMonth()]}</p></div>
   ${open.map(g=>`<button class="hopen" data-open="${esc(g.id)}"><span class="hdot"></span><span class="htx"><small>Jogo por terminar</small><b>${esc(TN[g.team]||g.teamName)} vs ${esc(g.opp)}</b></span><span class="hsc">${g.us}–${g.them}</span><span class="hgo">Continuar ›</span></button>`).join("")}
   <div class="hgrid">
    ${ro?"":tile("novo","jogo","Novo jogo","Registar um jogo ao vivo","main")}
    ${ro?"":tile("plantel","plantel","Plantel",nConv?`${nConv} convocados guardados`:"Convocados, números e nomes")}
    ${tile("epoca","stats","Estatísticas",nG?`${nG} jogo${nG===1?"":"s"} gravado${nG===1?"":"s"}`:"Ainda sem jogos")}
    ${isCoord()?tile("users","users","Utilizadores","Criar e gerir acessos"):""}
-   ${tile("ajuda","ajuda","Ajuda","Como usar a app no jogo")}
   </div>
   ${ng.length?`<div class="hnext"><h3>Próximos jogos</h3>${ng.map(g=>{const home=g.home.startsWith("FC Gaia");return `<button class="hng" data-ng="${esc(g.team)}|${esc(g.num)}"><span class="hd"><b>${dl(g.d)}</b><small>${esc(g.time||"")}</small></span><span class="htx"><b>${esc(home?g.away:g.home)}</b><small>${esc(TN[g.team]||g.team)} · ${home?"Em casa":"Fora"}</small></span><span class="hgo">Preparar ›</span></button>`}).join("")}</div>`:""}
   <p class="ver">Versão ${esc(VER||"local")}</p></section>`}
