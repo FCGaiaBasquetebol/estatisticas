@@ -1,5 +1,5 @@
 {
- "atualizado": 1792251291866,
+ "atualizado": 1792251369593,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -44,6 +44,21 @@
    "dk": {
     "iv": "aruuO1jTwOsDSApF",
     "ct": "7Xr3IUB5fxxgM32TJ9aM9aoa8bdmUll80Uzg6HWNH2Lwa6Fi3smvmL6CbnNNEKp0eAAwvEWta0fOt0zBhl7H/sEm1k/28hvUuEaRJHL0QUPiGj9dOo9epXBtAosds9hq6tznZbxrddYmEDciCw=="
+   }
+  },
+  {
+   "utilizador": "joaquim.oliveira",
+   "nome": "Joaquim Oliveira",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-14 Masc A"
+   ],
+   "ativo": true,
+   "salt": "mP30tDzcdr0YCRchirjjNA==",
+   "hash": "QguLr0Cn+KpAjdrvmfCZPiAaYqu3w7ogE7AMwClRCuE=",
+   "dk": {
+    "iv": "ah9ASFcIE1UFbo0V",
+    "ct": "Jj8blY5YP8SK7X0AAGudumd4rgowKaasqn7H+rGEzF+jSkEta946dZSrO41Brv7qlFBowxilLFv7EcqIXR2Ye8m5vZNdileD/D9l4KhsRmqfz5kNvqGDVMJGH7Eo3zuZPNpmUUT/4X1HZd6faQ=="
    }
   }
  ]
