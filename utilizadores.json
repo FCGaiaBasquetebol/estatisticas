@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792253978131,
+ "atualizado": 1792253981316,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -63,6 +63,22 @@
    "dk": {
     "iv": "1odtb2oFNOFenZmz",
     "ct": "wGDNxNRh2BfPuo3/HLvDWSAmEFtiX+3dC+890cWhZQZAaYyoyabofx5tQPEh/zbZ7b880A98FCtQ17Cb"
+   }
+  },
+  {
+   "utilizador": "carla.dias",
+   "nome": "Carla Dias",
+   "perfil": "consulta",
+   "cargo": "Diretor",
+   "escaloes": [
+    "*"
+   ],
+   "ativo": true,
+   "salt": "cGW5sL6UD9atMtTM9CUPtQ==",
+   "hash": "RP4oiK85PKL7zakFt9mxAiHpPouX8HdQe3vTcniEn8M=",
+   "dk": {
+    "iv": "V81UkzSQhOZ8kfnV",
+    "ct": "5/MrN2kS0NYr2Uc3yKTdoB9tVYGVADwlU70JijA3sI5fXZJaQv8OhK7Q19nrPTGBocvU/Pu8UUTIgG3q"
    }
   }
  ]
