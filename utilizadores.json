@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792254840378,
+ "atualizado": 1792254892740,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -153,6 +153,22 @@
    "dk": {
     "iv": "m4+PXHlJBQfa2cBa",
     "ct": "gwapPdr1wIKeQYckba38UElgczIBBCewewcDt/6VZEoS7bWha4RxuCrR2UFD1erIhLmteM+M/GYOHfvL"
+   }
+  },
+  {
+   "utilizador": "joaquim.oliveira",
+   "nome": "Joaquim Oliveira",
+   "perfil": "consulta",
+   "cargo": "Coordenador",
+   "escaloes": [
+    "*"
+   ],
+   "ativo": true,
+   "salt": "MmP3giawxcLUj5G1KUh8uQ==",
+   "hash": "euz3KsvA1MlS3RMpvAy+O7qDtkEL7sTN09VFjlIGqUo=",
+   "dk": {
+    "iv": "cD7xSbKm8607ioEc",
+    "ct": "qddVDFHH3xPx0MH1Gx4TulixLLsx4SflTos53h8QkoF74AaHRS3ak4gy3kq6m8X9c91CO0F4+MIA6qyJ"
    }
   }
  ]
