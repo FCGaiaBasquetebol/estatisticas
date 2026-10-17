@@ -106,3 +106,9 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 ## Mapa de lançamentos da época
 - **Época:** pontos por jogo, FC Gaia contra adversário, em linhas.
 - **Ficha do atleta:** pontos por jogo, em barras, com a média.
+
+## v17 (out 2026)
+- Menu: Novo jogo | Estatísticas | Utilizadores (o separador "Jogos" desapareceu; a lista de jogos está no fundo de Estatísticas).
+- Estatísticas: barra de filtros única (Escalão, Jogos — janela com escolha múltipla, Mostrar — equipa/atleta/adversários, Totais/Médias, Excel). O mapa de lançamentos segue o "Mostrar".
+- Novo jogo: "jogo de outra data" abre uma janela (Próximos / Já jogados / Outro jogo); jogos por terminar aparecem no topo com Continuar.
+- Equipas Seniores, Esperanças e Masters (OPEN_TEAMS) ficam disponíveis para todos os utilizadores, além dos escalões de cada um.
