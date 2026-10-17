@@ -824,6 +824,13 @@ body.fit .b2 .sc .s{font-size:60px}body.fit .b2 .clock .t{font-size:52px!importa
 body.fit .tsw-b{min-height:48px}body.fit .tsw-b b{font-size:18px}
 :root[data-theme=light] .tsw-b{background:#fff}:root[data-theme=light] .tsw-b.them[aria-pressed=false]{color:#2f6fd6;border-color:#9dbcf0}
 :root[data-theme=light] .tsw-b.them[aria-pressed=true]{background:#2f6fd6;border-color:#2f6fd6;color:#fff}:root[data-theme=light] .tsw-b.us[aria-pressed=true]{color:#111}
+
+/* ===== v22: cartão de dados de acesso ===== */
+.crd{max-width:440px!important}.crd-c{background:#0e0e0e;border:1px solid var(--gold);border-radius:14px;padding:18px 20px;color:#fff}
+.crd-h{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #333}.crd-h img{width:44px;height:44px;object-fit:contain}
+.crd-h b{display:block;font-family:var(--f-disp);font-weight:400;font-size:24px;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;line-height:1}.crd-h small{color:#aaa;font-weight:600}
+.crd dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin:0;align-items:baseline}.crd dt{color:#999;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px}.crd dd{margin:0;font-weight:700;font-size:16px;overflow-wrap:anywhere}
+.crd .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.crd .pw{font-size:24px;color:var(--gold);letter-spacing:1px}.crd .sm{font-size:13px;color:#ccc}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1046,6 +1053,17 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
       :this.st==="erro"?["Sem acesso à base de dados","bad","Fala com o administrador."]
       :n&&!this.busy?[`${n===1?"1 jogo":n+" jogos"} por enviar`,"off",navigator.onLine?"Toca para tentar enviar agora.":"Sem internet. Seguem sozinhos quando houver ligação."]:null;
     e.hidden=!S;if(!S)return;e.textContent="⚠ "+S[0];e.className="sync "+S[1];e.title=S[2]}};
+/* cartão com os dados de acesso, para fazer print ou copiar (a palavra-passe só existe neste momento) */
+function credBox(un,pw,isNew){const u=USERS.find(x=>x.utilizador===un)||{utilizador:un};const url="andreferraz12.github.io/fcgaia-estatisticas";
+  const esc2=(u.escaloes||[]).includes("*")?"Todos os escalões":(u.escaloes||[]).map(t=>TN[t]||t).join(", ")||"—";
+  const txt=`FC Gaia · Estatísticas de jogo\nNome: ${u.nome||""}\nUtilizador: ${un}\nPalavra-passe: ${pw}\nEscalões: ${esc2}\nEntrar em: https://${url}/`;
+  const m=document.createElement("div");m.className="modal";
+  m.innerHTML=`<div class="card crd"><div class="crd-c" id="crd-c"><div class="crd-h"><img src="${CREST}" alt=""><div><b>FC Gaia</b><small>Estatísticas de jogo · dados de acesso</small></div></div>
+   <dl><dt>Nome</dt><dd>${esc(u.nome||"")}</dd><dt>Utilizador</dt><dd class="mono">${esc(un)}</dd><dt>Palavra-passe</dt><dd class="mono pw">${esc(pw)}</dd><dt>Escalões</dt><dd>${esc(esc2)}</dd><dt>Entrar em</dt><dd class="mono sm">${url}</dd></dl></div>
+   <p class="hint" style="margin:10px 0 0">${isNew?"Utilizador criado.":"Palavra-passe alterada."} <b>Faz agora o print ou copia:</b> por segurança, a palavra-passe não fica guardada e não volta a aparecer.</p>
+   <div class="bar"><button class="btn" id="crd-cp">Copiar texto</button><button class="btn gold" id="crd-x">Fechar</button></div></div>`;
+  document.body.appendChild(m);m.querySelector("#crd-x").onclick=()=>m.remove();
+  m.querySelector("#crd-cp").onclick=async()=>{try{await navigator.clipboard.writeText(txt);toast("Copiado")}catch(e){toast("Não deu para copiar: faz print")}}}
 /* gestão de utilizadores */
 let UEDIT=null;
 function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&&PUBST!=="ok"&&!busy;
@@ -1132,12 +1150,12 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
     if(!validUser(o.utilizador)){err.textContent="Utilizador: 3 a 30 caracteres, só letras minúsculas, números, ponto, hífen ou _ (sem espaços nem acentos).";return}
     if(o.pw.length<PWMIN){err.textContent="A palavra-passe tem de ter pelo menos "+PWMIN+" caracteres.";return}
     if(!o.escaloes.length){err.textContent="Escolhe pelo menos um escalão.";return}
-    add.disabled=true;try{await Acc.createUser(o);toast("Utilizador criado");renderSetup()}catch(e){err.textContent=e.message;add.disabled=false}};
+    add.disabled=true;try{await Acc.createUser(o);toast("Utilizador criado");renderSetup();credBox(o.utilizador,o.pw,true)}catch(e){err.textContent=e.message;add.disabled=false}};
   const sv=$("#u-save");if(sv)sv.onclick=async()=>{const p={escaloes:sel(),...roleOf()};if(p.escaloes.includes("*"))p.escaloes=["*"];if(!p.cargo)p.cargo=undefined;if(!p.escaloes.length){err.textContent="Escolhe pelo menos um escalão.";return}
     try{await Acc.updateUser(UEDIT,p);UEDIT=null;UROLE="treinador";toast("Alterações guardadas");renderSetup()}catch(e){err.textContent="Não foi possível guardar: "+e.message}};
   const cc=$("#u-cancel");if(cc)cc.onclick=()=>{UEDIT=null;UROLE="treinador";renderSetup()};
   document.querySelectorAll("[data-ue]").forEach(b=>b.onclick=()=>{UEDIT=b.dataset.ue;const u=USERS.find(x=>x.utilizador===UEDIT);UROLE=u&&u.perfil==="consulta"?(u.cargo||"Coordenador"):"treinador";renderSetup();window.scrollTo(0,0)});
-  document.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const u=USERS.find(x=>x.utilizador===b.dataset.up);pwPrompt("Nova palavra-passe · "+(u?u.nome:""),async n=>{await Acc.updateUser(b.dataset.up,{pw:n});toast("Palavra-passe alterada");renderSetup()})});
+  document.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const u=USERS.find(x=>x.utilizador===b.dataset.up);pwPrompt("Nova palavra-passe · "+(u?u.nome:""),async n=>{await Acc.updateUser(b.dataset.up,{pw:n});toast("Palavra-passe alterada");renderSetup();credBox(b.dataset.up,n,false)})});
   document.querySelectorAll("[data-ua]").forEach(b=>b.onclick=()=>{const on=b.dataset.on==="1";confirmBox(on?"Reativar esta conta?":"Desativar esta conta? A pessoa deixa de conseguir entrar.",async()=>{await Acc.updateUser(b.dataset.ua,{ativo:on});renderSetup()})});
   document.querySelectorAll("[data-ux]").forEach(b=>b.onclick=()=>confirmBox("Apagar esta conta da lista? Os jogos não são apagados.",()=>{Acc.removeUser(b.dataset.ux);renderSetup()}))}
 
