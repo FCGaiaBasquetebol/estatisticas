@@ -1,5 +1,5 @@
 {
- "atualizado": 1792247205196,
+ "atualizado": 1792247210998,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -51,17 +51,6 @@
    "ativo": true,
    "salt": "vk6xWm1ZkVmSjREvrPw99g==",
    "hash": "fj+F6F5gPJ7P2BN5k/+BqFmZjDTwAwuZM5RT3sJzL08="
-  },
-  {
-   "utilizador": "davide",
-   "nome": "Davide",
-   "perfil": "treinador",
-   "escaloes": [
-    "Sub-16 Masc B"
-   ],
-   "ativo": true,
-   "salt": "KnJRspBdp0kmcdsgPPKyvA==",
-   "hash": "JIHjLV13By4UV6TnGNLfsG+A/cUm4rCtJGvIk7ueD+M="
   },
   {
    "utilizador": "ivo.coutinho",
