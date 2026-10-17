@@ -1,5 +1,5 @@
 {
- "atualizado": 1792251508427,
+ "atualizado": 1792251545500,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -89,6 +89,21 @@
    "dk": {
     "iv": "ZKsmXauMmuCD2/Xf",
     "ct": "gedbPZ3P/Hxw8LQVTpNrRvQ9PPpQAopA7dNpiBVKLXq6vXQBlqgQjc+ndzECuSYsLfnt0Gsj77CrR2Bb8LmaSI9n2pyogmTtn9PG7nkjgvljFzp9bpXhVyJ7iq57GI051WtfQCQZgy3RHZFqdA=="
+   }
+  },
+  {
+   "utilizador": "davide.coelho",
+   "nome": "Davide Coelho",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-16 Masc B"
+   ],
+   "ativo": true,
+   "salt": "uG9dH9XjS83db5R94sUdFQ==",
+   "hash": "DfRzvridYLoNhwQizl2MeTDDia9ZHzjs0JWArtfrbsY=",
+   "dk": {
+    "iv": "cq9cPWBLEN6JZoOR",
+    "ct": "v3K5KJ7bML5qo2jhM8WxiaFSu3ZKkEjkwjlE02v9BKTZ9j6YA2aW3HaVOiEAnGQtAMQWY+lfpd8fZpEk3g06WfRj3DJ4UmLDlU+OGKLI+EFIJxUomUsnd5maoY/oe3chHNo67Git3Ax19POSmw=="
    }
   }
  ]
