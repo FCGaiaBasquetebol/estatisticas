@@ -1194,7 +1194,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     if(g._sha)body.sha=g._sha;let r=await this.api(this.file(g),{method:"PUT",body});
     if(r.status===409||r.status===422){const cur=await this.api(this.file(g));if(cur.ok){const j=await cur.json();const rem=JSON.parse(unb64s(j.content));
         if((rem.upd||0)>(g.upd||0)){this.adopt(rem,j.sha);return}body.sha=j.sha}else delete body.sha;r=await this.api(this.file(g),{method:"PUT",body})}
-    if(!r.ok)throw new Error("envio "+r.status);const j=await r.json();this.mark(g.id,j.content.sha,g.upd);try{const me=USER&&USER.utilizador;if(me&&((g.ed&&g.ed.u===me)||(!g.ed&&(!g.by||g.by.u===me))))Act.game(g)}catch(e){}if(!g.demo)this.pushLive(g).catch(()=>{})},
+    if(!r.ok)throw new Error("envio "+r.status);const j=await r.json();this.mark(g.id,j.content.sha,g.upd);try{const me=USER&&USER.utilizador;if(me&&((g.ed&&g.ed.u===me)||(!g.ed&&(!g.by||g.by.u===me)))){Act.game(g);if(g.status==="fim")Exp.mark(g.team,g.date)}}catch(e){}if(!g.demo)this.pushLive(g).catch(()=>{})},
   /* resultados ao vivo: um índice pequeno (live/index.json) com o resultado de cada jogo, visível para todos */
   async liveEdit(fn){for(let k=0;k<3;k++){const r=await this.api("live/index.json");let sha,games={};
       if(r.ok){const j=await r.json();sha=j.sha;try{games=JSON.parse(unb64s(j.content)).games||{}}catch(e){}}else if(r.status!==404)return;
@@ -1221,6 +1221,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
       const m2=readAll();Object.values(m2).forEach(g=>{if(g._sha&&!seen.has(g.id)&&canSee(g)&&!(G&&G.id===g.id)){delete m2[g.id];changed=true}});if(changed)writeAll(m2);
       try{if(await this.pullLive()&&!G&&SETVIEW==="inicio")renderSetup()}catch(e){}
       try{await Act.flush()}catch(e){}
+      try{await Exp.run()}catch(e){console.warn("export",e)}
       this.st="ok";this.last=Date.now()}
     catch(e){console.warn("sync",e);if(this.st!=="erro")this.st=navigator.onLine?"falha":"offline"}
     this.busy=false;this.paint();const left=this.pending();
@@ -1263,6 +1264,37 @@ const Act={
         const w=await Sync.api(path,{method:"PUT",body:{message:"Atividade "+k,branch:GD.branch,content:b64s(JSON.stringify({ev:list})),...(sha?{sha}:{})}});
         if(w.ok){evs.forEach(e=>done.add(e.id));break}if(w.status!==409&&w.status!==422)break}}
     if(done.size)lsSet(AQK,JSON.stringify(this.q().filter(e=>!done.has(e.id))))}};
+
+/* ---------- exportação para o Drive ----------
+   Quando um jogo terminado é enviado (ou corrigido/apagado), este tablet prepara o PDF do jogo e o Excel do escalão
+   e deixa-os na base de dados em export/<escalão>/<época>/. O script da conta Google do clube copia-os para a pasta
+   do escalão (PDF) e atualiza o Google Sheets "Estatisticas de Jogo_<escalão>_<época>". */
+const XQK="fcgaia-stats-export";
+const epocaSl=d=>{const y=+String(d||"").slice(0,4),m=+String(d||"").slice(5,7);if(!y)return "";const a=m>=8?y:y-1;return a+"/"+(a+1)};
+const shortTeam=t=>String(TN[t]||t).replace(/^Sub (\d+)/,"Sub$1");
+const blobB64=b=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=ko;r.readAsDataURL(b)});
+const Exp={
+  q(){try{return JSON.parse(lsGet(XQK)||"{}")}catch(e){return {}}},
+  mark(team,date){if(!team||team==="Demo")return;const q=this.q(),ep=epocaSl(date||new Date().toISOString().slice(0,10));q[team+"|"+ep]=Date.now();lsSet(XQK,JSON.stringify(q))},
+  async put(path,b64,msg){const cur=await Sync.api(path);const sha=cur.ok?(await cur.json()).sha:undefined;
+    const w=await Sync.api(path,{method:"PUT",body:{message:msg,branch:GD.branch,content:b64,...(sha?{sha}:{})}});if(!w.ok)throw new Error("export "+w.status)},
+  async run(){const q=this.q(),keys=Object.keys(q);if(!keys.length||(G&&G.status!=="fim"&&!WATCH))return;let jsPDF=null;
+    for(const k of keys){const [team,ep]=k.split("|"),base=`export/${slug(team)}/${ep.replace("/","-")}`;
+      const games=Object.values(readAll()).filter(g=>g.team===team&&g.status==="fim"&&!g.demo&&epocaSl(g.date)===ep).map(g=>fixGame(JSON.parse(JSON.stringify(g))));
+      const fb=new Set(games.filter(g=>g.source).map(g=>g.date)),list=games.filter(g=>g.source||!fb.has(g.date)).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+      let info={pdfs:[]};const ri=await Sync.api(base+"/info.json");if(ri.ok){try{info=JSON.parse(unb64s((await ri.json()).content))}catch(e){}}
+      const prev=new Map((info.pdfs||[]).map(x=>[x.id,x])),pdfs=[];
+      for(const g of list){const nm=gameFile(g,"pdf"),p=prev.get(g.id);
+        if(p&&p.n===nm&&(p.u||0)>=(g.upd||0)){pdfs.push(p);continue}
+        jsPDF=jsPDF||await pdfLibs();const f=await makeGamePDF(jsPDF,g);
+        await this.put(`${base}/jogos/${nm}`,await blobB64(f),"PDF "+nm);
+        if(p&&p.n!==nm){const old=await Sync.api(`${base}/jogos/${p.n}`);if(old.ok)await Sync.api(`${base}/jogos/${p.n}`,{method:"DELETE",body:{message:"PDF antigo",sha:(await old.json()).sha,branch:GD.branch}})}
+        pdfs.push({id:g.id,n:nm,u:g.upd||Date.now()})}
+      for(const [id,p] of prev)if(!list.some(g=>g.id===id)){const old=await Sync.api(`${base}/jogos/${p.n}`);if(old.ok)await Sync.api(`${base}/jogos/${p.n}`,{method:"DELETE",body:{message:"Jogo apagado",sha:(await old.json()).sha,branch:GD.branch}})}
+      const nome=`Estatisticas de Jogo_${shortTeam(team)}_${ep}`;
+      if(list.length){const buf=await buildXLSX(list,String(TN[team]||team).toUpperCase()+" · ÉPOCA "+ep,nome+".xlsx",{buffer:true,quiet:true});await this.put(`${base}/estatisticas.xlsx`,await blobB64(new Blob([buf])),"Excel "+nome)}
+      await this.put(`${base}/info.json`,b64s(JSON.stringify({team,nome:shortTeam(team),epoca:ep,ficheiro:nome,upd:Date.now(),jogos:list.length,pdfs},null,1)),"Exportação "+nome);
+      const q2=this.q();if(q2[k]===q[k])delete q2[k];lsSet(XQK,JSON.stringify(q2))}}};
 /* vista do administrador */
 let BOTAB="users",ACTV={list:null,busy:false,err:"",u:"",k:"",months:2,dirs:null};
 async function loadActivity(more){if(ACTV.busy)return;if(!Sync.tok()||!navigator.onLine){ACTV.err=navigator.onLine?"Sem acesso à base de dados.":"Sem internet: liga-te para ver a atividade.";refreshAct();return}
@@ -1701,7 +1733,7 @@ function bindSaved(){
   document.querySelectorAll("[data-shr]").forEach(b=>b.onclick=()=>sharePDFs([b.dataset.shr]));document.querySelectorAll("[data-pdf]").forEach(b=>b.onclick=()=>sharePDFs([b.dataset.pdf],false));
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openGame(b.dataset.open));
   document.querySelectorAll("[data-xls]").forEach(b=>b.onclick=()=>{const keep=G;G=fixGame(readAll()[b.dataset.xls]);exportXLS();G=keep});
-  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();Act.add("del",gameAct(g));Sync.del(m[b.dataset.del]);delete m[b.dataset.del];writeAll(m);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();Act.add("del",gameAct(g));if(g.status==="fim")Exp.mark(g.team,g.date);Sync.del(m[b.dataset.del]);delete m[b.dataset.del];writeAll(m);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
   const bo=$("#bk-out");if(bo)bo.onclick=()=>{const blob=new Blob([JSON.stringify({app:"fcgaia-estatisticas",v:3,exportado:new Date().toISOString(),jogos:readAll()})],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="fcgaia-estatisticas-copia-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();toast("Cópia de segurança exportada")};
   const bi=$("#bk-in");if(bi)bi.onchange=()=>{const f=bi.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);const js=o.jogos||{};const m=readAll();let n=0;Object.entries(js).forEach(([k,g])=>{if(g&&g.st&&g.roster&&canSee(g)&&(!m[k]||(g.upd||0)>=(m[k].upd||0))){m[k]=g;n++}});writeAll(m);toast(n+" jogo(s) importado(s)");renderSetup()}catch(e){toast("Ficheiro inválido")}};r.readAsText(f)}}

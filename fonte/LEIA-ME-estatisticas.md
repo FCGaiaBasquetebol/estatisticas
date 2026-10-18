@@ -162,3 +162,7 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v58
 - Excel: topo compacto numa linha (Jogos "x de y" + Escolher ›, Valores ▾, Atleta ▾ + Jogo a jogo ›). Novo separador Jogos com Sim/Não por prova, fase e jogo (escolha múltipla); um jogo conta se os três estiverem em Sim (coluna oculta I). Dados!Contar lê daí.
+
+## v59 — exportação para o Drive
+- `Exp`: depois de enviar um jogo terminado (quem registou/corrigiu) ou apagar um jogo, a sincronização gera o PDF do jogo e o Excel do escalão e grava em export/<escalão>/<AAAA-AAAA>/ (jogos/*.pdf, estatisticas.xlsx, info.json com a lista de PDF e upd). Só regenera os PDF de jogos alterados; apaga PDF de jogos apagados.
+- drive/Codigo.gs (novo): copia PDF para as pastas 1. Sub14 B … 6. Sub18 A e atualiza o Google Sheets "Estatisticas de Jogo_<escalão>_<época>" (Drive API v3, conversão no mesmo ficheiro). Ver drive/LEIA-ME.md.
