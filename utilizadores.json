@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792346462682,
+ "atualizado": 1792346495738,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -219,6 +219,22 @@
    "dk": {
     "iv": "55GuJrd+2vdk5GN+",
     "ct": "7YPb8M3z5YHpkSBbJFrWJ9sNhUR3qVCAnWq3gLm3eVmt4uhIa43OUA0hYHn01jc6EtunGHkKLDF8rgmL"
+   }
+  },
+  {
+   "utilizador": "helder.almeida",
+   "nome": "Helder Almeida",
+   "perfil": "consulta",
+   "cargo": "Treinador",
+   "escaloes": [
+    "Sub-14 Masc A"
+   ],
+   "ativo": true,
+   "salt": "2GS77S0uRxfQoLJMs5e7dQ==",
+   "hash": "fBsuI3XsDvrKqLl/fiSPOKNmbawA/yXlVWl9J1oqiTQ=",
+   "dk": {
+    "iv": "TdgKGEJ6SfT2q72h",
+    "ct": "a5sgRXrke8E9dhRO7yDHRRvhwFiu62in0ddZjR1xf1BzES7sjatDABKndFCVjXWsMYp6vf0Qw8WR4sbT"
    }
   }
  ]
