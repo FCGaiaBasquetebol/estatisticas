@@ -889,6 +889,8 @@ table.bs tr.prw{cursor:pointer}table.bs tr.prw:hover td{background:rgba(226,184,
 .demob b{letter-spacing:1.5px}.demob span{flex:1;font-weight:600}.demob .btn{background:#111;color:#fff;border-color:#111}
 .htile.demo{border-style:dashed}
 body.fit .demob{padding:3px 10px;margin:0 0 4px;font-size:12px}
+
+.epteams{margin:0 0 10px}.tchip small{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;opacity:.7}.tchip.none{opacity:.55}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1381,7 +1383,7 @@ function teamGames(t){const today=new Date();today.setHours(0,0,0,0);
   return (DATA.games||[]).filter(r=>r[0]===t).map(r=>({num:r[3],comp:r[1],date:r[5],time:r[6],home:r[7],away:r[8],venue:r[9],res:r[11]}))
    .sort((a,b)=>Math.abs(new Date(a.date)-today)-Math.abs(new Date(b.date)-today))}
 let SETVIEW="inicio";    // inicio | plantel | novo | epoca | users
-let EP={team:"",mode:"tot",sort:"pts",excl:{},ath:null,shotA:""};
+let EP={teams:[],mode:"tot",sort:"pts",excl:{},ath:null,shotA:""};
 function snav(){return installBanner()+`<nav class="snav">${[["inicio","Início"]].concat(isRO()?[]:[["plantel","Plantel"],["novo","Novo jogo"]]).concat([["epoca","Estatísticas"]]).concat(isCoord()?[["users","Utilizadores"]]:[]).map(([k,l])=>`<button data-sv="${k}" aria-pressed="${SETVIEW===k}">${l}</button>`).join("")}</nav>`}
 function bindNav(){bindInstall();document.querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>{SETVIEW=b.dataset.sv;renderSetup();window.scrollTo(0,0)})}
 const ICO={
@@ -1547,23 +1549,23 @@ function bindSaved(){
 
 /* ---------- época / acumulado ---------- */
 const SUMK=["pts","m2","a2","m3","a3","mf","af","or","dr","ast","stl","blk","tov","pf","fp","fu","di","fl","ft","fd","pm","sec"];
-function seasonData(){const all=visGames().map(fixGame).filter(g=>!EP.team||g.team===EP.team).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+function seasonData(){const all=visGames().map(fixGame).filter(g=>!(EP.teams&&EP.teams.length)||EP.teams.includes(g.team)).sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   const games=all.filter(g=>!EP.excl[g.id]);const A={};
   games.forEach(g=>g.roster.forEach(p=>{const s=g.st[p.id];if(!s)return;const played=s.sec>0||SUMK.some(k=>k!=="sec"&&k!=="pm"&&s[k]);if(!played)return;
     const a=A[p.id]=A[p.id]||{id:p.id,name:p.name,num:p.num,gp:0,teams:new Set(),...Object.fromEntries(SUMK.map(k=>[k,0])),games:[]};
     a.gp++;a.num=p.num||a.num;a.teams.add(TN[g.team]||g.teamName);SUMK.forEach(k=>a[k]+=s[k]||0);a.games.push({g,s})}));
   return {all,games,ath:Object.values(A)}}
-function seasonView(){const vg=visGames();const teams=TEAMS.map(t=>t[0]).filter(t=>vg.some(g=>g.team===t));
-  if(EP.team&&!teams.includes(EP.team))EP.team="";if(!EP.team&&teams.length===1)EP.team=teams[0];
-  if(!vg.length)return `<h2>Estatísticas</h2><p class="hint">Ainda não há jogos. Faz o primeiro em Novo jogo, ou importa uma cópia de segurança.</p>${savedList([])}`;
+function seasonView(){const vg=visGames();const al=allowed();const teams=TEAMS.map(t=>t[0]).filter(t=>al.includes(t));
+  EP.teams=(EP.teams||[]).filter(t=>teams.includes(t));const nT=t=>vg.filter(g=>g.team===t).length;
+  const tbar=`<section class="ns epteams"><h3>${teams.length===1?"Escalão":"Escalões"}</h3>${teams.length===1?`<p class="teamone">${esc(TN[teams[0]]||teams[0])}</p>`:`<div class="tchips"><button class="tchip${EP.teams.length?"":" on"}" data-ept="" aria-pressed="${!EP.teams.length}">Todos</button>${teams.map(t=>{const on=EP.teams.includes(t),n=nT(t);return `<button class="tchip${on?" on":""}${n?"":" none"}" data-ept="${esc(t)}" aria-pressed="${on}">${esc(TN[t]||t)}${n?`<small>${n}</small>`:""}</button>`}).join("")}</div>`}</section>`;
+  if(!vg.length)return `<h2>Estatísticas</h2>${tbar}<p class="hint">Ainda não há jogos. Faz o primeiro em Novo jogo, ou importa uma cópia de segurança.</p>${savedList([])}`;
   const {all,games,ath}=seasonData();const avg=EP.mode==="avg";const sel=EP.sel||"";const selA=sel&&sel!=="_o"?ath.find(a=>a.id===sel):null;
   const nAll=all.length,nSel=games.length;
   const gLab=nSel===nAll?`Todos os jogos (${nAll})`:nSel===0?"Nenhum jogo":nSel===1?`1 jogo · vs ${games[0].opp}`:`${nSel} de ${nAll} jogos`;
   const opts=ath.slice().sort((a,b)=>(+a.num||999)-(+b.num||999)).map(a=>`<option value="${esc(a.id)}"${sel===a.id?" selected":""}>${esc(a.num||"–")} · ${esc(a.name)}</option>`).join("");
   const w=games.filter(g=>g.us>g.them).length,l=games.filter(g=>g.us<g.them).length,pf=games.reduce((t,g)=>t+g.us,0),pa=games.reduce((t,g)=>t+g.them,0),pg=x=>games.length?(x/games.length).toFixed(1):"0";
-  return `<div class="sthead"><h2>Estatísticas</h2></div>
+  return `<div class="sthead"><h2>Estatísticas</h2></div>${tbar}
   <div class="fbar" role="group" aria-label="Filtros">
-   ${teams.length>1?`<label class="f">Escalão<select id="ep-team"><option value="">Todos</option>${teams.map(t=>`<option value="${esc(t)}"${EP.team===t?" selected":""}>${esc(TN[t]||t)}</option>`).join("")}</select></label>`:`<div class="f fro"><span>Escalão</span><b>${esc(TN[teams[0]]||teams[0])}</b></div>`}
    <div class="f"><span>Jogos</span><button class="fsel" id="ep-games" type="button">${esc(gLab)}<i>▾</i></button></div>
    <label class="f">Mostrar<select id="ep-sel"><option value="">Equipa (todos os atletas)</option>${opts}<option value="_o"${sel==="_o"?" selected":""}>Adversários</option></select></label>
    <div class="f"><span>Valores</span><div class="seg2" role="group"><button data-epm="tot" aria-pressed="${!avg}">Totais</button><button data-epm="avg" aria-pressed="${avg}">Médias por jogo</button></div></div>
@@ -1640,7 +1642,7 @@ function seasonShots(games,ath){const k=EP.sel||"";const sh=games.flatMap(g=>g.l
   return `<h3>Mapa de lançamentos · ${esc(who)}</h3>`+zoneBlock(sh,k==="_o",`<p class="hint" style="margin:0 0 10px">${sh.length} lançamentos em ${games.length} jogo${games.length===1?"":"s"}. Muda em “Mostrar”, no topo.</p>`)}
 function bindSeason(){bindCharts();bindSaved();const eg=$("#ep-games");if(eg)eg.onclick=gamesSheet;
   const esl=$("#ep-sel");if(esl)esl.onchange=()=>{EP.sel=esl.value;const y=scrollY;renderSetup();scrollTo(0,y)};
-  const t=$("#ep-team");if(t)t.onchange=e=>{EP.team=e.target.value;EP.sel="";renderSetup()};
+  document.querySelectorAll("[data-ept]").forEach(b=>b.onclick=()=>{const t=b.dataset.ept;if(!t)EP.teams=[];else{const i=EP.teams.indexOf(t);if(i>=0)EP.teams.splice(i,1);else EP.teams.push(t)}EP.sel="";keepScroll(renderSetup)});
   document.querySelectorAll("[data-epm]").forEach(b=>b.onclick=()=>{EP.mode=b.dataset.epm;renderSetup()});
   document.querySelectorAll("[data-eps]").forEach(h=>h.onclick=()=>{EP.sort=h.dataset.eps;keepScroll(renderSetup)});
   document.querySelectorAll("[data-epx]").forEach(c=>c.onchange=()=>{if(c.checked)delete EP.excl[c.dataset.epx];else EP.excl[c.dataset.epx]=1;renderSetup()});
@@ -1659,7 +1661,7 @@ function exportSeason(){const {games,ath}=seasonData();if(!window.XLSX){toast("E
   const jr=[];games.forEach(g=>g.roster.forEach(p=>{const s=g.st[p.id];if(!s||!(s.sec>0||s.pts||s.a2||s.a3||s.af||s.pf))return;jr.push([g.date,TN[g.team]||g.teamName,g.opp,`${g.us}-${g.them}`,/^\d+$/.test(p.num)?+p.num:p.num,p.name,+(s.sec/60).toFixed(1),s.pts,s.m2,s.a2,s.m3,s.a3,s.mf,s.af,s.or,s.dr,s.ast,s.stl,s.blk,s.tov,s.pf,s.fd,s.pm,eff(s)])}));
   const w3=XLSX.utils.aoa_to_sheet([jh,...jr]);w3["!cols"]=jh.map((h,i)=>({wch:[1,2,5].includes(i)?20:8}));XLSX.utils.book_append_sheet(wb,w3,"Jogo a jogo");
   const w4=XLSX.utils.aoa_to_sheet([["Data","Equipa","Adversário","FC Gaia","Adversário","Resultado","Competição"],...games.map(g=>[g.date,TN[g.team]||g.teamName,g.opp,g.us,g.them,g.us>g.them?"V":g.us<g.them?"D":"E",g.comp||""])]);w4["!cols"]=[{wch:11},{wch:12},{wch:26},{wch:8},{wch:10},{wch:9},{wch:30}];XLSX.utils.book_append_sheet(wb,w4,"Jogos");
-  const nm="fcgaia-epoca-"+(EP.team?EP.team.toLowerCase().replace(/[^a-z0-9]+/g,"-"):"todos")+"-"+new Date().toISOString().slice(0,10)+".xlsx";
+  const nm="fcgaia-epoca-"+(EP.teams&&EP.teams.length?EP.teams.join("-").toLowerCase().replace(/[^a-z0-9]+/g,"-"):"todos")+"-"+new Date().toISOString().slice(0,10)+".xlsx";
   try{XLSX.writeFile(wb,nm);toast("Excel da época exportado")}catch(e){toast("Não foi possível descarregar aqui")}}
 
 /* ---------- jogo ---------- */
