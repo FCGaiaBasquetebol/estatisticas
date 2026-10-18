@@ -1790,7 +1790,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||isRO()|
    <div class="bR">${fin?"":`<button class="cbtn" id="c-next">Período ›</button><div class="opp" aria-label="Adversário"><button class="btn" data-o="o1">+1</button><button class="btn" data-o="o2">+2</button><button class="btn" data-o="o3">+3</button><button class="btn" data-o="opf">Falta</button></div>`}</div></div>`;
   const T=([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`;
   const tabs=`<div class="tabs" role="tablist">${isRO()||fin?"":T(["live","Jogo"])}<span class="tsp"></span><span class="tgrp" aria-label="Estatísticas">${[["team","Equipa"],["bs","Atletas"],["pbp","Jogadas"]].map(T).join("")}</span></div>`;
-  const exp=`<div class="expbar"><div class="pr-h"><b>FC Gaia ${esc(G.teamName)} ${G.us}–${G.them} ${esc(G.opp)}</b><span>${esc(G.date||"")}${G.comp?" · "+esc(G.comp):""}${G.venue?" · "+esc(G.venue):""}</span></div><span class="expl">Exportar</span><button class="btn sm" id="b-xls">Excel</button><button class="btn sm" id="b-pdf">PDF</button></div>`;
+  const exp=`<div class="expbar"><div class="pr-h"><b>FC Gaia ${esc(G.teamName)} ${G.us}–${G.them} ${esc(G.opp)}</b><span>${esc(G.date||"")}${G.comp?" · "+esc(G.comp):""}${G.venue?" · "+esc(G.venue):""}</span></div><span class="expl">Exportar</span><button class="btn sm gold" id="b-share">Partilhar</button><button class="btn sm" id="b-pdf">PDF</button><button class="btn sm" id="b-xls">Excel</button></div>`;
   let body="";
   if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id)),need=5-G.oncourt.length;
     const av=p=>`<span class="av nbonly"><span class="nb">${esc(p.num||"–")}</span></span>`;   // no jogo: só o número, como na camisola
@@ -1896,7 +1896,7 @@ function bind(){
   document.querySelectorAll("[data-ej]").forEach(inp=>{inp.onfocus=()=>inp.select();inp.onchange=()=>{const id=inp.dataset.ej,k=inp.dataset.ek,nv=Math.max(0,parseInt(inp.value,10)||0);const cur=(id==="_o"?G.ost:G.st[id])[k]||0;
     G.adj=G.adj||{};G.adj[id]=G.adj[id]||{};G.adj[id][k]=(G.adj[id][k]||0)+(nv-cur);rebuild();store();const y=scrollY;render();scrollTo(0,y);const nx=document.querySelector(`[data-ej="${id}"][data-ek="${k}"]`);if(nx)nx.classList.add("chg")}});
   const rok=$("#rv-ok");if(rok)rok.onclick=finalizeGame;const rbk=$("#rv-back");if(rbk)rbk.onclick=()=>{G.review=false;VIEW="live";store();render()};
-  const bse=$("#bs-ed");if(bse)bse.onclick=()=>{BSEDIT=!BSEDIT;if(!BSEDIT)Sync.soon(500);render()};const pd=$("#b-pdf");if(pd)pd.onclick=()=>{document.body.classList.add("printing");setTimeout(()=>{print();document.body.classList.remove("printing")},50)};
+  const bse=$("#bs-ed");if(bse)bse.onclick=()=>{BSEDIT=!BSEDIT;if(!BSEDIT)Sync.soon(500);render()};const pd=$("#b-pdf");if(pd)pd.onclick=()=>gamePDF(false);const sh=$("#b-share");if(sh)sh.onclick=()=>gamePDF(true);
   const ro=$("#b-reopen");if(ro)ro.onclick=()=>{G.status="jogo";store();VIEW="live";render()};
   const bl=$("#b-list");if(bl)bl.onclick=()=>{G=null;stopTick();renderSetup()}}
 /* corrigir o tempo: botões grandes de ±, ou escrever mm:ss */
@@ -1934,6 +1934,67 @@ function editEv(i){const e=G.log[i];if(!e)return;const m=document.createElement(
 function afterEdit(msg){G.undo=[];rebuild();store();render();toast(msg);Sync.soon(2000)}
 function confirmBox(msg,ok){const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><p style="margin:0 0 14px;font-size:17px">${esc(msg)}</p><div class="bar"><button class="btn gold" id="m-ok">Sim</button><button class="btn" id="m-no">Não</button></div></div>`;
   document.body.appendChild(m);m.querySelector("#m-ok").onclick=()=>{m.remove();ok()};m.querySelector("#m-no").onclick=()=>m.remove()}
+
+/* ---------- PDF da ficha de jogo (gerado no aparelho; partilha pelo menu do sistema) ---------- */
+function loadJS(src){return new Promise((ok,ko)=>{if(document.querySelector(`script[data-src="${src}"]`))return ok();const s=document.createElement("script");s.src=src;s.dataset.src=src;s.onload=ok;s.onerror=()=>ko(new Error("Sem ligação para gerar o PDF"));document.head.appendChild(s)})}
+async function pdfLibs(){if(!window.jspdf)await loadJS("jspdf.umd.min.js");if(!(window.jspdf&&window.jspdf.jsPDF.API.autoTable))await loadJS("jspdf.plugin.autotable.min.js");return window.jspdf.jsPDF}
+const fileSlug=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+async function gamePDF(share){let jsPDF;try{toast("A preparar o PDF…",8000,"busy");jsPDF=await pdfLibs()}catch(e){toast("Não foi possível preparar o PDF: "+e.message,4000,"warn");return}
+  const doc=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"}),W=297,H=210,M=12,GOLD=[226,184,18],INK=[20,22,26],MUT=[90,96,104];
+  const t=totals(),o=G.ost||STAT0(),np=G.np||4,ql=q=>q>np?"P"+(q-np):q+"º";
+  // cabeçalho
+  doc.setFillColor(0,0,0);doc.rect(0,0,W,30,"F");doc.setFillColor(...GOLD);doc.rect(0,30,W,1.2,"F");
+  try{doc.addImage(CREST,"PNG",M,4,22,22)}catch(e){}
+  doc.setTextColor(...GOLD);doc.setFont("helvetica","bold");doc.setFontSize(10);doc.text("FC GAIA · "+String(G.teamName||G.team).toUpperCase(),M+27,10);
+  doc.setTextColor(255,255,255);doc.setFontSize(20);doc.text(`FC Gaia  ${G.us} – ${G.them}  ${G.opp}`,M+27,20);
+  doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(200,200,200);
+  const d=G.date?new Date(G.date+"T12:00"):null;const meta=[d?d.toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long",year:"numeric"}):"",G.comp,G.venue,G.home?"Em casa":"Fora"].filter(Boolean).join("  ·  ");
+  doc.text(meta,M+27,26.5);
+  // parciais por período
+  const qs=[];for(let q=1;q<=Math.max(np,G.q||np);q++){const ev=G.log.filter(e=>e.q===q&&e.us!=null);if(!ev.length&&q>np)continue;const last=ev.length?ev[ev.length-1]:null;qs.push([q,last?last.us:null,last?last.them:null])}
+  let pu=0,pt=0;const par=qs.map(([q,u,th])=>{const a=u==null?"":u-pu,b=th==null?"":th-pt;if(u!=null){pu=u;pt=th}return [ql(q),a,b]});
+  doc.autoTable({startY:37,margin:{left:M},tableWidth:70,theme:"grid",styles:{fontSize:9,halign:"center",cellPadding:1.6,lineColor:[210,210,210]},headStyles:{fillColor:INK,textColor:255},
+    head:[["Parciais",...par.map(x=>x[0]),"Total"]],body:[["FC Gaia",...par.map(x=>x[1]),G.us],[G.opp.length>14?G.opp.slice(0,13)+"…":G.opp,...par.map(x=>x[2]),G.them]],columnStyles:{0:{halign:"left",fontStyle:"bold"}}});
+  // comparação de equipas
+  const pc=(m,a)=>a?Math.round(100*m/a)+"%":"–",sh=(s,m,a)=>`${s[m]}/${s[a]} (${pc(s[m],s[a])})`;
+  doc.autoTable({startY:37,margin:{left:M+78},tableWidth:W-2*M-78,theme:"grid",styles:{fontSize:9,halign:"center",cellPadding:1.6,lineColor:[210,210,210]},headStyles:{fillColor:INK,textColor:255},
+    head:[["Equipa","2 pontos","3 pontos","Lances livres","Ressaltos (O/D)","Assist.","Roubos","Desarmes","Perdas","Faltas"]],
+    body:[["FC Gaia",sh(t,"m2","a2"),sh(t,"m3","a3"),sh(t,"mf","af"),`${t.or+t.dr} (${t.or}/${t.dr})`,t.ast,t.stl,t.blk,t.tov,t.pf],
+          [G.opp,sh(o,"m2","a2"),sh(o,"m3","a3"),sh(o,"mf","af"),`${o.or+o.dr} (${o.or}/${o.dr})`,o.ast,o.stl,o.blk,o.tov,o.pf]],
+    columnStyles:{0:{halign:"left",fontStyle:"bold"}}});
+  // ficha dos atletas
+  const r=(n,nm,s,min)=>[n,nm,min,s.pts,`${s.m2}/${s.a2}`,`${s.m3}/${s.a3}`,`${s.mf}/${s.af}`,s.or,s.dr,s.or+s.dr,s.ast,s.stl,s.blk,s.tov,s.pf,s.fd,(s.pm>0?"+":"")+s.pm,eff(s)];
+  const rows=bsRows().map(({p,s})=>r(p.num||"",p.name+(dq(s)?"  (excluído)":""),s,fmtMin(s.sec)));
+  doc.autoTable({startY:doc.lastAutoTable.finalY+6,margin:{left:M,right:M},theme:"striped",styles:{fontSize:8.5,halign:"center",cellPadding:1.4},headStyles:{fillColor:GOLD,textColor:INK,fontStyle:"bold"},
+    head:[["Nº","Atleta","MIN","PTS","2PT","3PT","LL","RO","RD","RT","AST","ROU","DL","PER","F","FR","+/-","VAL"]],
+    body:rows,foot:[["","Total FC Gaia","",t.pts,`${t.m2}/${t.a2}`,`${t.m3}/${t.a3}`,`${t.mf}/${t.af}`,t.or,t.dr,t.or+t.dr,t.ast,t.stl,t.blk,t.tov,t.pf,t.fd,"",eff(t)]],
+    footStyles:{fillColor:[255,246,207],textColor:INK,fontStyle:"bold",halign:"center"},columnStyles:{1:{halign:"left",cellWidth:58},3:{fontStyle:"bold"}}});
+  doc.setFontSize(7);doc.setTextColor(...MUT);doc.text("MIN minutos · 2PT/3PT/LL convertidos/tentados · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas · FR faltas recebidas · VAL valorização",M,doc.lastAutoTable.finalY+5);
+  // página 2: mapas de lançamentos
+  const shots=G.log.filter(e=>e.x!=null);
+  if(shots.length){doc.addPage();doc.setFillColor(0,0,0);doc.rect(0,0,W,14,"F");doc.setFillColor(...GOLD);doc.rect(0,14,W,1,"F");
+    doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(12);doc.text(`Mapa de lançamentos · FC Gaia ${G.us} – ${G.them} ${G.opp}`,M,9.5);
+    const court=(x0,y0,w,list,title,col)=>{const k=w/1500,h=1400*k,X=v=>x0+v*k,Y=v=>y0+v*k;
+      doc.setTextColor(...INK);doc.setFont("helvetica","bold");doc.setFontSize(11);doc.text(title,x0,y0-3);
+      doc.setFillColor(...col);doc.rect(x0,y0,w,h,"F");doc.setDrawColor(60,60,60);doc.setLineWidth(.35);doc.rect(x0,y0,w,h);
+      doc.rect(X(505),Y(0),490*k,580*k);doc.circle(X(750),Y(580),180*k);doc.line(X(90),Y(0),X(90),Y(YC));doc.line(X(1410),Y(0),X(1410),Y(YC));
+      const a0=Math.atan2(YC-BY,90-BX),a1=Math.atan2(YC-BY,1410-BX);const pts=[];for(let i=0;i<=48;i++){const a=a0+(a1-a0)*i/48;pts.push([X(BX+R3*Math.cos(a)),Y(BY+R3*Math.sin(a))])}
+      for(let i=1;i<pts.length;i++)doc.line(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1]);
+      doc.setDrawColor(200,80,30);doc.circle(X(BX),Y(BY),22.5*k);doc.setDrawColor(60,60,60);doc.line(X(660),Y(120),X(840),Y(120));
+      let ok=0,n=0;list.forEach(e=>{n++;const good=e.t.endsWith("+");if(good){ok++;doc.setFillColor(30,150,70);doc.setDrawColor(255,255,255);doc.setLineWidth(.3);doc.circle(X(e.x),Y(e.y),2,"FD")}else{doc.setDrawColor(200,40,40);doc.setLineWidth(.7);const c=1.8;doc.line(X(e.x)-c,Y(e.y)-c,X(e.x)+c,Y(e.y)+c);doc.line(X(e.x)+c,Y(e.y)-c,X(e.x)-c,Y(e.y)+c)}});
+      doc.setLineWidth(.35);
+      const zs={};list.forEach(e=>{const z=zoneN(e.x,e.y);zs[z]=zs[z]||[0,0];zs[z][1]++;if(e.t.endsWith("+"))zs[z][0]++});
+      doc.autoTable({startY:y0+h+4,margin:{left:x0},tableWidth:w,theme:"grid",styles:{fontSize:8,cellPadding:1.1,halign:"center"},headStyles:{fillColor:INK,textColor:255},
+        head:[["Zona","Conv./Tent.","%"]],body:Object.keys(zs).sort((a,b)=>a-b).map(z=>[`Z${z} · ${ZDESC[z]}`,`${zs[z][0]}/${zs[z][1]}`,pc(zs[z][0],zs[z][1])]).concat([[{content:"Total",styles:{fontStyle:"bold"}},`${ok}/${n}`,pc(ok,n)]]),columnStyles:{0:{halign:"left"}}})};
+    const cw=(W-2*M-16)/2;court(M,26,cw,shots.filter(e=>e.side!=="o"),"FC Gaia",[244,236,214]);court(M+cw+16,26,cw,shots.filter(e=>e.side==="o"),G.opp,[222,233,250])}
+  // rodapé
+  const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(...MUT);
+    doc.text(`FC Gaia · Estatísticas de jogo${G.by?" · registado por "+G.by.n:""} · ${new Date().toLocaleString("pt-PT")}`,M,H-6);doc.text(`${i}/${n}`,W-M,H-6,{align:"right"})}
+  const name=`${G.date||"jogo"} ${G.teamName||G.team} vs ${G.opp}`.trim(),fn=fileSlug("fcgaia "+name)+".pdf";
+  const blob=doc.output("blob"),file=new File([blob],fn,{type:"application/pdf"});
+  if(share&&navigator.canShare&&navigator.canShare({files:[file]})){try{$("#toast").hidden=true;await navigator.share({files:[file],title:"FC Gaia · "+name,text:`FC Gaia ${G.us}–${G.them} ${G.opp} · ${G.teamName||G.team}`})}catch(e){if(e&&e.name!=="AbortError")toast("Não foi possível partilhar: "+e.message,4000,"warn")}return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast(share?"Este aparelho não tem partilha: o PDF foi descarregado":"PDF descarregado",3000,"ok")}
 
 /* ---------- exportar ---------- */
 function exportXLS(){const t=totals(),fn=`fcgaia-${G.team.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")}-${G.date}-vs-${G.opp.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")}`.replace(/-+/g,"-");
