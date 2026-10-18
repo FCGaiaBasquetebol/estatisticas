@@ -137,3 +137,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Nome dos ficheiros: `AAAA-MM-DD_F1 J01_Jogo N_Casa x Fora_Prova` (Taça → "Taça", sem número → "Amigável"). Fase e jornada vêm do calendário (r[12], r[4]) e passam a ficar no jogo (`fase`, `jor`).
 - Excel: 1 Resumo · 2 Atletas · 3 Lançamentos FC Gaia · 4 Adversário · 5 Jogadas.
 - Zonas só como Z1…Z9 em toda a app, PDF e Excel (sem nomes, a pedido).
+
+## v52
+- PDF p.2: campo mais pequeno, quadros em 2 colunas e “Evolução do resultado” por baixo (linha FC Gaia vs adversário em degraus, linhas a separar períodos, maior vantagem, empates, trocas de liderança). `scoreSeries`, `scoreSVG`, `svgJPEG`.

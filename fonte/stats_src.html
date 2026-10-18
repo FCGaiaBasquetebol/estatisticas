@@ -2242,8 +2242,30 @@ async function shareFiles(files,share){
   toast(share?(files.length>1?`Este aparelho não tem partilha: ${files.length} PDF descarregados`:"Este aparelho não tem partilha: o PDF foi descarregado"):files.length>1?`${files.length} PDF descarregados`:"PDF descarregado",3500,"ok")}
 /* ficha do jogo em PDF: 1) resumo numa só página · 2) lançamentos FC Gaia · 3) adversário */
 async function makeGamePDF(jsPDF,g){const us=g.log.filter(e=>e.x!=null&&e.side!=="o"),th=g.log.filter(e=>e.x!=null&&e.side==="o");
-  const img={us:us.length?await courtPNG(us,"#f4ecd6","#1e9e4a"):null,them:th.length?await courtPNG(th,"#dfe9f7","#1659c7"):null};
+  const S=scoreSeries(g),img={us:us.length?await courtPNG(us,"#f4ecd6","#1e9e4a"):null,them:th.length?await courtPNG(th,"#dfe9f7","#1659c7"):null,S:S.pts.length>2?S:null};
+  if(img.S)img.score=await svgJPEG(scoreSVG(g,S),2800,600);
   const keep=G;G=g;try{return buildPDF(jsPDF,img)}finally{G=keep}}
+/* evolução do resultado: [segundos de jogo, FC Gaia, adversário] a cada mudança */
+function scoreSeries(g){const per=(g.per||10)*60,np=g.np||4,el=e=>e.q<=np?(e.q-1)*per+per-(e.c||0):np*per+(e.q-np-1)*300+300-(e.c||0);
+  const pts=[[0,0,0]];let lu=0,lt=0,maxQ=np;(g.log||[]).forEach(e=>{if(e.q>maxQ)maxQ=e.q;if(e.us==null)return;if(e.us!==lu||e.them!==lt){pts.push([Math.max(0,Math.round(el(e))),e.us,e.them]);lu=e.us;lt=e.them}});
+  const ends=[];for(let q=1;q<=maxQ;q++)ends.push(q<=np?q*per:np*per+(q-np)*300);
+  const fmt=t=>{let q=1;while(q<ends.length&&t>ends[q-1])q++;const r=Math.max(0,ends[q-1]-t),nm=q<=np?q+".º per.":"Prol. "+(q-np);return nm+" "+String(Math.floor(r/60)).padStart(2,"0")+":"+String(Math.round(r%60)).padStart(2,"0")};
+  let bu=[0,0],bt=[0,0],ties=0,ch=0,lead=0;pts.forEach(p=>{const d=p[1]-p[2],sg=Math.sign(d);if(d>bu[0])bu=[d,p[0]];if(-d>bt[0])bt=[-d,p[0]];if(!sg&&p[0]>0)ties++;if(sg&&lead&&sg!==lead)ch++;if(sg)lead=sg});
+  return {pts,ends,np,per,tot:ends[ends.length-1],fmt,bu,bt,ties,ch}}
+function scoreSVG(g,S){const W=1400,H=300,L=46,Rr=150,T=26,B=30,iw=W-L-Rr,ih=H-T-B,last=S.pts[S.pts.length-1],maxY=Math.max(20,Math.ceil(Math.max(last[1],last[2])/20)*20);
+  const x=t=>L+t/S.tot*iw,y=v=>T+ih-v/maxY*ih,US="#a88600",TH="#2f6fd6";
+  const step=k=>{let d=`M${x(0)} ${y(0)}`;S.pts.forEach(p=>{d+=`H${x(p[0]).toFixed(1)}V${y(p[k]).toFixed(1)}`});return d+`H${x(S.tot)}`};
+  let gr="";for(let v=0;v<=maxY;v+=20)gr+=`<line x1="${L}" x2="${L+iw}" y1="${y(v)}" y2="${y(v)}" stroke="#e6e8eb" stroke-width="1.5"/><text x="${L-10}" y="${y(v)+6}" text-anchor="end" font-size="17" fill="#8a9099">${v}</text>`;
+  let st=0;S.ends.forEach((e,i)=>{const lb=i<S.np?(i+1)+".º":"P"+(i+1-S.np);gr+=`<text x="${x((st+e)/2)}" y="${T-8}" text-anchor="middle" font-size="16" font-weight="700" fill="#5d636b">${lb}</text>`;if(i<S.ends.length-1)gr+=`<line x1="${x(e)}" x2="${x(e)}" y1="${T}" y2="${T+ih}" stroke="#9aa0a8" stroke-width="2"/>`;st=e});
+  for(let m=0;m*60<=S.tot;m+=(S.per>=600?10:5))gr+=`<text x="${x(m*60)}" y="${T+ih+22}" text-anchor="middle" font-size="16" fill="#8a9099">${m}'</text>`;
+  const gap=Math.abs(y(last[1])-y(last[2]))<26?(last[1]>=last[2]?[-12,12]:[12,-12]):[0,0];
+  const lab=(v,c,t,dy)=>`<circle cx="${x(S.tot)}" cy="${y(v)}" r="6" fill="${c}"/><text x="${x(S.tot)+12}" y="${y(v)+7+dy}" font-size="20" font-weight="700" fill="#1b1d21">${t} ${v}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Arial,Helvetica,sans-serif"><rect width="${W}" height="${H}" fill="#fff"/>${gr}
+   <line x1="${L}" x2="${L+iw}" y1="${T+ih}" y2="${T+ih}" stroke="#9aa0a8" stroke-width="2"/>
+   <path d="${step(2)}" fill="none" stroke="${TH}" stroke-width="3.5" stroke-linejoin="round"/><path d="${step(1)}" fill="none" stroke="${US}" stroke-width="4" stroke-linejoin="round"/>
+   ${lab(last[1],US,"FC Gaia",gap[0])}${lab(last[2],TH,String(g.opp).slice(0,12),gap[1])}</svg>`}
+function svgJPEG(svg,w,h){return new Promise(res=>{try{const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);res(c.toDataURL("image/jpeg",.9))}catch(e){res(null)}};
+  im.onerror=()=>res(null);im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)}catch(e){res(null)}})}
 /* desenha o campo com as zonas (o mesmo da app) numa imagem para o PDF */
 function courtPNG(shots,floor,okc){return new Promise(res=>{try{
   const st=`<style>.c-floor{fill:${floor}}.c-paint{fill:rgba(0,0,0,.035);stroke:#6b6b6b;stroke-width:5}.c-line,.c-3p{fill:none;stroke:#6b6b6b;stroke-width:5}.c-board{stroke:#333;stroke-width:8}.c-rim{fill:none;stroke:#e2541b;stroke-width:6}.c-out{fill:none;stroke:#333;stroke-width:10}
@@ -2315,16 +2337,24 @@ function buildPDF(jsPDF,img){img=img||{};
   const courtImg=(doc,data,empty)=>{if(data){try{doc.addImage(data,"JPEG",M,CY,CW,CH)}catch(e){}doc.setDrawColor(60,60,60);doc.setLineWidth(.3);doc.rect(M,CY,CW,CH)}
     else{doc.setFillColor(244,244,244);doc.rect(M,CY,CW,CH,"F");doc.setTextColor(...MUT);doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(empty,M+CW/2,CY+CH/2,{align:"center",maxWidth:CW-20})}
     doc.setFontSize(8);doc.setTextColor(...MUT);doc.text("Bola cheia: convertido  ·  X: falhado  ·  em cada zona: convertidos/tentados e %. Os lances livres não entram no mapa.",M,CY+CH+5)};
-  // ---------- página 2: lançamentos FC Gaia ----------
+  // ---------- página 2: lançamentos FC Gaia + evolução do resultado ----------
   const usS=G.log.filter(e=>e.x!=null&&e.side!=="o");
-  if(usS.length){doc.addPage();band(doc,15,"Lançamentos · FC Gaia",scoreTxt(G,"FC Gaia"," – "));courtImg(doc,img.us,"");
-    let y=side(doc,usS,INK);
-    doc.autoTable({theme:"grid",margin:{left:RX,right:M},tableWidth:RW,startY:y+4,styles:{fontSize:8.3,cellPadding:1.25,halign:"center",lineColor:LINE},headStyles:{fillColor:INK,textColor:255},
-      head:[["Tipo","C/T","%"]],body:[["2 pontos",ca(t.m2,t.a2),pc(t.m2,t.a2)],["3 pontos",ca(t.m3,t.a3),pc(t.m3,t.a3)],["Lances livres",ca(t.mf,t.af),pc(t.mf,t.af)]],columnStyles:{0:{halign:"left",cellWidth:RW*.58}}});
+  if(usS.length||img.score){doc.addPage();band(doc,15,"Lançamentos · FC Gaia",scoreTxt(G,"FC Gaia"," – "));
+    const ch=img.score?106:CH,cw=ch*1500/1400,rx=M+cw+7,cwid=(W-M-rx-5)/2,tb={theme:"grid",styles:{fontSize:8.2,cellPadding:1.2,halign:"center",lineColor:LINE},headStyles:{fillColor:INK,textColor:255}};
+    if(img.us){try{doc.addImage(img.us,"JPEG",M,CY,cw,ch)}catch(e){}doc.setDrawColor(60,60,60);doc.setLineWidth(.3);doc.rect(M,CY,cw,ch)}
+    else{doc.setFillColor(244,244,244);doc.rect(M,CY,cw,ch,"F");doc.setTextColor(...MUT);doc.setFontSize(10);doc.text("Sem lançamentos marcados no campo.",M+cw/2,CY+ch/2,{align:"center"})}
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(...MUT);doc.text("Bola cheia: convertido · X: falhado · em cada zona: convertidos/tentados e %. Os lances livres não entram no mapa.",M,CY+ch+4.5);
+    const zs={};for(let z=1;z<=9;z++)zs[z]=[0,0];usS.forEach(e=>{const z=zoneN(e.x,e.y);zs[z][1]++;if(e.t.endsWith("+"))zs[z][0]++});const ok=usS.filter(e=>e.t.endsWith("+")).length;
+    doc.autoTable({...tb,margin:{left:rx},tableWidth:cwid,startY:CY,head:[["Zona","C/T","%"]],body:Object.keys(zs).map(z=>["Z"+z,ca(...zs[z]),pc(...zs[z])]).concat([[{content:"Total campo",styles:{fontStyle:"bold"}},{content:ca(ok,usS.length),styles:{fontStyle:"bold"}},{content:pc(ok,usS.length),styles:{fontStyle:"bold"}}]]),columnStyles:{0:{halign:"left"}}});
+    doc.autoTable({...tb,margin:{left:rx},tableWidth:cwid,startY:doc.lastAutoTable.finalY+4,head:[["Tipo","C/T","%"]],body:[["2 pontos",ca(t.m2,t.a2),pc(t.m2,t.a2)],["3 pontos",ca(t.m3,t.a3),pc(t.m3,t.a3)],["Lances livres",ca(t.mf,t.af),pc(t.mf,t.af)]],columnStyles:{0:{halign:"left"}}});
     const pl=bsRows().filter(({s})=>s.a2+s.a3+s.af).sort((a,b)=>b.s.pts-a.s.pts);
-    if(pl.length)doc.autoTable({theme:"striped",margin:{left:RX,right:M},tableWidth:RW,startY:doc.lastAutoTable.finalY+4,styles:{fontSize:7.6,cellPadding:1,halign:"center"},headStyles:{fillColor:GOLD,textColor:INK},
-      head:[["Atleta","2PT","3PT","LL","Campo"]],body:pl.map(({p,s})=>[`${p.num||"–"} ${String(p.name).split(/\s+/).slice(0,1).concat(String(p.name).split(/\s+/).slice(-1)).filter((v,i,a)=>a.indexOf(v)===i).join(" ")}`,ca(s.m2,s.a2),ca(s.m3,s.a3),ca(s.mf,s.af),pc(s.m2+s.m3,s.a2+s.a3)]),
-      columnStyles:{0:{halign:"left",cellWidth:RW*.4}},pageBreak:"avoid"})}
+    if(pl.length)doc.autoTable({theme:"striped",margin:{left:rx+cwid+5},tableWidth:cwid,startY:CY,styles:{fontSize:7.4,cellPadding:1,halign:"center"},headStyles:{fillColor:GOLD,textColor:INK},
+      head:[["Atleta","2PT","3PT","LL","%"]],body:pl.map(({p,s})=>[`${p.num||"–"} ${String(p.name).split(/\s+/).slice(0,1).concat(String(p.name).split(/\s+/).slice(-1)).filter((v,i,a)=>a.indexOf(v)===i).join(" ")}`,ca(s.m2,s.a2),ca(s.m3,s.a3),ca(s.mf,s.af),pc(s.m2+s.m3,s.a2+s.a3)]),
+      columnStyles:{0:{halign:"left",cellWidth:cwid*.42}}});
+    if(img.score){const S=img.S,yS=CY+ch+10,fm=S.fmt;doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...INK);doc.text("Evolução do resultado",M,yS);
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(...MUT);
+      doc.text([S.bu[0]?`Maior vantagem FC Gaia +${S.bu[0]} (${fm(S.bu[1])})`:"",S.bt[0]?`Maior vantagem ${G.opp} +${S.bt[0]} (${fm(S.bt[1])})`:"",`Empates ${S.ties}`,`Trocas de liderança ${S.ch}`].filter(Boolean).join("   ·   "),M+42,yS);
+      const iw=W-2*M,ih=iw*600/2800;try{doc.addImage(img.score,"JPEG",M,yS+2,iw,Math.min(ih,H-9-(yS+2)))}catch(e){}}}
   // ---------- página 3: adversário ----------
   const thS=G.log.filter(e=>e.x!=null&&e.side==="o"),hasO=thS.length||o.pts||o.a2||o.a3||o.af||o.pf||o.or||o.dr;
   if(hasO){doc.addPage();band(doc,15,"Adversário · "+G.opp,scoreTxt(G,"FC Gaia"," – "));courtImg(doc,img.them,"Sem lançamentos do adversário marcados no campo.");
