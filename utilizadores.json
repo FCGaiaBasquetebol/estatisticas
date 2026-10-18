@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792347518028,
+ "atualizado": 1792353225289,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -161,7 +161,13 @@
    "perfil": "consulta",
    "cargo": "Coordenador",
    "escaloes": [
-    "*"
+    "Esperanças",
+    "Sub-18 Masc A",
+    "Sub-18 Masc B",
+    "Sub-16 Masc A",
+    "Sub-16 Masc B",
+    "Sub-14 Masc A",
+    "Sub-14 Masc B"
    ],
    "ativo": true,
    "salt": "MmP3giawxcLUj5G1KUh8uQ==",
