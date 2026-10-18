@@ -36,7 +36,7 @@ const CFG = {
 /* ===================== instalação ===================== */
 function instalar() {
   if (!token_()) throw new Error("Falta a propriedade GITHUB_TOKEN (Definições do projeto → Propriedades do script).");
-  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === "sincronizar").forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
   ScriptApp.newTrigger("sincronizar").timeBased().everyDays(1).atHour(CFG.hora).inTimezone("Europe/Lisbon").create();
   Logger.log("Instalado: corre todos os dias por volta das " + CFG.hora + "h. Para atualizar já, executa «sincronizar».");
   Logger.log(JSON.stringify(sincronizar()));
@@ -95,7 +95,6 @@ function sincronizar() {
         if (info.jogos) {
           const xb = raw_(e.path + "/estatisticas.xlsx").setContentType(MimeType.MICROSOFT_EXCEL);
           st.folha = folha_(st.folha, info.ficheiro, xb, pasta);
-          gatilhoAtleta_(st.folha);
           res.folhas++;
         }
         st.upd = info.upd;
@@ -127,24 +126,6 @@ function folha_(id, nome, blob, pasta) {
   }
   const novo = Drive.Files.create({ name: nome, mimeType: MimeType.GOOGLE_SHEETS, parents: [pasta.getId()] }, blob);
   return novo.id;
-}
-
-/* Ao escolher um atleta (Equipa → Atleta ▾), abre o separador Atleta. */
-function aoEditar(e) {
-  try {
-    if (!e || !e.range) return;
-    const sh = e.range.getSheet();
-    if (sh.getName() !== "Equipa" || e.range.getRow() !== 4 || e.range.getColumn() !== 16) return;   // P4
-    if (String(sh.getRange("P4").getValue()) === "Todos os atletas") return;
-    const a = e.source.getSheetByName("Atleta");
-    if (a) a.activate();
-  } catch (x) {}
-}
-function gatilhoAtleta_(id) {
-  const ts = ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === "aoEditar");
-  if (ts.some(t => t.getTriggerSourceId() === id)) return;
-  ts.filter(t => { try { return !existe_(t.getTriggerSourceId()); } catch (e) { return true; } }).forEach(t => ScriptApp.deleteTrigger(t));
-  ScriptApp.newTrigger("aoEditar").forSpreadsheet(id).onEdit().create();
 }
 
 /* ===================== auxiliares ===================== */

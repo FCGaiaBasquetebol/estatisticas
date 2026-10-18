@@ -178,3 +178,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v64
 - Excel: Atleta ▾ volta a filtrar a tabela de atletas da Equipa ("Todos os atletas" mostra todos) e continua a alimentar o separador Atleta.
+
+## v65
+- Excel: sai o Atleta ▾ da Equipa; botão "Atletas: jogo a jogo ›" leva ao separador Atleta, que tem a sua caixa Atleta ▾ e o botão "‹ Voltar ao ecrã principal". A tabela de atletas da Equipa mostra sempre todos. Codigo.gs sem o gatilho onEdit.

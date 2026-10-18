@@ -2533,8 +2533,7 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   lab(ws,"B4","Jogos");ws.mergeCells("C4:E4");box(ws.getCell("C4"),F(`COUNTIFS(Jogos!$I$6:$I$400,"Sim")&" de ${games.length}"`));ws.getCell("C4").alignment={horizontal:"center",vertical:"middle"};
   ws.mergeCells("F4:H4");link(ws.getCell("F4"),"Escolher ›","Jogos");
   lab(ws,"J4","Valores ▾");pick(ws,"K4:M4","Totais",'"Totais,Médias por jogo"');
-  lab(ws,"O4","Atleta ▾");pick(ws,"P4:T4","Todos os atletas",`Listas!$B$1:$B$${ath.length+1}`);
-  ws.mergeCells("U4:W4");link(ws.getCell("U4"),"Jogo a jogo ›","Atleta");
+  ws.mergeCells("P4:T4");{const c=ws.getCell("P4");c.value={text:"Atletas: jogo a jogo ›",hyperlink:"#'Atleta'!A1"};c.font={name:"Arial",size:11,bold:true,color:{argb:INKC}};c.fill=fillOf(GOLD);c.alignment={horizontal:"center",vertical:"middle"};const b={style:"thin",color:{argb:"FFB89400"}};c.border={top:b,bottom:b,left:b,right:b}}
   // equipa
   sec(ws,6,"EQUIPA");
   hdr(ws,7,["","Equipa","Jogos","V","D","PTS","Campo C","Campo T","Campo %","2PT C","2PT T","2PT %","3PT C","3PT T","3PT %","LL C","LL T","LL %","RO","RD","RT","AST","ROU","DL","PER"]);
@@ -2552,7 +2551,7 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   const r0=13,n=Math.max(ath.length,1);
   ath.forEach((a,i)=>{const r=r0+i,fill=i%2?ZEB:undefined,B=`$B${r}`,J=`$C${r}`;
     const S=k=>A(`SUMIFS(${col(k)},${col("Atleta")},${B},${col("Tipo")},"Atleta",${CR})`,J);
-    put(ws,r,2,F(`IF($P$4="Todos os atletas",Listas!$B$${i+2},IF(${i}=0,$P$4,""))`),{b:1,fill});
+    put(ws,r,2,a,{b:1,fill});
     put(ws,r,1,F(`IF(${B}="","",IFERROR(INDEX(Listas!$C$2:$C$${n+1},MATCH(${B},Listas!$B$2:$B$${n+1},0)),""))`),{fill});
     const E=x=>`IF(${B}="","",${x})`;
     put(ws,r,3,F(E(`COUNTIFS(${col("Atleta")},${B},${col("Tipo")},"Atleta",${CR},${col("Jogou")},1)`)),{fill});
@@ -2566,7 +2565,7 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   Object.entries(PC).forEach(([c,[m,t]])=>put(ws,rt,+c,F(`IFERROR(${L(m)}${rt}/${L(t)}${rt},"")`),{...TF,fmt:"0%"}));put(ws,rt,17,F(`O${rt}+P${rt}`),TF);
   for(let c=1;c<=25;c++)ws.getCell(rt,c).border={top:{style:"thin",color:{argb:GOLD}},bottom:{style:"thin",color:{argb:GOLD}}};
   const rl=rt+2;ws.mergeCells(`A${rl}:Y${rl}`);const lg=ws.getCell("A"+rl);
-  lg.value="Jogos: “Escolher ›” abre a lista onde marcas Sim/Não por prova, fase ou jogo. Valores muda equipa e atletas. Atleta ▾ + “Jogo a jogo ›” abre a folha do atleta. MIN minutos · C convertidos · T tentados · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas · FR faltas recebidas · VAL valorização.";
+  lg.value="Jogos: “Escolher ›” abre a lista onde marcas Sim/Não por prova, fase ou jogo. Valores muda equipa e atletas. “Atletas: jogo a jogo ›” abre a folha de cada atleta. MIN minutos · C convertidos · T tentados · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas · FR faltas recebidas · VAL valorização.";
   lg.font={name:"Arial",size:8,color:{argb:MUTC}};lg.alignment={wrapText:true};ws.getRow(rl).height=28;
   // ================= JOGOS (escolha) =================
   wj.columns=[{width:9},{width:6},{width:12},{width:38},{width:10},{width:6},{width:8},{width:4,hidden:true},{width:4,hidden:true}];
@@ -2590,15 +2589,16 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   dataRows.forEach((row,i)=>{D.addRow([...row,{formula:`IFERROR(INDEX(Jogos!$I$${j0}:$I$${j1},MATCH(A${i+2},Jogos!$H$${j0}:$H$${j1},0)),"Sim")`}])});
   ws.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.3,right:.3,top:.4,bottom:.4,header:.2,footer:.2}};
   // ================= ATLETA =================
-  wa.columns=[{width:12},{width:40},{width:8},...Array(22).fill({width:8})];
-  band(wa,"FC GAIA · "+title,"Jogo a jogo do atleta escolhido no separador Equipa");
-  wa.mergeCells("B4:L4");const an=wa.getCell("B4");an.value=F(`IF(Equipa!$P$4="Todos os atletas","Escolhe um atleta no separador Equipa (Atleta ▾)",IFERROR("#"&INDEX(Listas!$C$2:$C$${n+1},MATCH(Equipa!$P$4,Listas!$B$2:$B$${n+1},0))&"  ","")&Equipa!$P$4)`);
+  wa.columns=[{width:12},{width:34},{width:8},...Array(22).fill({width:8})];
+  band(wa,"FC GAIA · "+title,"Jogo a jogo: escolhe o atleta na caixa Atleta ▾");
+  lab(wa,"B4","Atleta ▾");pick(wa,"C4:H4","Escolhe o atleta",`Listas!$B$1:$B$${ath.length+1}`);
+  wa.mergeCells("J4:T4");const an=wa.getCell("J4");an.value=F(`IF($C$4="Escolhe o atleta","",IFERROR("#"&INDEX(Listas!$C$2:$C$${n+1},MATCH($C$4,Listas!$B$2:$B$${n+1},0))&"  ","")&$C$4)`);
   an.font={name:"Arial",size:18,bold:true,color:{argb:INKC}};an.alignment={vertical:"middle"};wa.getRow(4).height=30;
-  wa.mergeCells("V4:Y4");link(wa.getCell("V4"),"‹ Equipa","Equipa");wa.getCell("V4").alignment={horizontal:"right",vertical:"middle"};
+  wa.mergeCells("U4:Y4");{const c=wa.getCell("U4");c.value={text:"‹ Voltar ao ecrã principal",hyperlink:"#'Equipa'!A1"};c.font={name:"Arial",size:11,bold:true,color:{argb:INKC}};c.fill=fillOf(GOLD);c.alignment={horizontal:"center",vertical:"middle"};const b={style:"thin",color:{argb:"FFB89400"}};c.border={top:b,bottom:b,left:b,right:b}}
   wa.mergeCells("B5:Y5");const fl=wa.getCell("B5");fl.value=F(`"Jogos a contar: "&Equipa!$C$4&" · "&Equipa!$K$4`);fl.font={name:"Arial",size:9,italic:true,color:{argb:MUTC}};
   sec(wa,6,"JOGO A JOGO");
   hdr(wa,7,["Data","Jogo","Res.","MIN","PTS","2PT C","2PT T","2PT %","3PT C","3PT T","3PT %","LL C","LL T","LL %","RO","RD","RT","AST","ROU","DL","PER","F","FR","+/-","VAL"]);
-  const SEL="Equipa!$P$4";const ka=[[5,"PTS"],[6,"2C"],[7,"2T"],[9,"3C"],[10,"3T"],[12,"LC"],[13,"LT"],[15,"RO"],[16,"RD"],[18,"AST"],[19,"ROU"],[20,"DL"],[21,"PER"],[22,"F"],[23,"FR"],[24,"+/-"],[25,"VAL"]];
+  const SEL="Atleta!$C$4";const ka=[[5,"PTS"],[6,"2C"],[7,"2T"],[9,"3C"],[10,"3T"],[12,"LC"],[13,"LT"],[15,"RO"],[16,"RD"],[18,"AST"],[19,"ROU"],[20,"DL"],[21,"PER"],[22,"F"],[23,"FR"],[24,"+/-"],[25,"VAL"]];
   const a0=8;games.forEach((g,i)=>{const r=a0+i,fill=i%2?ZEB:undefined,lb=labels[i],Q=`"${lb.replace(/"/g,'""')}"`;
     const on=`COUNTIFS(${col("Atleta")},${SEL},${col("Tipo")},"Atleta",${col("Jogo")},${Q},${CR})>0`;
     const one=k=>`IF(${on},SUMIFS(${col(k)},${col("Atleta")},${SEL},${col("Tipo")},"Atleta",${col("Jogo")},${Q},${CR}),"")`;
