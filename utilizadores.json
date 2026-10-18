@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792347313345,
+ "atualizado": 1792347518028,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -285,7 +285,7 @@
   {
    "utilizador": "francisco.pinto",
    "nome": "Francisco Pinto",
-   "perfil": "treinador",
+   "perfil": "consulta",
    "escaloes": [
     "Seniores Masc",
     "Esperanças",
@@ -302,7 +302,8 @@
    "dk": {
     "iv": "RFIfc7mTS4xp/SxN",
     "ct": "U2N5fYhvaqn0mE652g8m4ffErEA+JCIb4pI0RnJvF9nC4QXBctP94JDJ2guRz/AKdqOYeT+dDdlG863F"
-   }
+   },
+   "cargo": "Diretor"
   }
  ]
 }
