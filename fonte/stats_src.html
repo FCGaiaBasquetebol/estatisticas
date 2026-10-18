@@ -2218,7 +2218,8 @@ function gameTitle(g){const m=gameMeta(g),tc=/taça/i.test(m.fase+" "+(g.comp||"
   const fj=tc?"Taça":m.fase?`F${(String(m.fase).match(/\d+/)||["1"])[0]}${m.jor?" J"+String(m.jor).padStart(2,"0"):""}`:(!g.gameNum?"Amigável":"");
   const us="FC Gaia "+(g.teamName||TN[g.team]||g.team||""),teams=g.home===false?`${g.opp} x ${us}`:`${us} x ${g.opp}`;
   return [fj,g.gameNum?"Jogo "+g.gameNum:"",teams,String(g.comp||"").split("·")[0].trim()].filter(Boolean).join("_")}
-const gameFile=(g,ext)=>([g.date,gameTitle(g)].filter(Boolean).join("_")).replace(/[\/\\:*?"<>|]+/g,"-").replace(/\s+/g," ").trim()+"."+ext;
+const noAcc=x=>String(x).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[ªº]/g,"");
+const gameFile=(g,ext)=>noAcc([g.date,gameTitle(g)].filter(Boolean).join("_")).replace(/[\/\\:*?"<>|]+/g,"-").replace(/\s+/g," ").trim()+"."+ext;
 const fileSlug=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 async function gamePDF(share){let jsPDF;try{toast("A preparar o PDF…",8000,"busy");jsPDF=await pdfLibs()}catch(e){toast("Não foi possível preparar o PDF: "+e.message,4000,"warn");return}
   await shareFiles([await makeGamePDF(jsPDF,G)],share)}
@@ -2363,7 +2364,7 @@ function buildPDF(jsPDF,img){img=img||{};
    por isso, quando o Drive for juntando jogos à folha "Dados", tudo se atualiza sozinho. */
 async function xlsxLib(){if(!window.ExcelJS)await loadJS("exceljs.min.js");return window.ExcelJS}
 function gameLabel(g){const m=gameMeta(g),fj=/taça/i.test(m.fase+" "+(g.comp||""))?"Taça":m.fase?`F${(String(m.fase).match(/\d+/)||["1"])[0]}${m.jor?" J"+String(m.jor).padStart(2,"0"):""}`:"";
-  return [g.date,fj,scoreTxt(g,"FC Gaia "+(g.teamName||TN[g.team]||g.team))].filter(Boolean).join(" · ")}
+  return [g.date,fj,scoreTxt(g,"FC Gaia")].filter(Boolean).join(" · ")}
 async function buildXLSX(games,title,fname){let EX;try{toast("A preparar o Excel…",15000,"busy");EX=await xlsxLib()}catch(e){toast("Não foi possível preparar o Excel: "+e.message,4000,"warn");return}
   games=games.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""));
   const wb=new EX.Workbook();wb.creator="FC Gaia Basquetebol";wb.created=new Date();wb.calcProperties.fullCalcOnLoad=true;
@@ -2402,64 +2403,71 @@ async function buildXLSX(games,title,fname){let EX;try{toast("A preparar o Excel
   const pick=(rng,v,list)=>{ws.mergeCells(rng);const c=ws.getCell(rng.split(":")[0]);c.value=v;c.font={name:"Arial",size:11,bold:true,color:{argb:INKC}};c.alignment={vertical:"middle",indent:1};
     c.fill={type:"pattern",pattern:"solid",fgColor:{argb:"FFFFFFFF"}};c.border={top:{style:"thin",color:{argb:GOLD}},bottom:{style:"thin",color:{argb:GOLD}},left:{style:"thin",color:{argb:GOLD}},right:{style:"thin",color:{argb:GOLD}}};
     c.dataValidation={type:"list",allowBlank:false,formulae:[list],showErrorMessage:true,errorTitle:"Escolhe da lista",error:"Escolhe um valor da lista."}};
-  lab("B4","Jogo ▾");pick("C4:L4","Todos os jogos",`Listas!$A$1:$A$${labels.length+1}`);
-  lab("N4","Atleta ▾");pick("O4:U4","Todos os atletas",`Listas!$B$1:$B$${ath.length+1}`);
-  const GC='IF($C$4="Todos os jogos","*",$C$4)';
+  lab("B4","Jogo ▾");pick("C4:J4","Todos os jogos",`Listas!$A$1:$A$${labels.length+1}`);
+  lab("L4","Atleta ▾");pick("M4:R4","Todos os atletas",`Listas!$B$1:$B$${ath.length+1}`);
+  lab("T4","Valores ▾");pick("U4:Y4","Totais",'"Totais,Médias por jogo"');
+  const GC='IF($C$4="Todos os jogos","*",$C$4)',AV='$U$4="Médias por jogo"',A=(e,n)=>`IF(${AV},ROUND((${e})/MAX(1,${n}),1),${e})`;
   const sec=(r,t)=>{ws.mergeCells(`A${r}:${last}${r}`);const c=ws.getCell("A"+r);c.value=t;c.font={name:"Arial",size:11,bold:true,color:{argb:INKC}};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:GOLD}};c.alignment={vertical:"middle",indent:1};ws.getRow(r).height=22};
   const hdr=(r,list)=>{list.forEach((t,i)=>{const c=ws.getCell(r,i+1);c.value=t;c.font={name:"Arial",size:9,bold:true,color:{argb:INKC}};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:HEAD}};c.alignment={horizontal:i===1?"left":"center",vertical:"middle",wrapText:true};c.border={bottom:{style:"thin",color:{argb:GOLD}}}});ws.getRow(r).height=26};
-  const put=(r,c,v,o)=>{const x=ws.getCell(r,c);x.value=v;x.font={name:"Arial",size:10,bold:!!(o&&o.b),color:{argb:INKC}};x.alignment={horizontal:c===2?"left":"center",vertical:"middle"};if(o&&o.fmt)x.numFmt=o.fmt;if(o&&o.fill)x.fill={type:"pattern",pattern:"solid",fgColor:{argb:o.fill}};x.border={bottom:{style:"hair",color:{argb:LINEC}}};return x};
+  const put=(r,c,v,o)=>{const x=ws.getCell(r,c);x.value=v;x.font={name:"Arial",size:10,bold:!!(o&&o.b),italic:!!(o&&o.i),color:{argb:INKC}};x.alignment={horizontal:(o&&o.al)||(c===2?"left":"center"),vertical:"middle"};if(o&&o.fmt)x.numFmt=o.fmt;if(o&&o.fill)x.fill={type:"pattern",pattern:"solid",fgColor:{argb:o.fill}};x.border={bottom:{style:"hair",color:{argb:LINEC}}};return x};
   const F=f=>({formula:f});
+  const sumT=(k,tipo)=>`SUMIFS(${col(k)},${col("Tipo")},"${tipo}",${col("Jogo")},${GC})`;
   // ---- equipa ----
   sec(6,"EQUIPA");
   hdr(7,["","Equipa","Jogos","V","D","PTS","Campo C","Campo T","Campo %","2PT C","2PT T","2PT %","3PT C","3PT T","3PT %","LL C","LL T","LL %","RO","RD","RT","AST","ROU","DL","PER"]);
-  const sumT=(k,tipo)=>`SUMIFS(${col(k)},${col("Tipo")},"${tipo}",${col("Jogo")},${GC})`;
-  const teamRow=(r,name,tipo,fill)=>{const S=k=>sumT(k,tipo);
+  const teamRow=(r,name,tipo,fill)=>{const S=k=>A(sumT(k,tipo),`$C$${r}`);
     put(r,1,"",{fill});put(r,2,name,{b:1,fill});put(r,3,F(`COUNTIFS(${col("Tipo")},"Adversário",${col("Jogo")},${GC})`),{fill});
-    put(r,4,F(`COUNTIFS(${col("Tipo")},"Adversário",${col("Jogo")},${GC},${col("Res")},"V")`),{fill});put(r,5,F(`COUNTIFS(${col("Tipo")},"Adversário",${col("Jogo")},${GC},${col("Res")},"D")`),{fill});
-    put(r,6,F(S("PTS")),{b:1,fill});put(r,7,F(`${S("2C")}+${S("3C")}`),{fill});put(r,8,F(`${S("2T")}+${S("3T")}`),{fill});put(r,9,F(`IFERROR(G${r}/H${r},"")`),{fill,fmt:"0%"});
+    put(r,4,tipo==="Atleta"?F(`COUNTIFS(${col("Tipo")},"Adversário",${col("Jogo")},${GC},${col("Res")},"V")`):"",{fill});put(r,5,tipo==="Atleta"?F(`COUNTIFS(${col("Tipo")},"Adversário",${col("Jogo")},${GC},${col("Res")},"D")`):"",{fill});
+    put(r,6,F(S("PTS")),{b:1,fill});put(r,7,F(A(`${sumT("2C",tipo)}+${sumT("3C",tipo)}`,`$C$${r}`)),{fill});put(r,8,F(A(`${sumT("2T",tipo)}+${sumT("3T",tipo)}`,`$C$${r}`)),{fill});put(r,9,F(`IFERROR(G${r}/H${r},"")`),{fill,fmt:"0%"});
     put(r,10,F(S("2C")),{fill});put(r,11,F(S("2T")),{fill});put(r,12,F(`IFERROR(J${r}/K${r},"")`),{fill,fmt:"0%"});
     put(r,13,F(S("3C")),{fill});put(r,14,F(S("3T")),{fill});put(r,15,F(`IFERROR(M${r}/N${r},"")`),{fill,fmt:"0%"});
     put(r,16,F(S("LC")),{fill});put(r,17,F(S("LT")),{fill});put(r,18,F(`IFERROR(P${r}/Q${r},"")`),{fill,fmt:"0%"});
     put(r,19,F(S("RO")),{fill});put(r,20,F(S("RD")),{fill});put(r,21,F(`S${r}+T${r}`),{fill});put(r,22,F(S("AST")),{fill});put(r,23,F(S("ROU")),{fill});put(r,24,F(S("DL")),{fill});put(r,25,F(S("PER")),{fill});ws.getRow(r).height=20};
   teamRow(8,"FC Gaia","Atleta",CREAM);teamRow(9,"Adversários","Adversário",BLUE);
-  ["D","E"].forEach(c=>{ws.getCell(c+9).value="";});
   // ---- atletas ----
   sec(11,"ATLETAS");
   hdr(12,["Nº","Atleta","J","MIN","PTS","2PT C","2PT T","2PT %","3PT C","3PT T","3PT %","LL C","LL T","LL %","RO","RD","RT","AST","ROU","DL","PER","F","FR","+/-","VAL"]);
-  const r0=13,n=Math.max(ath.length,1);
+  const r0=13,n=Math.max(ath.length,1),CK={5:"PTS",6:"2C",7:"2T",9:"3C",10:"3T",12:"LC",13:"LT",15:"RO",16:"RD",18:"AST",19:"ROU",20:"DL",21:"PER",22:"F",23:"FR",24:"+/-",25:"VAL"};
+  const pctC={8:[6,7],11:[9,10],14:[12,13]},L=c=>String.fromCharCode(64+c);
   for(let i=0;i<n;i++){const r=r0+i,fill=i%2?ZEB:undefined,B=`$B${r}`;
-    const S=k=>`IF(${B}="","",SUMIFS(${col(k)},${col("Atleta")},${B},${col("Tipo")},"Atleta",${col("Jogo")},${GC}))`;
-    put(r,2,F(`IF($O$4="Todos os atletas",IFERROR(INDEX(Listas!$B$2:$B$${n+1},${i+1}),""),IF(${i}=0,$O$4,""))`),{b:1,fill});
+    const S=k=>`IF(${B}="","",${A(`SUMIFS(${col(k)},${col("Atleta")},${B},${col("Tipo")},"Atleta",${col("Jogo")},${GC})`,`$C${r}`)})`;
+    put(r,2,F(`IF($M$4="Todos os atletas",IFERROR(INDEX(Listas!$B$2:$B$${n+1},${i+1}),""),IF(${i}=0,$M$4,""))`),{b:1,fill});
     put(r,1,F(`IF(${B}="","",IFERROR(INDEX(Listas!$C$2:$C$${n+1},MATCH(${B},Listas!$B$2:$B$${n+1},0)),""))`),{fill});
     put(r,3,F(`IF(${B}="","",COUNTIFS(${col("Atleta")},${B},${col("Tipo")},"Atleta",${col("Jogo")},${GC},${col("Jogou")},1))`),{fill});
-    put(r,4,F(`IF(${B}="","",SUMIFS(${col("Seg")},${col("Atleta")},${B},${col("Tipo")},"Atleta",${col("Jogo")},${GC})/86400)`),{fill,fmt:"[m]:ss"});
-    put(r,5,F(S("PTS")),{b:1,fill});
-    put(r,6,F(S("2C")),{fill});put(r,7,F(S("2T")),{fill});put(r,8,F(`IFERROR(F${r}/G${r},"")`),{fill,fmt:"0%"});
-    put(r,9,F(S("3C")),{fill});put(r,10,F(S("3T")),{fill});put(r,11,F(`IFERROR(I${r}/J${r},"")`),{fill,fmt:"0%"});
-    put(r,12,F(S("LC")),{fill});put(r,13,F(S("LT")),{fill});put(r,14,F(`IFERROR(L${r}/M${r},"")`),{fill,fmt:"0%"});
-    put(r,15,F(S("RO")),{fill});put(r,16,F(S("RD")),{fill});put(r,17,F(`IF(${B}="","",O${r}+P${r})`),{fill});
-    ["AST","ROU","DL","PER","F","FR","+/-"].forEach((k,j)=>put(r,18+j,F(S(k)),{fill}));put(r,25,F(S("VAL")),{b:1,fill})}
-  const rt=r0+n,sumC=c=>{const L=String.fromCharCode(64+c);return F(`SUM(${L}${r0}:${L}${rt-1})`)};
-  put(rt,1,"",{fill:CREAM});put(rt,2,"Total",{b:1,fill:CREAM});
-  for(let c=3;c<=25;c++){const L=String.fromCharCode(64+c);
-    const f=c===8?F(`IFERROR(F${rt}/G${rt},"")`):c===11?F(`IFERROR(I${rt}/J${rt},"")`):c===14?F(`IFERROR(L${rt}/M${rt},"")`):c===3?"":c===24?"":sumC(c);
-    const x=put(rt,c,f,{b:1,fill:CREAM,fmt:[8,11,14].includes(c)?"0%":c===4?"[m]:ss":undefined});x.border={top:{style:"thin",color:{argb:GOLD}},bottom:{style:"thin",color:{argb:GOLD}}}}
-  ws.getCell(rt,3).value="";
-  // ---- jogos ----
-  const rj=rt+2;sec(rj,"JOGOS");hdr(rj+1,["","Jogo","","","","","","","","","","","","","","Resultado","","V/D","Prova"]);ws.mergeCells(`B${rj+1}:O${rj+1}`);ws.mergeCells(`P${rj+1}:Q${rj+1}`);ws.mergeCells(`S${rj+1}:Y${rj+1}`);
-  games.forEach((g,i)=>{const r=rj+2+i,fill=i%2?ZEB:undefined;ws.mergeCells(`B${r}:O${r}`);ws.mergeCells(`P${r}:Q${r}`);ws.mergeCells(`S${r}:Y${r}`);put(r,2,labels[i],{fill});
-    put(r,16,AWs(g),{b:1,fill});put(r,18,g.us>g.them?"V":g.us<g.them?"D":"E",{b:1,fill});put(r,19,String(g.comp||""),{fill});ws.getCell(r,19).alignment={horizontal:"left"}});
-  function AWs(g){return g.home===false?`${g.them}–${g.us}`:`${g.us}–${g.them}`}
+    put(r,4,F(`IF(${B}="","",SUMIFS(${col("Seg")},${col("Atleta")},${B},${col("Tipo")},"Atleta",${col("Jogo")},${GC})/86400/IF(${AV},MAX(1,$C${r}),1))`),{fill,fmt:"[m]:ss"});
+    Object.entries(CK).forEach(([c,k])=>put(r,+c,F(S(k)),{fill,b:c==5||c==25}));
+    Object.entries(pctC).forEach(([c,[m,t]])=>put(r,+c,F(`IFERROR(${L(m)}${r}/${L(t)}${r},"")`),{fill,fmt:"0%"}));
+    put(r,17,F(`IF(${B}="","",O${r}+P${r})`),{fill})}
+  const rt=r0+n,TF={fill:CREAM,b:1};
+  put(rt,1,"",TF);put(rt,2,F(`IF(${AV},"Equipa · por jogo","Total equipa")`),TF);put(rt,3,F("$C$8"),TF);
+  put(rt,4,F(`${sumT("Seg","Atleta")}/86400/IF(${AV},MAX(1,$C$8),1)`),{...TF,fmt:"[m]:ss"});
+  Object.entries(CK).forEach(([c,k])=>put(rt,+c,k==="+/-"?"":F(A(sumT(k,"Atleta"),"$C$8")),TF));
+  Object.entries(pctC).forEach(([c,[m,t]])=>put(rt,+c,F(`IFERROR(${L(m)}${rt}/${L(t)}${rt},"")`),{...TF,fmt:"0%"}));put(rt,17,F(`O${rt}+P${rt}`),TF);
+  for(let c=1;c<=25;c++)ws.getCell(rt,c).border={top:{style:"thin",color:{argb:GOLD}},bottom:{style:"thin",color:{argb:GOLD}}};
+  // ---- jogos: prova › fase › jogos ----
+  const rj=rt+2;sec(rj,"JOGOS");hdr(rj+1,["J.","Data","Jogo","","","","","","","","","","","","","Resultado","","V/D","Local"]);
+  ws.mergeCells(`C${rj+1}:O${rj+1}`);ws.mergeCells(`P${rj+1}:Q${rj+1}`);ws.mergeCells(`S${rj+1}:Y${rj+1}`);ws.getCell(`C${rj+1}`).alignment={horizontal:"left",vertical:"middle"};
+  const grp=new Map();games.forEach((g,i)=>{const parts=String(g.comp||"").split("·").map(x=>x.trim()).filter(Boolean),cp=parts[0]||"Outros jogos",m=gameMeta(g);
+    const fs=[m.fase&&!/taça/i.test(m.fase)?m.fase:"",parts.slice(1).join(" · ")].filter(Boolean).join(" · ");
+    if(!grp.has(cp))grp.set(cp,new Map());const fm=grp.get(cp);if(!fm.has(fs))fm.set(fs,[]);fm.get(fs).push(i)});
+  let r=rj+2,zi=0;const fd=d=>d?d.slice(8,10)+"/"+d.slice(5,7)+"/"+d.slice(0,4):"";
+  grp.forEach((fm,cp)=>{ws.mergeCells(`A${r}:${last}${r}`);const c=ws.getCell("A"+r);c.value=cp;c.font={name:"Arial",size:10,bold:true,color:{argb:INKC}};c.fill={type:"pattern",pattern:"solid",fgColor:{argb:HEAD}};c.alignment={vertical:"middle",indent:1};ws.getRow(r).height=20;r++;
+    fm.forEach((idx,fs)=>{if(fs){ws.mergeCells(`A${r}:${last}${r}`);const f=ws.getCell("A"+r);f.value=fs;f.font={name:"Arial",size:10,bold:true,italic:true,color:{argb:MUTC}};f.fill={type:"pattern",pattern:"solid",fgColor:{argb:CREAM}};f.alignment={vertical:"middle",indent:2};r++}
+      idx.forEach(i=>{const g=games[i],m=gameMeta(g),fill=zi++%2?ZEB:undefined,us="FC Gaia";ws.mergeCells(`C${r}:O${r}`);ws.mergeCells(`P${r}:Q${r}`);ws.mergeCells(`S${r}:Y${r}`);
+        put(r,1,m.jor?"J"+String(m.jor).padStart(2,"0"):"",{fill});put(r,2,fd(g.date),{fill,al:"left"});put(r,3,g.home===false?`${g.opp} x ${us}`:`${us} x ${g.opp}`,{fill,al:"left"});
+        put(r,16,g.home===false?`${g.them}–${g.us}`:`${g.us}–${g.them}`,{b:1,fill});put(r,18,g.us>g.them?"V":g.us<g.them?"D":"E",{b:1,fill});put(r,19,g.home===false?"Fora":"Casa",{fill,al:"left"});r++})})});
   // legenda
-  const rl=rj+3+games.length;ws.mergeCells(`A${rl}:${last}${rl}`);const lg=ws.getCell("A"+rl);
-  lg.value="Escolhe o jogo e o atleta nas caixas do topo (▾). MIN minutos · C convertidos · T tentados · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas · FR faltas recebidas · VAL valorização.";
+  const rl=r+1;ws.mergeCells(`A${rl}:${last}${rl}`);const lg=ws.getCell("A"+rl);
+  lg.value="Escolhe o jogo, o atleta e totais ou médias nas caixas do topo (▾). MIN minutos · C convertidos · T tentados · RO/RD/RT ressaltos · AST assistências · ROU roubos · DL desarmes · PER perdas · F faltas · FR faltas recebidas · VAL valorização.";
   lg.font={name:"Arial",size:8,color:{argb:MUTC}};lg.alignment={wrapText:true};ws.getRow(rl).height=26;
   ws.pageSetup={orientation:"landscape",paperSize:9,fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:.3,right:.3,top:.4,bottom:.4,header:.2,footer:.2}};
   try{const buf=await wb.xlsx.writeBuffer();await shareFiles([new File([buf],fname,{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})],false);toast("Excel exportado",2500,"ok")}
   catch(e){toast("Não foi possível criar o Excel: "+e.message,4000,"warn")}}
 function exportXLS(){const g=G;buildXLSX([g],String(g.teamName||TN[g.team]||g.team).toUpperCase()+" · "+gameTitle(g).replace(/_/g," · "),gameFile(g,"xlsx"))}
-function exportSeason(){const {games}=seasonData();if(!games.length)return;const tn=[...new Set(games.map(g=>TN[g.team]||g.team))];
-  buildXLSX(games,tn.join(", ").toUpperCase()+" · ESTATÍSTICAS",fileSlug("fcgaia estatisticas "+tn.join(" ")+" "+new Date().toISOString().slice(0,10))+".xlsx")}
+const epocaOf=d=>{const y=+String(d||"").slice(0,4),m=+String(d||"").slice(5,7);if(!y)return "";const a=m>=8?y:y-1;return a+"-"+String((a+1)%100).padStart(2,"0")};
+/* um Excel por escalão (o Drive vai juntando os jogos a este mesmo ficheiro) */
+async function exportSeason(){const {games}=seasonData();if(!games.length)return;const by=new Map();games.forEach(g=>{if(!by.has(g.team))by.set(g.team,[]);by.get(g.team).push(g)});
+  for(const [t,gs] of by){const tn=TN[t]||t,ep=epocaOf(gs[gs.length-1].date);await buildXLSX(gs,tn.toUpperCase()+" · ÉPOCA "+ep,noAcc(`FC Gaia ${tn}_Estatisticas ${ep}.xlsx`))}}
 window.addEventListener("beforeunload",()=>{if(G)store()});
 document.addEventListener("visibilitychange",()=>{if(G)store()});
 boot();
