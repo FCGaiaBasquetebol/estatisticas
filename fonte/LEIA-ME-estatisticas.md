@@ -131,3 +131,9 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Tema claro: a 4.ª e 5.ª falta do atleta já se veem (laranja / vermelho).
 - Substituir: escolhe vários a sair e vários a entrar, “Sair os 5”, Confirmar. Arrastar continua a ser um de cada vez.
 - PDF ao lado do Excel: nas Estatísticas (respeita escalões, jogos, atleta, totais/médias) e em cada jogo da lista.
+
+## v50 — PDF e Excel do jogo
+- PDF: p.1 resumo (letra ajustada para caber numa página: parciais, equipas, destaques, atletas, adversário); p.2 campo grande do FC Gaia com zonas + quadros por zona/tipo/atleta; p.3 adversário (campo com zonas, estatística vs FC Gaia, parciais). O campo é a mesma imagem SVG da app, convertida em JPEG (`courtPNG`).
+- Nome dos ficheiros: `AAAA-MM-DD_F1 J01_Jogo N_Casa x Fora_Prova` (Taça → "Taça", sem número → "Amigável"). Fase e jornada vêm do calendário (r[12], r[4]) e passam a ficar no jogo (`fase`, `jor`).
+- Excel: 1 Resumo · 2 Atletas · 3 Lançamentos FC Gaia · 4 Adversário · 5 Jogadas.
+- App: zonas com nome (Garrafão, Média esq., Canto…) em vez de Z1…Z9; tabelas com o nome completo.
