@@ -851,6 +851,13 @@ body.fit .tsw-b{min-height:48px}body.fit .tsw-b b{font-size:18px}
 
 .ulh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.ulh h3{margin:0}
 .uav.usel{border:2px dashed var(--line);cursor:pointer;font:inherit;font-weight:800}.uav.usel.on{background:var(--ko);border:2px solid var(--ko);color:#fff;font-size:20px}
+
+/* ===== v24: partilhar vários jogos ===== */
+.jhh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:28px;border-top:1px solid var(--line);padding-top:16px}.jhh .jhd{margin:0;border:0;padding:0}
+.jsbar{position:sticky;bottom:10px;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0;padding:10px 14px;border:2px solid var(--gold);border-radius:12px;background:var(--bg)}
+.saved.selm .sv{cursor:pointer;display:flex;align-items:center;justify-content:flex-start;gap:12px}.saved.selm .sv-i{flex:1;text-align:left}.saved.selm .sv .ck{flex:none;width:26px;height:26px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;font-weight:900}
+.saved.selm .sv.on{border-color:var(--gold);background:rgba(226,184,18,.1)}.saved.selm .sv.on .ck{background:var(--gold);border-color:var(--gold);color:#111}
+:root[data-theme=light] .saved.selm .sv.on{background:#fff6cf}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1449,12 +1456,24 @@ function playerBox(p,keepY){const S=SETUP,isNew=!p;const m=document.createElemen
 
 /* ---------- jogos guardados ---------- */
 function savedList(list){const all=(list||visGames()).slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0));
-  return `<h3 class="jhd">Jogos</h3>
-  ${all.length?`<div class="saved">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null;return `<div class="sv"><div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${g.by?` · por ${esc(g.by.n)}`:""}${g.ed?` · editado por ${esc(g.ed.n)}`:""}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
-    <div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"||isRO()?"Ver":"Continuar"}</button><button class="btn sm gold" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div></div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
+  const selM=!!JSEL,nSel=selM?Object.keys(JSEL).length:0;
+  return `<div class="jhh"><h3 class="jhd">Jogos</h3>${all.length?(selM?"":`<button class="btn sm" id="js-on">Partilhar vários</button>`):""}</div>
+  ${all.length?`<div class="saved${selM?" selm":""}">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null,on=selM&&JSEL[g.id];return `<div class="sv${on?" on":""}"${selM?` data-js="${esc(g.id)}" role="checkbox" aria-checked="${!!on}" tabindex="0"`:""}>${selM?`<span class="ck">${on?"✓":""}</span>`:""}<div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${g.by?` · por ${esc(g.by.n)}`:""}${g.ed?` · editado por ${esc(g.ed.n)}`:""}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
+    ${selM?"":`<div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"||isRO()?"Ver":"Continuar"}</button><button class="btn sm gold" data-shr="${esc(g.id)}">Partilhar</button><button class="btn sm" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div>`}</div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
+  ${selM?`<div class="jsbar"><span><b>${nSel}</b> ${nSel===1?"jogo escolhido":"jogos escolhidos"}</span><div class="bar" style="margin:0"><button class="btn sm" id="js-all">${nSel===all.length?"Nenhum":"Todos"}</button><button class="btn sm gold" id="js-go"${nSel?"":" disabled"}>Partilhar PDF${nSel>1?"s":""}</button><button class="btn sm" id="js-x">Cancelar</button></div></div>`:""}
   ${isCoord()?`<div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button><label class="btn" for="bk-in">Importar cópia</label><input type="file" id="bk-in" accept=".json,application/json" hidden></div>`:""}
   <p class="hint">${Sync.tok()?"Os jogos ficam gravados neste dispositivo e são enviados para a base de dados do clube sempre que há internet. Aparecem nos tablets de quem tem o mesmo escalão.":"Os jogos ficam gravados só neste tablet, porque ainda não tens acesso à base de dados. Fala com o administrador."}</p>`}
+let JSEL=null;
+async function sharePDFs(ids){let jsPDF;try{toast(ids.length>1?`A preparar ${ids.length} PDF…`:"A preparar o PDF…",15000,"busy");jsPDF=await pdfLibs()}catch(e){toast("Não foi possível preparar o PDF: "+e.message,4000,"warn");return}
+  const m=readAll(),files=[];for(const id of ids){const g=m[id];if(g)files.push(makeGamePDF(jsPDF,fixGame(JSON.parse(JSON.stringify(g)))))}
+  await shareFiles(files,true)}
 function bindSaved(){
+  const keepY=f=>{const y=scrollY;f();renderSetup();scrollTo(0,y)};
+  const jo=$("#js-on");if(jo)jo.onclick=()=>keepY(()=>{JSEL={}});const jx=$("#js-x");if(jx)jx.onclick=()=>keepY(()=>{JSEL=null});
+  const ja=$("#js-all");if(ja)ja.onclick=()=>keepY(()=>{const ids=[...document.querySelectorAll("[data-js]")].map(e=>e.dataset.js);JSEL=Object.keys(JSEL).length===ids.length?{}:Object.fromEntries(ids.map(i=>[i,1]))});
+  document.querySelectorAll("[data-js]").forEach(r=>{const t=()=>keepY(()=>{const k=r.dataset.js;if(JSEL[k])delete JSEL[k];else JSEL[k]=1});r.onclick=t;r.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();t()}}});
+  const jg=$("#js-go");if(jg)jg.onclick=async()=>{const ids=[...document.querySelectorAll("[data-js]")].map(e=>e.dataset.js).filter(i=>JSEL[i]);await sharePDFs(ids);JSEL=null;const y=scrollY;renderSetup();scrollTo(0,y)};
+  document.querySelectorAll("[data-shr]").forEach(b=>b.onclick=()=>sharePDFs([b.dataset.shr]));
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{G=fixGame(readAll()[b.dataset.open]);if(!G)return;SEL=null;SUB=null;SIDE="us";VIEW=G.status==="fim"||isRO()?"team":"live";if(G.status!=="fim"&&!isRO())store();render();if(!isRO())startTick()});
   document.querySelectorAll("[data-xls]").forEach(b=>b.onclick=()=>{const keep=G;G=fixGame(readAll()[b.dataset.xls]);exportXLS();G=keep});
   document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();Sync.del(m[b.dataset.del]);delete m[b.dataset.del];writeAll(m);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
@@ -1940,6 +1959,14 @@ function loadJS(src){return new Promise((ok,ko)=>{if(document.querySelector(`scr
 async function pdfLibs(){if(!window.jspdf)await loadJS("jspdf.umd.min.js");if(!(window.jspdf&&window.jspdf.jsPDF.API.autoTable))await loadJS("jspdf.plugin.autotable.min.js");return window.jspdf.jsPDF}
 const fileSlug=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 async function gamePDF(share){let jsPDF;try{toast("A preparar o PDF…",8000,"busy");jsPDF=await pdfLibs()}catch(e){toast("Não foi possível preparar o PDF: "+e.message,4000,"warn");return}
+  await shareFiles([makeGamePDF(jsPDF,G)],share)}
+/* constrói a ficha de um jogo (troca G só durante a construção, sem pausas) */
+function makeGamePDF(jsPDF,g){const keep=G;G=g;try{return buildPDF(jsPDF)}finally{G=keep}}
+async function shareFiles(files,share){
+  if(share&&navigator.canShare&&navigator.canShare({files})){try{$("#toast").hidden=true;await navigator.share({files,title:files.length===1?"FC Gaia · "+files[0].name.replace(/\.pdf$/,""):`FC Gaia · ${files.length} jogos`})}catch(e){if(e&&e.name!=="AbortError")toast("Não foi possível partilhar: "+e.message,4000,"warn")}return}
+  files.forEach((f,i)=>setTimeout(()=>{const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},i*400));
+  toast(share?(files.length>1?`Este aparelho não tem partilha: ${files.length} PDF descarregados`:"Este aparelho não tem partilha: o PDF foi descarregado"):files.length>1?`${files.length} PDF descarregados`:"PDF descarregado",3500,"ok")}
+function buildPDF(jsPDF){
   const doc=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"}),W=297,H=210,M=12,GOLD=[226,184,18],INK=[20,22,26],MUT=[90,96,104];
   const t=totals(),o=G.ost||STAT0(),np=G.np||4,ql=q=>q>np?"P"+(q-np):q+"º";
   // cabeçalho
@@ -1991,10 +2018,7 @@ async function gamePDF(share){let jsPDF;try{toast("A preparar o PDF…",8000,"bu
   const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(...MUT);
     doc.text(`FC Gaia · Estatísticas de jogo${G.by?" · registado por "+G.by.n:""} · ${new Date().toLocaleString("pt-PT")}`,M,H-6);doc.text(`${i}/${n}`,W-M,H-6,{align:"right"})}
   const name=`${G.date||"jogo"} ${G.teamName||G.team} vs ${G.opp}`.trim(),fn=fileSlug("fcgaia "+name)+".pdf";
-  const blob=doc.output("blob"),file=new File([blob],fn,{type:"application/pdf"});
-  if(share&&navigator.canShare&&navigator.canShare({files:[file]})){try{$("#toast").hidden=true;await navigator.share({files:[file],title:"FC Gaia · "+name,text:`FC Gaia ${G.us}–${G.them} ${G.opp} · ${G.teamName||G.team}`})}catch(e){if(e&&e.name!=="AbortError")toast("Não foi possível partilhar: "+e.message,4000,"warn")}return}
-  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  toast(share?"Este aparelho não tem partilha: o PDF foi descarregado":"PDF descarregado",3000,"ok")}
+  return new File([doc.output("blob")],fn,{type:"application/pdf"})}
 
 /* ---------- exportar ---------- */
 function exportXLS(){const t=totals(),fn=`fcgaia-${G.team.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")}-${G.date}-vs-${G.opp.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-")}`.replace(/-+/g,"-");
