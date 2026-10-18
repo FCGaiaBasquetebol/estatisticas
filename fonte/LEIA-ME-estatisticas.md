@@ -143,3 +143,7 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v53
 - PDF p.1: sem destaques nem parciais; estatística de equipa em tabela larga (FC Gaia a dourado, adversário a azul); letra e espaçamento das linhas ajustam-se para encher a página (`fits(k,pad)`). Parciais vão para a p.2, junto da evolução do resultado (ficam na p.1 só se não houver p.2). Excel: sem destaques.
+
+## v54 — Excel numa folha
+- ExcelJS (exceljs.min.js, carregado só quando se exporta; em cache no SW). Folha "Estatísticas" com cores do clube em tom claro: filtros Jogo ▾ e Atleta ▾ (validação de dados), EQUIPA (FC Gaia vs Adversários), ATLETAS com Total, JOGOS. Tudo por fórmulas (SUMIFS/COUNTIFS) sobre a folha escondida "Dados" (uma linha por atleta por jogo + "Adversário"), com margem de 400 linhas para o Drive ir juntando jogos. "Listas" (escondida) alimenta os filtros.
+- O botão Excel do jogo exporta só esse jogo; o das Estatísticas exporta os jogos escolhidos.
