@@ -519,6 +519,7 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
 .ua{grid-column:4;grid-row:1/3;margin:0;justify-content:flex-end;align-self:center}
 .usec{margin-top:36px;border-top:1px solid var(--line);padding-top:18px}
 .usec>.hint{margin:4px 0 14px}
+.perf{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 4px}.perf>span{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}.perf small{color:var(--muted);font-size:12px}
 .pplt{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:16px;margin-right:4px}.pplt:hover{border-color:var(--gold)}.pplt i{font-style:normal}.ppl.shut .ppl-h{margin:0}.ppl .ppl-h{align-items:center}
 .actf{margin-bottom:10px}.actt td{white-space:nowrap}.actt td:nth-child(4){white-space:normal;min-width:220px}.actt tr.apagar td:nth-child(3){color:var(--ko);font-weight:700}.actt tr.contas td:nth-child(3){color:var(--gold-ink,var(--gold))}
 .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.lgrid .card{margin:0!important}
@@ -971,7 +972,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const p2=n=>String(n).padStart(2,"0");
 const fmtT=s=>{s=Math.max(0,Math.ceil(s));return p2(Math.floor(s/60))+":"+p2(s%60)};
-const fmtMin=s=>{s=Math.round(s);return Math.floor(s/60)+":"+p2(s%60)};
+const fmtMin=s=>{if(s==null||isNaN(s))return "–";s=Math.round(s);return Math.floor(s/60)+":"+p2(s%60)};
 const MSH=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
 function toast(t,ms,kind){const e=$("#toast");e.textContent=t;e.className="toast"+(kind?" tk-"+kind:"");e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,ms||1600)}
 /* aviso ao gravar: diz claramente se as estatísticas seguiram ou ficaram no tablet */
@@ -994,7 +995,7 @@ function startDemo(){stopWatch();WATCH=false;const old=(()=>{try{return JSON.par
 function demoBar(){return G&&G.demo?`<div class="demob"><b>JOGO DE TREINO</b><span>Experimenta à vontade: nada é gravado nos jogos nem enviado para a base de dados.</span><button class="btn sm" id="dm-x">Sair do treino</button></div>`:""}
 const recOf=g=>g&&(g.lk||g.by)||null;
 const othersGame=g=>!!g&&g.status!=="fim"&&!!USER&&(isRO()||(()=>{const r=recOf(g);return !!r&&r.u!==USER.utilizador})());
-function openGame(id){const g=fixGame(readAll()[id]);if(!g)return;stopWatch();G=g;SEL=null;SUB=null;SIDE="us";BSEDIT=false;
+function openGame(id){const g=fixGame(readAll()[id]);if(!g)return;PER=0;stopWatch();G=g;SEL=null;SUB=null;SIDE="us";BSEDIT=false;
   WATCH=othersGame(G);
   if(WATCH){VIEW=VIEW==="live"?"team":(["team","bs","pbp"].includes(VIEW)?VIEW:"team");stopTick();render();startWatch();return}
   VIEW=G.status==="fim"||isRO()?"team":"live";if(G.status!=="fim"&&!isRO())store();render();if(!isRO())startTick()}
@@ -1007,11 +1008,11 @@ function watchBar(){if(!WATCH)return "";const r=recOf(G)||{},ended=G.q>=G.np&&wa
   return `<div class="watchb"><span class="wdot${G.running?" on":""}"></span><span class="wtx"><b>A acompanhar ao vivo</b> · regista ${esc(r.n||"outro utilizador")} · <span id="w-age">${wAge()}</span><small>Só consulta: não dá para alterar enquanto outra pessoa regista.</small></span>
    ${isRO()?"":`${ended?`<button class="btn sm gold" id="w-end">Terminar e gravar jogo</button>`:""}${idle&&!ended?`<button class="btn sm" id="w-take">Assumir o registo</button>`:""}`}</div>`}
 function takeOver(){stopWatch();G.clock=watchClock();if(G.running){G.running=false;G.log.push({q:G.q,c:Math.round(G.clock),us:G.us,them:G.them,on:G.oncourt.slice(),t:"pausa"})}WATCH=false;store();Sync.soon(0)}
-function store(){if(!G||WATCH)return;if(G.demo){G.upd=Date.now();try{localStorage.setItem(DEMO_K,JSON.stringify({...G,undo:[]}))}catch(e){}return}if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();if(USER&&!isRO()){const me={u:USER.utilizador,n:USER.nome||USER.utilizador};if(!G.by)G.by=me;else if(G.by.u!==me.u)G.ed={...me,t:Date.now()};if(G.status!=="fim")G.lk={...me,t:Date.now()}}const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);if(G.running)Sync.later(15000);else Sync.soon(6000);
+function store(){if(!G||WATCH||G.source)return;if(G.demo){G.upd=Date.now();try{localStorage.setItem(DEMO_K,JSON.stringify({...G,undo:[]}))}catch(e){}return}if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();if(USER&&!isRO()){const me={u:USER.utilizador,n:USER.nome||USER.utilizador};if(!G.by)G.by=me;else if(G.by.u!==me.u)G.ed={...me,t:Date.now()};if(G.status!=="fim")G.lk={...me,t:Date.now()}}const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);if(G.running)Sync.later(15000);else Sync.soon(6000);
   try{if(G.status==="fim")localStorage.removeItem(KC);else localStorage.setItem(KC,G.id)}catch(e){}}
 function load(){try{const old=localStorage.getItem(KEY);if(old){const g=JSON.parse(old);if(g){g.id=g.id||"j"+(g.created||Date.now());const m=readAll();m[g.id]=g;writeAll(m);localStorage.setItem(KC,g.id)}localStorage.removeItem(KEY)}}catch(e){}
   try{const id=localStorage.getItem(KC);return id?readAll()[id]||null:null}catch(e){return null}}
-function fixGame(g){if(!g)return g;if(TN[g.team])g.teamName=TN[g.team];g.ost=g.ost||STAT0();[...Object.values(g.st),g.ost].forEach(x=>["fp","fu","di","fl","ft","fd"].forEach(k=>{if(x[k]==null)x[k]=0}));return g}
+function fixGame(g){if(!g)return g;if(g.clock==null||isNaN(g.clock))g.clock=0;if(!g.q)g.q=Math.max(1,...(g.log||[]).map(e=>e.q||0));if(!g.np)g.np=4;if(TN[g.team])g.teamName=TN[g.team];g.ost=g.ost||STAT0();[...Object.values(g.st),g.ost].forEach(x=>["fp","fu","di","fl","ft","fd"].forEach(k=>{if(x[k]==null)x[k]=0}));return g}
 const pname=n=>n&&n===n.toUpperCase()?n.toLowerCase().replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase()):n;
 
 let G=null;            // jogo em curso
@@ -2121,7 +2122,7 @@ function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
 const LBL={pausa:"Jogo gravado (relógio parado)",di:"Falta disruptiva",fl:"Falta flagrante",tc:"Falta técnica ao treinador",tb:"Falta técnica ao banco","2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3+":"Triplo convertido","3-":"Triplo falhado","1+":"Lance livre convertido","1-":"Lance livre falhado",
  or:"Ressalto ofensivo",dr:"Ressalto defensivo",ast:"Assistência",stl:"Roubo de bola",blk:"Desarme de lançamento",tov:"Perda de bola",fp:"Falta pessoal",fu:"Falta antidesportiva",ft:"Falta técnica",fd:"Falta recebida",
  to:"Desconto de tempo",o1:"Adversário: lance livre",o2:"Adversário: 2 pontos",o3:"Adversário: 3 pontos",opf:"Adversário: falta",sub:"Substituição",fimq:"Fim do período",iniq:"Início do período",fim:"Fim do jogo"};
-function logText(e){if(e.side==="o")return "Adversário — "+(LBL[e.t]||e.t)+(e.auto?" (falta recebida)":"");if(e.t==="to")return "FC Gaia — "+LBL.to;const p=e.id?pById(e.id):null;
+function logText(e){if(e.side==="o")return (G&&G.opp||"Adversário")+" — "+(LBL[e.t]||e.t)+(e.auto?" (falta recebida)":"");if(e.t==="to")return "FC Gaia — "+LBL.to;const p=e.id?pById(e.id):null;
   if(e.t==="sub"){const o=e.out?pById(e.out):null;return `Entra ${p?"#"+p.num+" "+p.name:""}${o?" · sai #"+o.num+" "+o.name:""}`}
   return (p?`#${p.num} ${p.name} — `:"")+(LBL[e.t]||e.t)}
 const BSCOLS=[["num","Nº"],["name","Atleta"],["sec","MIN"],["pts","PTS"],["m2","2PT"],["m3","3PT"],["mf","LL"],["or","RO"],["dr","RD"],["rt","RT"],["ast","AST"],["stl","ROU"],["blk","DL"],["tov","PER"],["fp","FP"],["di","DI"],["fl","FL"],["ft","T"],["pf","F"],["fd","FR"],["pm","+/-"],["val","VAL"]];
@@ -2160,11 +2161,16 @@ const FITQ=matchMedia("(min-width:700px) and (min-height:560px)");
 function fitCourt(){const g=document.querySelector(".fit .cgrid");if(!g)return;const cs=getComputedStyle(g),side=document.querySelector(".cgrid .panel");
   const w=g.clientWidth-(side?side.offsetWidth:0)-parseFloat(cs.columnGap||0),h=g.clientHeight;const s=Math.max(200,Math.floor(Math.min(w,h*1500/1400)));g.style.setProperty("--cw",s+"px")}
 addEventListener("resize",()=>{if(G&&VIEW==="live"){document.body.classList.toggle("fit",G.status!=="fim"&&FITQ.matches);fitCourt()}});
+let PER=0;const q2l=q=>q>(G?G.np:4)?"prolongamento "+(q-G.np):q+".º período";
+/* ficha de um período: as mesmas contas, só com as jogadas desse período (os minutos não se separam por período) */
+function periodView(g,q){const R={st:{},ost:{...STAT0(),sec:null},us:0,them:0,tfUs:{},tfThem:{},coach:{us:{c:0,b:0},them:{c:0,b:0}}};
+  g.roster.forEach(p=>{R.st[p.id]={...STAT0(),sec:null}});const evs=g.log.filter(e=>e.q===q);evs.forEach(e=>applyEv({...e},R));
+  return {...g,st:R.st,ost:R.ost,us:R.us,them:R.them,log:evs,qs:undefined,adj:undefined,coach:R.coach}}
 function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||!!G.review;if(fin&&VIEW==="live")VIEW="team";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
   $("#b-save").textContent=WATCH?"‹ Voltar":G.demo?"Sair do treino":fin?"‹ Voltar":"Gravar e sair";$("#b-cancel").hidden=true;
   const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
   const tsc=k=>{const us=k==="us",tf=us?tfU:tfT,ti=toInfo(k);
-    return `<div class="sc ${k}"><span class="n">${esc(us?G.teamName:G.opp)}</span><span class="s">${us?G.us:G.them}</span><span class="tinfo"><span class="tfp${tf>=4?" bonus":""}" title="Faltas de equipa neste período${tf>=4?" · a partir de agora há lances livres":""}"><small>Faltas</small><b>${tf}</b></span><span class="tos${ti.used>=ti.max?" full":""}" title="Descontos de tempo: ${ti.used} de ${ti.max} usados na ${toSegName(ti.seg)}"><small>Desc.</small>${Array.from({length:Math.max(ti.max,ti.used)},(_,i)=>`<i${i<ti.used?' class="u"':""}></i>`).join("")}</span></span></div>`};
+    return `<div class="sc ${k}"><span class="n">${esc(us?"FC Gaia":G.opp)}</span><span class="s">${us?G.us:G.them}</span><span class="tinfo"><span class="tfp${tf>=4?" bonus":""}" title="Faltas de equipa neste período${tf>=4?" · a partir de agora há lances livres":""}"><small>Faltas</small><b>${tf}</b></span><span class="tos${ti.used>=ti.max?" full":""}" title="Descontos de tempo: ${ti.used} de ${ti.max} usados na ${toSegName(ti.seg)}"><small>Desc.</small>${Array.from({length:Math.max(ti.max,ti.used)},(_,i)=>`<i${i<ti.used?' class="u"':""}></i>`).join("")}</span></span></div>`};
   const board=`<div class="board b2">
    <div class="bL">${fin?"":`<button class="cbtn run${G.running?" on":""}" id="c-run">${G.running?"❚❚ Parar":"▶ Iniciar"}</button>`}</div>
    <div class="bC">
@@ -2176,6 +2182,10 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||
   const T=([k,l])=>`<button role="tab" data-v="${k}" aria-selected="${VIEW===k}">${l}</button>`;
   const tabs=`<div class="tabs" role="tablist">${roG()||fin?"":T(["live","Jogo"])}<span class="tsp"></span><span class="tgrp" aria-label="Estatísticas">${[["team","Equipa"],["bs","Atletas"],["pbp","Jogadas"]].map(T).join("")}</span></div>`;
   const exp=`<div class="expbar"><div class="pr-h"><b>${esc(scoreTxt(G,"FC Gaia "+G.teamName))}</b><span>${esc(G.date||"")}${G.comp?" · "+esc(G.comp):""}${G.venue?" · "+esc(G.venue):""}</span></div><span class="expl">Exportar</span><button class="btn sm gold" id="b-share">Partilhar</button><button class="btn sm" id="b-pdf">PDF</button><button class="btn sm" id="b-xls">Excel</button></div>`;
+  const perOK=fin&&!G.review&&!BSEDIT&&VIEW!=="live"&&(G.log||[]).some(e=>e.q&&/^[123][+-]$/.test(e.t)),qsL=perOK?[...new Set(G.log.map(e=>e.q).filter(Boolean))].sort((a,b)=>a-b):[];
+  if(!qsL.includes(PER))PER=0;
+  const perBar=qsL.length>1?`<div class="perf"><span>Período</span><div class="seg2 sm" role="group" aria-label="Período">${[0,...qsL].map(q=>`<button type="button" data-per="${q}" aria-pressed="${PER===q}">${q?(q>G.np?"Prol. "+(q-G.np):q+".º"):"Jogo todo"}</button>`).join("")}</div>${PER?`<small>Só as jogadas do ${q2l(PER)}. Os minutos não se separam por período.</small>`:""}</div>`:"";
+  const REALG=G;if(PER)G=periodView(G,PER);
   let body="";
   if(VIEW==="live"&&!fin){const on=G.oncourt.map(pById),bench=G.roster.filter(p=>!G.oncourt.includes(p.id)),need=5-G.oncourt.length;
     const av=p=>`<span class="av nbonly"><span class="nb">${esc(p.num||"–")}</span></span>`;   // no jogo: só o número, como na camisola
@@ -2206,7 +2216,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||
       </div>
       <div class="lastbar">${last[0]?`<span class="lq">${last[0].q>G.np?"P"+(last[0].q-G.np):last[0].q+"P"} ${fmtT(last[0].c)}</span><span class="lt">${esc(logText(last[0]))}</span>`:`<span class="lt hint">Toca no campo onde foi o lançamento. Para substituir, arrasta um atleta do banco para cima de quem sai.</span>`}
        <button class="undo" id="b-undo"${G.undo.length?"":" disabled"}>↶ Anular</button></div></div></div>${subDock()}`}
-  else if(VIEW==="pbp"){const ed=!roG()&&!G.source;body=exp+(ed?`<p class="hint">Enganaste-te? Toca em <b>Editar</b> para mudar o atleta, o tipo de jogada (por exemplo 2 → 3 pontos) ou apagá-la. A estatística é recalculada.</p>`:"")+`<ul class="pbp ed">${G.log.map((e,i)=>[e,i]).reverse().map(([e,i])=>pbpLi(e).replace("</li>",ed&&EVT[e.t]?`<button class="btn sm pe" data-ev="${i}">Editar</button></li>`:`<span></span></li>`)).join("")}</ul>`}
+  else if(VIEW==="pbp"){const ed=!roG()&&!G.source&&!PER;body=exp+(ed?`<p class="hint">Enganaste-te? Toca em <b>Editar</b> para mudar o atleta, o tipo de jogada (por exemplo 2 → 3 pontos) ou apagá-la. A estatística é recalculada.</p>`:"")+`<ul class="pbp ed">${G.log.map((e,i)=>[e,i]).reverse().map(([e,i])=>pbpLi(e).replace("</li>",ed&&EVT[e.t]?`<button class="btn sm pe" data-ev="${i}">Editar</button></li>`:`<span></span></li>`)).join("")}</ul>`}
   else if(VIEW==="team"){body=exp+teamView()+(fin&&!WATCH?`<div class="bar">${roG()||G.source?"":`<button class="btn" id="b-reopen">Reabrir jogo</button>`}<button class="btn" id="b-list">Voltar aos jogos</button></div>`:"")}
   else{const t=totals();
     const EDB=!roG()&&(G.review||BSEDIT);const I=(id,k,v)=>EDB?`<input class="ein" inputmode="numeric" data-ej="${esc(id)}" data-ek="${k}" value="${v||0}" aria-label="${k}">`:v;
@@ -2219,7 +2229,9 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||
      <p class="hint">MIN minutos · 2PT/3PT/LL convertidos/tentados · RO/RD/RT ressaltos ofensivos/defensivos/total · AST assistências · ROU roubos · DL desarmes · PER perdas · FP faltas pessoais · DI disruptivas · FL flagrantes · T técnicas · F total de faltas · FR faltas recebidas · VAL valorização.</p>
      ${shotChart()}
      ${fin&&!WATCH?`<div class="bar">${roG()||G.source?"":`<button class="btn" id="b-reopen">Reabrir jogo</button>`}<button class="btn" id="b-list">Voltar aos jogos</button></div>`:""}`}
-  $("#app").innerHTML=demoBar()+board+watchBar()+tabs+body;bind();fitCourt();
+  G=REALG;
+  $("#app").innerHTML=demoBar()+board+watchBar()+tabs+perBar+body;bind();fitCourt();
+  document.querySelectorAll("[data-per]").forEach(b=>b.onclick=()=>{PER=+b.dataset.per;keepScroll(render)});
   const dx=$("#dm-x");if(dx)dx.onclick=()=>$("#b-save").click();
   const we=$("#w-end");if(we)we.onclick=()=>{takeOver();endBox()};
   const wt=$("#w-take");if(wt)wt.onclick=()=>confirmBox(`O registo está parado há algum tempo. Assumir o registo deste jogo? ${esc((recOf(G)||{}).n||"A outra pessoa")} deixa de poder alterar a partir de outro tablet sem voltar a assumir.`,()=>{takeOver();VIEW="live";render();startTick()})}
@@ -2635,7 +2647,7 @@ const epocaOf=d=>{const y=+String(d||"").slice(0,4),m=+String(d||"").slice(5,7);
 /* um Excel por escalão (o Drive vai juntando os jogos a este mesmo ficheiro) */
 async function exportSeason(){const {games}=seasonData();if(!games.length)return;const by=new Map();games.forEach(g=>{if(!by.has(g.team))by.set(g.team,[]);by.get(g.team).push(g)});
   for(const [t,gs] of by){const tn=TN[t]||t,ep=epocaOf(gs[gs.length-1].date);await buildXLSX(gs,tn.toUpperCase()+" · ÉPOCA "+ep,noAcc(`FC Gaia ${tn}_Estatisticas ${ep}.xlsx`))}}
-window.addEventListener("beforeunload",()=>{if(G)store()});
-document.addEventListener("visibilitychange",()=>{if(G)store()});
+window.addEventListener("beforeunload",()=>{if(G&&G.status!=="fim"&&!roG())store()});
+document.addEventListener("visibilitychange",()=>{if(G&&G.status!=="fim"&&!roG())store()});
 boot();
 </script></body></html>

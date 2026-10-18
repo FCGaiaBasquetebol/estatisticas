@@ -190,3 +190,8 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v69
 - Drive: pastas 1. Séniores, 2. Esperanças, 4. Masters. Jogos importados (FIBA/FPB) que chegam ao tablet do administrador são marcados para exportação.
+
+## v70
+- Ficha de jogo: filtro Período (Jogo todo / 1.º … / Prol.) em Equipa, Atletas e Jogadas (periodView recalcula a partir das jogadas; MIN e +/- sem dados por período mostram –; edição de jogadas desligada no filtro).
+- Corrigido NaN:NaN no relógio de jogos importados (fixGame acerta clock/q/np); marcador diz "FC Gaia"; jogadas do adversário com o nome dele.
+- Abrir/ver um jogo terminado já não o grava nem o reenvia (store só em jogos a decorrer; nunca em jogos importados).
