@@ -891,6 +891,12 @@ table.bs tr.prw{cursor:pointer}table.bs tr.prw:hover td{background:rgba(226,184,
 body.fit .demob{padding:3px 10px;margin:0 0 4px;font-size:12px}
 
 .epteams{margin:0 0 10px}.tchip small{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;opacity:.7}.tchip.none{opacity:.55}
+
+/* ===== v29: pedidos para apagar ===== */
+.sv-req{flex-basis:100%;margin-top:6px;padding:6px 10px;border-radius:8px;background:rgba(220,60,50,.1);border:1px solid rgba(220,60,50,.35);color:var(--ko);font-size:13px;font-weight:700}
+.sv{flex-wrap:wrap}.btn.ghostd{color:var(--ko);border-color:rgba(220,60,50,.35)}
+.hreq{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--ink);cursor:pointer;padding:12px 18px;margin-bottom:10px;border-radius:14px;border:2px solid var(--ko);background:rgba(220,60,50,.08)}
+.hreq>span:first-child{font-size:26px;text-align:center}.hreq .htx b{font-size:20px}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1347,7 +1353,7 @@ const HELP=[["Antes do jogo: preparar para jogar sem internet","A app funciona s
  ["Adversário","Usa +1, +2, +3 e Falta no marcador, ou toca no botão azul do adversário, por cima do campo, para marcar lançamentos e ações dele (o campo fica azul). Para voltar, toca em FC Gaia ou num atleta.","5"],
  ["Substitui a arrastar","Arrasta um atleta do banco para cima de quem sai. Se alguém for excluído, o relógio pára e a app pede logo quem entra.","6"],
  ["Relógio e períodos","▶ Iniciar e Parar ao lado do tempo. Toca no tempo para o corrigir. Período › mostra todos os períodos, com o seguinte em destaque.","7"],
- ["Termina e grava","Terminar jogo → Gravar abre a revisão: confirma os números com a ficha oficial, corrige o que for preciso e carrega em Gravar jogo. Jogadas erradas editam-se ou apagam-se no separador Jogadas. Para parar e continuar mais tarde, Gravar e sair: o jogo fica no Início com “Continuar”. Os números ficam em Estatísticas, com Excel.","8"],
+ ["Termina e grava","Terminar jogo → “Deve terminar o jogo?” → Sim: o jogo fica gravado e é enviado. Para corrigir números depois: Atletas → Corrigir estatística. Para apagar um jogo, quem não é administrador usa “Pedir para apagar” e o administrador confirma. Jogadas erradas editam-se ou apagam-se no separador Jogadas. Para parar e continuar mais tarde, Gravar e sair: o jogo fica no Início com “Continuar”. Os números ficam em Estatísticas, com Excel.","8"],
  ["Acompanhar um jogo ao vivo","Quando outra pessoa está a registar, no Início aparece “A decorrer · regista …”: toca em Acompanhar. A faixa azul diz quem regista e há quanto tempo atualizou (de 15 em 15 s, com internet). O resultado, o tempo e as estatísticas mudam sozinhos, mas é só consulta. Em Atletas, toca no título de uma coluna para ordenar (1.º toque: maior primeiro; 2.º: menor primeiro; 3.º: ordem normal). Toca num atleta para ver a ficha dele: números, mapa de lançamentos e jogadas (‹ › passa ao seguinte). Partilhar envia o PDF do momento. No fim do último período aparece “Terminar e gravar jogo”; se o registo estiver parado há mais de 15 min, “Assumir o registo”.","9"],
  ["Envio das estatísticas","Ao gravar, se houver internet aparece “A enviar estatísticas…” e depois “✓ Estatísticas enviadas”: ficam disponíveis para toda a equipa técnica do escalão. Sem internet, o jogo fica gravado no tablet e aparece “⚠ 1 jogo por enviar” no topo; basta abrir a app com Wi-Fi ou dados e segue sozinho (“✓ jogo enviado”). A app funciona sem internet no pavilhão, desde que tenha sido aberta antes com ligação. Se aparecer “⚠ Só neste tablet”, pede acesso ao administrador.",""]];
 function helpBox(){const m=document.createElement("div");m.className="modal help";
@@ -1406,6 +1412,7 @@ function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];co
   return `<section class="home">
   <div class="hhello"><h2>Olá${first?", "+esc(first):""}</h2><button class="hhelp" data-home="ajuda"><span class="hic">${ICO.ajuda}</span>Ajuda</button><p>${["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][now.getDay()]}, ${now.getDate()} ${MSH[now.getMonth()]}</p></div>
   ${open.map(g=>`<button class="hopen" data-open="${esc(g.id)}"><span class="hdot"></span><span class="htx"><small>${othersGame(g)?`A decorrer · regista ${esc((recOf(g)||{}).n||"")}`:"Jogo por terminar"}</small><b>${esc(TN[g.team]||g.teamName)} vs ${esc(g.opp)}</b></span><span class="hsc">${g.us}–${g.them}</span><span class="hgo">${othersGame(g)?"Acompanhar":"Continuar"} ›</span></button>`).join("")}
+  ${isCoord()&&visGames().some(g=>g.delReq)?`<button class="hreq" data-home="epoca"><span>🗑</span><span class="htx"><b>${visGames().filter(g=>g.delReq).length} ${visGames().filter(g=>g.delReq).length===1?"pedido":"pedidos"} para apagar jogos</b><small>Os jogos continuam guardados até decidires. Abre Estatísticas → Jogos.</small></span><span class="hgo">Ver ›</span></button>`:""}
   <div class="hgrid">
    ${ro?"":tile("novo","jogo","Novo jogo","Registar um jogo ao vivo","main")}
    ${ro?"":tile("plantel","plantel","Plantel",nConv?`${nConv} convocados guardados`:"Convocados, números e nomes")}
@@ -1527,7 +1534,7 @@ function savedList(list){const all=(list||visGames()).slice().sort((a,b)=>(b.dat
   const selM=!!JSEL,nSel=selM?Object.keys(JSEL).length:0;
   return `<div class="jhh"><h3 class="jhd">Jogos</h3>${all.length?(selM?"":`<button class="btn sm" id="js-on">Partilhar vários</button>`):""}</div>
   ${all.length?`<div class="saved${selM?" selm":""}">${all.map(g=>{const d=g.date?new Date(g.date+"T12:00"):null,on=selM&&JSEL[g.id];return `<div class="sv${on?" on":""}"${selM?` data-js="${esc(g.id)}" role="checkbox" aria-checked="${!!on}" tabindex="0"`:""}>${selM?`<span class="ck">${on?"✓":""}</span>`:""}<div class="sv-i"><b>${esc(TN[g.team]||g.teamName)} · vs ${esc(g.opp)}</b><span>${d?d.getDate()+" "+MSH[d.getMonth()]+" "+d.getFullYear():""} · FC Gaia ${g.us}–${g.them} · ${g.status==="fim"?"terminado":"<em>em curso</em>"}${g.by?` · por ${esc(g.by.n)}`:""}${g.ed?` · editado por ${esc(g.ed.n)}`:""}${Sync.tok()?(Sync.dirty(g)?' · <span class="warn">⬆ por enviar</span>':' · ☁︎'):""}</span></div>
-    ${selM?"":`<div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"?"Ver":othersGame(g)?"Acompanhar":"Continuar"}</button><button class="btn sm gold" data-shr="${esc(g.id)}">Partilhar</button><button class="btn sm" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:""}</div>`}</div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
+    ${selM?"":`<div class="sv-b"><button class="btn sm" data-open="${esc(g.id)}">${g.status==="fim"?"Ver":othersGame(g)?"Acompanhar":"Continuar"}</button><button class="btn sm gold" data-shr="${esc(g.id)}">Partilhar</button><button class="btn sm" data-xls="${esc(g.id)}">Excel</button>${isCoord()?`${g.delReq?`<button class="btn sm" data-dcan="${esc(g.id)}">Manter</button>`:""}<button class="btn sm danger" data-del="${esc(g.id)}">Apagar</button>`:isRO()?"":g.delReq?`<button class="btn sm" data-dcan="${esc(g.id)}">Cancelar pedido</button>`:`<button class="btn sm ghostd" data-dreq="${esc(g.id)}">Pedir para apagar</button>`}</div>`}${g.delReq?`<div class="sv-req">🗑 Pedido para apagar por ${esc(g.delReq.n)}${isCoord()?" · confirma com Apagar, ou Manter":" · à espera do administrador"}</div>`:""}</div>`}).join("")}</div>`:`<p class="hint">Ainda não há jogos guardados.</p>`}
   ${selM?`<div class="jsbar"><span><b>${nSel}</b> ${nSel===1?"jogo escolhido":"jogos escolhidos"}</span><div class="bar" style="margin:0"><button class="btn sm" id="js-all">${nSel===all.length?"Nenhum":"Todos"}</button><button class="btn sm gold" id="js-go"${nSel?"":" disabled"}>Partilhar PDF${nSel>1?"s":""}</button><button class="btn sm" id="js-x">Cancelar</button></div></div>`:""}
   ${isCoord()?`<div class="bar"><button class="btn" id="bk-out"${all.length?"":" disabled"}>Cópia de segurança (exportar)</button><label class="btn" for="bk-in">Importar cópia</label><input type="file" id="bk-in" accept=".json,application/json" hidden></div>`:""}
   <p class="hint">${Sync.tok()?"Os jogos ficam gravados neste dispositivo e são enviados para a base de dados do clube sempre que há internet. Aparecem nos tablets de quem tem o mesmo escalão.":"Os jogos ficam gravados só neste tablet, porque ainda não tens acesso à base de dados. Fala com o administrador."}</p>`}
@@ -1535,7 +1542,11 @@ let JSEL=null;
 async function sharePDFs(ids){let jsPDF;try{toast(ids.length>1?`A preparar ${ids.length} PDF…`:"A preparar o PDF…",15000,"busy");jsPDF=await pdfLibs()}catch(e){toast("Não foi possível preparar o PDF: "+e.message,4000,"warn");return}
   const m=readAll(),files=[];for(const id of ids){const g=m[id];if(g)files.push(makeGamePDF(jsPDF,fixGame(JSON.parse(JSON.stringify(g)))))}
   await shareFiles(files,true)}
+function delReq(id,on){const m=readAll(),g=m[id];if(!g)return;if(on)g.delReq={u:USER.utilizador,n:USER.nome||USER.utilizador,t:Date.now()};else delete g.delReq;g.upd=Date.now();writeAll(m);Sync.soon(0);
+  toast(on?"Pedido enviado: o administrador decide se apaga. As estatísticas ficam guardadas até lá.":isCoord()?"Pedido recusado: o jogo fica guardado.":"Pedido cancelado",4000,"ok")}
 function bindSaved(){
+  document.querySelectorAll("[data-dreq]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.dreq];confirmBox(`Pedir ao administrador para apagar o jogo vs ${g.opp} (${g.date})? Fica guardado até ele confirmar.`,()=>{delReq(b.dataset.dreq,true);keepScroll(renderSetup)})});
+  document.querySelectorAll("[data-dcan]").forEach(b=>b.onclick=()=>{delReq(b.dataset.dcan,false);keepScroll(renderSetup)});
   const keepY=f=>{const y=scrollY;f();renderSetup();scrollTo(0,y)};
   const jo=$("#js-on");if(jo)jo.onclick=()=>keepY(()=>{JSEL={}});const jx=$("#js-x");if(jx)jx.onclick=()=>keepY(()=>{JSEL=null});
   const ja=$("#js-all");if(ja)ja.onclick=()=>keepY(()=>{const ids=[...document.querySelectorAll("[data-js]")].map(e=>e.dataset.js);JSEL=Object.keys(JSEL).length===ids.length?{}:Object.fromEntries(ids.map(i=>[i,1]))});
@@ -1838,16 +1849,11 @@ function periodPick(){if(G.running){G.running=false;store();render()}
     if(q>G.q){G.undo=[];addLog({t:"fimq"});G.q=q;G.clock=(q>G.np?5:G.per)*60;addLog({t:"iniq"});store();render();toast(qLabel(q)+" · "+fmtT(G.clock))}
     else{G.q=q;store();render();toast("Voltaste ao "+qLabel(q)+". Acerta o tempo se precisares");clockEdit()}});
   m.querySelector("#pp-end").onclick=()=>{m.remove();endBox()}}
-function finalizeGame(){G.review=false;G.status="fim";G.running=false;if(!G.log.some(e=>e.t==="fim"))addLog({t:"fim"});VIEW="team";store();render();Sync.soon(0);toast("Jogo gravado")}
-function endBox(){if(G.running){G.running=false;store();render()}const m=document.createElement("div");m.className="modal";
-  m.innerHTML=`<div class="card endb"><h3 style="margin-top:0">Terminar o jogo</h3><p class="endsc"><span>FC Gaia</span><b>${G.us}–${G.them}</b><span>${esc(G.opp)}</span></p>
-   <div class="endg"><button class="btn gold" id="eb-save">Gravar<small>Fecha o jogo com este resultado</small></button><button class="btn danger" id="eb-del">Não gravar<small>Apaga o jogo e tudo o que foi registado</small></button><button class="btn" id="eb-x">Cancelar<small>Volta ao jogo</small></button></div></div>`;
-  document.body.appendChild(m);m.querySelector("#eb-x").onclick=()=>m.remove();
-  m.querySelector("#eb-save").onclick=()=>{m.remove();G.running=false;G.review=true;VIEW="bs";store();render();window.scrollTo(0,0)};
-  m.querySelector("#eb-del").onclick=()=>{m.remove();confirmBox("Apagar mesmo este jogo? Não dá para recuperar.",()=>{const g=G;G=null;stopTick();const all=readAll();delete all[g.id];writeAll(all);Sync.del(g);
-    try{localStorage.removeItem(KC)}catch(e){}SEL=null;SUB=null;SIDE="us";SETVIEW="novo";renderSetup();toast("Jogo apagado")})}}
+function finalizeGame(){G.review=false;G.status="fim";G.running=false;if(!G.log.some(e=>e.t==="fim"))addLog({t:"fim"});VIEW="team";store();render();Sync.soon(0);toast(G.demo?"Treino terminado (não é guardado)":"Jogo gravado",3000,"ok")}
+function endBox(){if(G.running){G.running=false;addLog({t:"pausa"});store();render()}
+  confirmBox(`Deve terminar o jogo? FC Gaia ${G.us}–${G.them} ${G.opp}. Fica gravado com este resultado${G.demo?" (treino: não é guardado)":" e é enviado"}.`,()=>{finalizeGame();if(!G.demo)saveNotice()})}
 function nextQ(){if(G.running){toast("Pára o relógio primeiro");return}
-  if(G.q>=G.np&&G.us!==G.them){confirmBox("Terminar o jogo?",()=>{G.status="fim";G.running=false;addLog({t:"fim"});store();render()});return}
+  if(G.q>=G.np&&G.us!==G.them){endBox();return}
   const ot=G.q>=G.np;confirmBox(ot?"Jogo empatado: começar prolongamento (5 min)?":"Passar ao "+qLabel(G.q+1)+"?",()=>{G.undo=[];G.q++;G.clock=(ot?5:G.per)*60;addLog({t:"iniq"});store();render()})}
 const LBL={pausa:"Jogo gravado (relógio parado)",di:"Falta disruptiva",fl:"Falta flagrante",tc:"Falta técnica ao treinador",tb:"Falta técnica ao banco","2+":"Lançamento de 2 convertido","2-":"Lançamento de 2 falhado","3+":"Triplo convertido","3-":"Triplo falhado","1+":"Lance livre convertido","1-":"Lance livre falhado",
  or:"Ressalto ofensivo",dr:"Ressalto defensivo",ast:"Assistência",stl:"Roubo de bola",blk:"Desarme de lançamento",tov:"Perda de bola",fp:"Falta pessoal",fu:"Falta antidesportiva",ft:"Falta técnica",fd:"Falta recebida",
@@ -1950,7 +1956,7 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||
      ${fin&&!WATCH?`<div class="bar">${roG()?"":`<button class="btn" id="b-reopen">Reabrir jogo</button>`}<button class="btn" id="b-list">Voltar aos jogos</button></div>`:""}`}
   $("#app").innerHTML=demoBar()+board+watchBar()+tabs+body;bind();fitCourt();
   const dx=$("#dm-x");if(dx)dx.onclick=()=>$("#b-save").click();
-  const we=$("#w-end");if(we)we.onclick=()=>confirmBox("Terminar o jogo e gravar? Passas a ser tu a fechar o registo.",()=>{takeOver();endBox()});
+  const we=$("#w-end");if(we)we.onclick=()=>{takeOver();endBox()};
   const wt=$("#w-take");if(wt)wt.onclick=()=>confirmBox(`O registo está parado há algum tempo. Assumir o registo deste jogo? ${esc((recOf(G)||{}).n||"A outra pessoa")} deixa de poder alterar a partir de outro tablet sem voltar a assumir.`,()=>{takeOver();VIEW="live";render();startTick()})}
 /* estatísticas de equipa: FC Gaia vs adversário, parciais por período */
 function teamView(){const t=totals(),o=G.ost,fg=x=>[x.m2+x.m3,x.a2+x.a3];
