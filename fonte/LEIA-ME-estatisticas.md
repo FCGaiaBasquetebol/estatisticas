@@ -172,3 +172,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v61
 - Backoffice → Ligações: cartão "Google Drive" com "Enviar tudo para o Drive" (marca todos os jogos terminados para exportação e mostra o progresso).
+
+## v63
+- Backoffice com 3 separadores: Utilizadores · Ligações · Atividade. "Pessoas do clube" pode ser fechado (▸/▾), fica guardado no dispositivo.

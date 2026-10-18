@@ -519,6 +519,7 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
 .ua{grid-column:4;grid-row:1/3;margin:0;justify-content:flex-end;align-self:center}
 .usec{margin-top:36px;border-top:1px solid var(--line);padding-top:18px}
 .usec>.hint{margin:4px 0 14px}
+.pplt{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:16px;margin-right:4px}.pplt:hover{border-color:var(--gold)}.pplt i{font-style:normal}.ppl.shut .ppl-h{margin:0}.ppl .ppl-h{align-items:center}
 .actf{margin-bottom:10px}.actt td{white-space:nowrap}.actt td:nth-child(4){white-space:normal;min-width:220px}.actt tr.apagar td:nth-child(3){color:var(--ko);font-weight:700}.actt tr.contas td:nth-child(3){color:var(--gold-ink,var(--gold))}
 .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.lgrid .card{margin:0!important}
 @media (max-width:1100px){.ugrid{grid-template-columns:1fr}.ugrid .uform{order:0;position:static}.lgrid{grid-template-columns:1fr}
@@ -1341,14 +1342,16 @@ function sugUser(name){const w=nrm(name).replace(/[^a-z0-9 ]/g,"").split(" ").fi
 const PWW="abelha agua aguia apito areia aro autocarro aviao azul baleia banana barco bicicleta bloco bola bolo borboleta branco burro cafe caju camara caminho campo cao capitao carro carta carvalho castelo cavalo cereja cesto cha chave chuva circo circulo cobre coelho comboio cometa corrida corvo cravo cristal diamante douro dragao drible duende equipa escada esmeralda estrada estrela fada falcao farol ferro festa figo filme flauta flor foca fogo foguete fonte formiga foto gaia galo garrafao gato gelo gigante golfinho grilo guitarra heroi ilha janela jardim jogo lago lapis laranja leao leite letra limao linha livro lobo lua maca mapa mar medalha mel melao milho mina monte morango mota muralha navio neve ninja nuvem oliveira ouro pao papel passe pato pedra peixe pera perola piano pinho pirata planeta polvo pomba ponte ponto porta porto praca praia prata preto queijo radio raposa rede relogio ressalto rio robo rocha rosa roxo rua rubi safira salto sapo selo sereia serra sino sol sopa tabela taca tambor tartaruga teatro telhado tempo tesouro tigre topazio torre trator treino trigo triplo trompete urso uva vale vela vento verde vidro viking violino vitoria".split(" ");
 function genPw(){const r=crypto.getRandomValues(new Uint32Array(4)),w=i=>PWW[r[i]%PWW.length];return w(0)+"-"+w(1)+"-"+w(2)+"-"+String(10+r[3]%90)}
 let PSEL={},USELM=false,USEL={};
+const PPLK="fcgaia-stats-pessoas-aberto",PPLOPEN=()=>lsGet(PPLK)!=="0";
 function peopleCard(){const ps=clubPeople();if(!ps.length)return "";const has=new Set(USERS.map(u=>nrm(u.nome)));
   const grps=["Treinadores","Team managers","Coordenação","Direção"];const n=Object.keys(PSEL).length;
   const lab=r=>r.perfil==="treinador"?"Estatístico":r.cargo+" · visualização";
-  return `<section class="card ppl"><div class="ppl-h"><div><h3 style="margin:0">Pessoas do clube</h3><p class="hint" style="margin:2px 0 0">Do calendário. Escolhe a quem dar acesso: o perfil e os escalões já vêm sugeridos.</p></div>
-    <div class="bar" style="margin:0">${n===1?`<button class="btn sm" id="pp-one">Ajustar antes de criar</button>`:""}<button class="btn gold" id="pp-go"${n?"":" disabled"}>Dar acesso${n?` a ${n}`:""}</button></div></div>
-   ${grps.map(g=>{const l=ps.filter(p=>p.grp===g);return l.length?`<div class="ppl-g"><h4>${g}</h4><div class="ppl-l">${l.map(p=>{const ok=has.has(nrm(p.name)),on=!!PSEL[nrm(p.name)];
+  const open=PPLOPEN(),miss=ps.filter(p=>!has.has(nrm(p.name))).length;
+  return `<section class="card ppl${open?"":" shut"}"><div class="ppl-h"><button type="button" class="pplt" id="pp-tog" aria-expanded="${open}" title="${open?"Fechar":"Abrir"}"><i>${open?"▾":"▸"}</i></button><div style="flex:1;min-width:0"><h3 style="margin:0">Pessoas do clube${open?"":` <span class="cnt">${miss} sem acesso</span>`}</h3><p class="hint" style="margin:2px 0 0">Do calendário. Escolhe a quem dar acesso: o perfil e os escalões já vêm sugeridos.</p></div>
+    ${open?`<div class="bar" style="margin:0">${n===1?`<button class="btn sm" id="pp-one">Ajustar antes de criar</button>`:""}<button class="btn gold" id="pp-go"${n?"":" disabled"}>Dar acesso${n?` a ${n}`:""}</button></div>`:""}</div>
+   ${!open?"":grps.map(g=>{const l=ps.filter(p=>p.grp===g);return l.length?`<div class="ppl-g"><h4>${g}</h4><div class="ppl-l">${l.map(p=>{const ok=has.has(nrm(p.name)),on=!!PSEL[nrm(p.name)];
      return `<button type="button" class="pp${on?" on":""}${ok?" done":""}" data-pp="${esc(nrm(p.name))}"${ok?" disabled":""} title="${esc(lab(p.role))}${p.role.escaloes[0]==="*"?" · todos os escalões":" · "+p.role.escaloes.map(t=>TN[t]||t).join(", ")}"><span class="ck">${ok?"✓":on?"✓":""}</span><span><b>${esc(p.name)}</b><small>${ok?"Já tem acesso":esc(p.meta)}</small></span></button>`}).join("")}</div></div>`:""}).join("")}</section>`}
-function bindPeople(){const ps=clubPeople(),by=k=>ps.find(p=>nrm(p.name)===k);
+function bindPeople(){const ps=clubPeople(),by=k=>ps.find(p=>nrm(p.name)===k);const tg=$("#pp-tog");if(tg)tg.onclick=()=>{lsSet(PPLK,PPLOPEN()?"0":"1");const y=scrollY;renderSetup();scrollTo(0,y)};
   document.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const k=b.dataset.pp;if(PSEL[k])delete PSEL[k];else PSEL[k]=1;const y=scrollY;renderSetup();scrollTo(0,y)});
   const one=$("#pp-one");if(one)one.onclick=()=>{const p=by(Object.keys(PSEL)[0]);if(!p)return;PSEL={};UEDIT=null;UROLE=p.role.perfil==="treinador"?"estat":p.role.cargo;renderSetup();
     $("#u-n").value=p.name;$("#u-u").value=sugUser(p.name);$("#u-p").value=genPw();document.querySelectorAll("#u-esc input").forEach(i=>i.checked=p.role.escaloes.includes(i.value));$(".uform").scrollIntoView({behavior:"smooth",block:"start"})};
@@ -1426,7 +1429,7 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
   const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
   const miss=[!lsGet(GK)?"a <b>publicação de utilizadores</b> (sem ela, o que crias aqui só fica neste computador)":"",!Sync.tok()?"a <b>base de dados dos jogos</b>":""].filter(Boolean);
   return `<div class="uhead"><p class="hint">Quem pode entrar na área privada e em que escalões.</p></div>
-  ${miss.length?`<div class="ualert"><span>⚠️ Falta ligar ${miss.join(" e ")}.</span><button class="btn sm gold" id="u-golig">Ir para Ligações ↓</button></div>`:""}
+  ${miss.length?`<div class="ualert"><span>⚠️ Falta ligar ${miss.join(" e ")}.</span><button class="btn sm gold" id="u-golig">Ir para Ligações ›</button></div>`:""}
   ${ed?"":peopleCard()}
   <div class="ugrid">
    <section class="card uform${ed?" editing":""}">
@@ -1455,11 +1458,12 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
      <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Editar</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
    </section>
   </div>
-  <div class="usec" id="ligacoes"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
+`}
+function ligView(){const pend=Acc.pending();return `<div class="usec bo1" id="ligacoes"><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
    <div class="lgrid">${pubCard(pend)}${dbCard()}${driveCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
   bindPeople();
-  const gl=$("#u-golig");if(gl)gl.onclick=()=>$("#ligacoes").scrollIntoView({behavior:"smooth",block:"start"});
+  const gl=$("#u-golig");if(gl)gl.onclick=()=>{BOTAB="lig";renderSetup();scrollTo(0,0)};
   const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox(UFILE.tk?"Trocar o token da base de dados (por exemplo, quando expira)? Colas o novo a seguir e todos os utilizadores continuam com acesso.":"Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso vai precisar de uma palavra-passe nova (só desta vez).",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
     const go=async pw=>{dbo.disabled=true;try{const keep=await dbConnect(t,pw);toast(keep?"Token trocado. Todos mantêm o acesso.":"Base de dados ligada",3000,"ok");Act.add("token");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
@@ -1612,7 +1616,7 @@ function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW
   if(SETVIEW==="inicio"){$("#app").innerHTML=snav()+homeView();bindNav();bindHome();return}
   if(SETVIEW==="epoca"){$("#app").innerHTML=snav()+seasonView();bindNav();bindSeason();return}
   if(SETVIEW==="users"&&isCoord()){const T=(k,l)=>`<button data-bo="${k}" aria-pressed="${BOTAB===k}">${l}</button>`;
-    $("#app").innerHTML=snav()+`<div class="bohead"><h2>Backoffice</h2><div class="seg2" role="tablist" aria-label="Backoffice">${T("users","Utilizadores")}${T("act","Atividade")}</div></div>`+(BOTAB==="act"?`<div class="usec bo1" id="atividade"><p class="hint">Quem entrou, quem enviou ou corrigiu jogos, pedidos para apagar e alterações às contas. Fica guardado 12 meses.</p>${actCard()}</div>`:usersView());
+    $("#app").innerHTML=snav()+`<div class="bohead"><h2>Backoffice</h2><div class="seg2" role="tablist" aria-label="Backoffice">${T("users","Utilizadores")}${T("lig","Ligações")}${T("act","Atividade")}</div></div>`+(BOTAB==="act"?`<div class="usec bo1" id="atividade"><p class="hint">Quem entrou, quem enviou ou corrigiu jogos, pedidos para apagar e alterações às contas. Fica guardado 12 meses.</p>${actCard()}</div>`:BOTAB==="lig"?ligView():usersView());
     bindNav();document.querySelectorAll("[data-bo]").forEach(b=>b.onclick=()=>{BOTAB=b.dataset.bo;renderSetup();scrollTo(0,0)});
     if(BOTAB==="act"){bindAct();if(!ACTV.list&&!ACTV.busy&&!ACTV.err)loadActivity()}else bindUsers();return}
   const myTeams=TEAMS.filter(([id])=>allowed().includes(id));
