@@ -30,6 +30,9 @@ const CFG = {
     "Sub-16 Masc A": "4. Sub16 A",
     "Sub-18 Masc B": "5. Sub18 B",
     "Sub-18 Masc A": "6. Sub18 A",
+    "Seniores Masc": "1. Séniores",      // dentro de "3. Séniores | S23"
+    "Esperanças": "2. Esperanças",       // dentro de "3. Séniores | S23"
+    "Masters": "4. Masters",
   },
 };
 

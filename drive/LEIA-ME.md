@@ -8,7 +8,7 @@ O que acontece:
    - mantém na mesma pasta o Google Sheets **`Estatisticas de Jogo_Sub14 B_2026/2027`** (sempre o mesmo ficheiro e o mesmo link);
    - jogos apagados na app: o PDF vai para o lixo do Drive.
 
-Pastas (em `CFG.pastas`): 1. Sub14 B · 2. Sub14 A · 3. Sub16 B · 4. Sub16 A · 5. Sub18 B · 6. Sub18 A.
+Pastas (em `CFG.pastas`): 1. Sub14 B · 2. Sub14 A · 3. Sub16 B · 4. Sub16 A · 5. Sub18 B · 6. Sub18 A · 1. Séniores · 2. Esperanças · 4. Masters.
 Os outros escalões ficam na base de dados mas não são copiados (basta juntar a pasta em `CFG.pastas`).
 
 ## Instalação (uma vez, na conta Google do clube)

@@ -187,3 +187,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v68
 - Excel: botões de navegação com fórmula HYPERLINK (a célula toda é a ligação); o Codigo.gs reescreve-os com #gid no Google Sheets. Separador Jogos com resumo de pontos marcados/sofridos/diferença (totais e médias, só jogos a contar).
+
+## v69
+- Drive: pastas 1. Séniores, 2. Esperanças, 4. Masters. Jogos importados (FIBA/FPB) que chegam ao tablet do administrador são marcados para exportação.

@@ -1219,7 +1219,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
       const ok=new Set(allowed().map(slug)),seen=new Set(),m=readAll();
       for(const f of list){const mm=f.name.match(/^(.+)__(.+)\.json$/);if(!mm||!ok.has(mm[1]))continue;const id=mm[2];seen.add(id);const loc=m[id];
         if(loc&&loc._sha===f.sha)continue;if(loc&&this.dirty(loc)&&loc._sha)continue;
-        const x=await this.api(f.path);if(!x.ok)continue;const j=await x.json();const rem=JSON.parse(unb64s(j.content));if(!loc||(rem.upd||0)>=(loc.upd||0)){if(this.adopt(rem,j.sha))changed=true}else this.mark(id,j.sha,loc._sup)}
+        const x=await this.api(f.path);if(!x.ok)continue;const j=await x.json();const rem=JSON.parse(unb64s(j.content));if(!loc||(rem.upd||0)>=(loc.upd||0)){if(this.adopt(rem,j.sha)){changed=true;if(rem.source&&rem.status==="fim"&&isCoord())Exp.mark(rem.team,rem.date)}}else this.mark(id,j.sha,loc._sup)}
       const m2=readAll();Object.values(m2).forEach(g=>{if(g._sha&&!seen.has(g.id)&&canSee(g)&&!(G&&G.id===g.id)){delete m2[g.id];changed=true}});if(changed)writeAll(m2);
       try{if(await this.pullLive()&&!G&&SETVIEW==="inicio")renderSetup()}catch(e){}
       try{await Act.flush()}catch(e){}
