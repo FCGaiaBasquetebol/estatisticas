@@ -159,3 +159,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 ## v57 — Excel do escalão (base do Google Sheets)
 - Separadores Equipa e Atleta (visíveis); Dados e Listas ocultos. Filtros: Prova / fase (lista "Prova" e "Prova · Fase"), Jogo, Valores (Totais/Médias) e coluna Contar (Sim/Não) na lista de jogos. Critérios em Listas!F1:F4.
 - Atleta ▾ na Equipa + ligação "Ver jogo a jogo ›" → separador Atleta (linha por jogo, Total, Média por jogo, ligação "‹ Equipa"). `buildXLSX(games,title,fname,{buffer:true})` devolve o ficheiro sem descarregar (para o envio automático).
+
+## v58
+- Excel: topo compacto numa linha (Jogos "x de y" + Escolher ›, Valores ▾, Atleta ▾ + Jogo a jogo ›). Novo separador Jogos com Sim/Não por prova, fase e jogo (escolha múltipla); um jogo conta se os três estiverem em Sim (coluna oculta I). Dados!Contar lê daí.
