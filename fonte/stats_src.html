@@ -94,7 +94,7 @@ svg.court.live{cursor:crosshair}
 .btn.sm{padding:6px 10px;font-size:13px}
 .zsep path{stroke:#000;stroke-opacity:.25;stroke-width:4;fill:none}
 .zl text{text-anchor:middle;paint-order:stroke;stroke:#000;stroke-width:10px;stroke-linejoin:round}
-.zl-n{font-family:var(--f-disp);font-size:52px;fill:#fff}.zl text.zl-c{font-size:34px}.zl-v.cs{text-anchor:start}.zl-v.ce{text-anchor:end}
+.zl-n{font-family:var(--f-disp);font-size:64px;fill:#fff}.zl-v.cs{text-anchor:start}.zl-v.ce{text-anchor:end}
 .zl-v{font-family:var(--f-cond);font-weight:700;font-size:44px;fill:#fff}
 .zsw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
 table.bs tr.avgr td{background:#121a12;font-weight:700;color:#cfe8cf}
@@ -1839,7 +1839,6 @@ function rebuild(){if(!G)return;const R={st:{},ost:{...STAT0(),sec:0},us:0,them:
 const BX=750,BY=157.5,R3=675,C3=90,YC=BY+Math.sqrt(R3*R3-(BX-C3)*(BX-C3));
 function shotVal(x,y){if(x<C3||x>1500-C3)return 3;return Math.hypot(x-BX,y-BY)>R3?3:2}
 /* zonas de lançamento: 1 garrafão · 2/3/4 meia distância esq./centro/dir. · 5/9 cantos · 6/7/8 triplo lateral esq./frontal/lateral dir. */
-const ZDESC={1:"Garrafão",2:"Meia distância esquerda",3:"Meia distância centro",4:"Meia distância direita",5:"Triplo canto esquerdo",6:"Triplo lateral esquerda",7:"Triplo frontal",8:"Triplo lateral direita",9:"Triplo canto direito"};
 const ZCOL={1:"#e2b812",2:"#4fc3f7",3:"#7e9cff",4:"#4fc3f7",5:"#ff7a6e",6:"#5fd27a",7:"#c792ea",8:"#5fd27a",9:"#ff7a6e"};
 const ZLAB={1:[750,380],2:[300,330],3:[750,720],4:[1200,330],5:[45,110],6:[200,980],7:[750,1180],8:[1300,980],9:[1455,110]};
 const ANG=22.5*Math.PI/180;
@@ -1847,7 +1846,7 @@ function zoneN(x,y){if(Math.abs(x-BX)<=245&&y<=580)return 1;
   if(shotVal(x,y)===2)return x<505?2:x>995?4:3;
   if(y<=YC&&(x<C3||x>1500-C3))return x<BX?5:9;
   return Math.abs(Math.atan2(x-BX,y-BY))<=ANG?7:(x<BX?6:8)}
-function shotZone(x,y){return ZDESC[zoneN(x,y)]}
+function shotZone(x,y){return "Z"+zoneN(x,y)}
 function zoneStats(sh){const z={};for(let i=1;i<=9;i++)z[i]=[0,0];sh.forEach(e=>{const k=zoneN(e.x,e.y);z[k][1]++;if(e.t.endsWith("+"))z[k][0]++});return z}
 function zoneSeps(){const a=Math.sin(ANG),b=Math.cos(ANG),yx=x=>(BY+Math.sqrt(R3*R3-(x-BX)*(x-BX))).toFixed(1),L=2200;
   return `<g class="zsep2"><path d="M505 580V${yx(505)}M995 580V${yx(995)}M505 0V580M995 0V580M505 580H995"/>
@@ -1862,10 +1861,7 @@ function zonesLayer(zs){const L=2200,dx=Math.sin(ANG)*L,dy=Math.cos(ANG)*L,f=n=>
    <g clip-path="url(#arc2)"><rect x="0" y="0" width="1500" height="1400" fill="#111"/><rect x="0" y="0" width="505" height="1400" ${f(2)}/><rect x="505" y="0" width="490" height="1400" ${f(3)}/><rect x="995" y="0" width="505" height="1400" ${f(4)}/></g>
    <rect x="505" y="0" width="490" height="580" fill="#111"/><rect x="505" y="0" width="490" height="580" ${f(1)}/>
 `}
-const ZSH={1:"Garrafão",2:"Média esq.",3:"Média centro",4:"Média dir.",5:"Canto",6:"Triplo esq.",7:"Triplo frontal",8:"Triplo dir.",9:"Canto"};
-function zonesLabels(zs){return Object.entries(ZLAB).map(([n,[x,y]])=>{const v=zs[n],c=n==5||n==9,val=v[1]?`${v[0]}/${v[1]} · ${Math.round(100*v[0]/v[1])}%`:"";
-  if(c){const x0=n==5?0:1410,cy=(YC/2).toFixed(0),T=(bx,cl,tx)=>`<text x="${x0+bx}" y="${cy}" class="${cl}" transform="rotate(-90 ${x0+bx} ${cy})">${tx}</text>`;return `<g class="zl">${T(val?38:58,"zl-n zl-c",ZSH[n])}${val?T(82,"zl-v zl-c",val):""}</g>`}
-  return `<g class="zl"><text x="${x}" y="${y}" class="zl-n">${ZSH[n]}</text>${val?`<text x="${x}" y="${y+58}" class="zl-v">${val}</text>`:""}</g>`}).join("")}
+function zonesLabels(zs){return Object.entries(ZLAB).map(([n,[x,y]])=>{const v=zs[n];return `<g class="zl"><text x="${x}" y="${y}" class="zl-n">Z${n}</text>${v[1]?`<text x="${n==5?6:n==9?1494:x}" y="${y+58}" class="zl-v"${n==5?' style="text-anchor:start"':n==9?' style="text-anchor:end"':""}>${v[0]}/${v[1]} · ${Math.round(100*v[0]/v[1])}%</text>`:""}</g>`}).join("")}
 /* mapa de lançamentos: ver por zonas, por 2/3 pontos ou só os lançamentos */
 let SHOTV=(()=>{try{return localStorage.getItem("fcgaia-stats-mapa")||"zonas"}catch(e){return "zonas"}})();
 const SHV=[["zonas","Zonas","As 9 zonas do campo, com convertidos/tentados e % de cada uma."],["pts","2 e 3 pontos","Dentro e fora da linha de 3: quantos, de quantos, e %."],["pontos","Só lançamentos","O campo limpo, só com os lançamentos: ● convertido, ✕ falhado."]];
@@ -1878,7 +1874,7 @@ function ptsLabels(ps){const L=(x,y,t,v)=>`<g class="zl"><text x="${x}" y="${y}"
   return L(750,700,"2 PONTOS",ps[2])+L(750,1010,"3 PONTOS",ps[3])}
 function zoneBlock(sh,opp,extra){const zs=zoneStats(sh),ps=ptsStats(sh),mode=SHOTV,tm=[ps[2][0]+ps[3][0],ps[2][1]+ps[3][1]];
   const seg=`<div class="shv"><span class="shv-l">Ver no mapa</span><div class="seg2 sm" role="group" aria-label="Ver no mapa">${SHV.map(([k,l,d])=>`<button type="button" data-shv="${k}" aria-pressed="${mode===k}" title="${esc(d)}">${l}</button>`).join("")}</div></div>`;
-  const table=mode==="zonas"?`<table class="bs zt"><thead><tr><th class="l">Zona</th><th>C/T</th><th>%</th></tr></thead><tbody>${Object.entries(zs).map(([k,v])=>`<tr title="${esc(ZDESC[k])}"><td class="l"><i class="zsw" style="background:${ZCOL[k]}"></i>${esc(ZDESC[k])}</td><td>${v[0]}/${v[1]}</td><td>${pct(v[0],v[1])}</td></tr>`).join("")}</tbody></table>`
+  const table=mode==="zonas"?`<table class="bs zt"><thead><tr><th class="l">Zona</th><th>C/T</th><th>%</th></tr></thead><tbody>${Object.entries(zs).map(([k,v])=>`<tr><td class="l"><i class="zsw" style="background:${ZCOL[k]}"></i>Z${k}</td><td>${v[0]}/${v[1]}</td><td>${pct(v[0],v[1])}</td></tr>`).join("")}</tbody></table>`
     :`<table class="bs zt"><thead><tr><th class="l">Lançamentos</th><th>C/T</th><th>%</th></tr></thead><tbody>
       <tr><td class="l">${mode==="pts"?'<i class="zsw" style="background:#e2b812"></i>':""}2 pontos</td><td>${ps[2][0]}/${ps[2][1]}</td><td>${pct(ps[2][0],ps[2][1])}</td></tr>
       <tr><td class="l">${mode==="pts"?'<i class="zsw" style="background:#5aa0ff"></i>':""}3 pontos</td><td>${ps[3][0]}/${ps[3][1]}</td><td>${pct(ps[3][0],ps[3][1])}</td></tr>
@@ -2252,7 +2248,7 @@ async function makeGamePDF(jsPDF,g){const us=g.log.filter(e=>e.x!=null&&e.side!=
 function courtPNG(shots,floor,okc){return new Promise(res=>{try{
   const st=`<style>.c-floor{fill:${floor}}.c-paint{fill:rgba(0,0,0,.035);stroke:#6b6b6b;stroke-width:5}.c-line,.c-3p{fill:none;stroke:#6b6b6b;stroke-width:5}.c-board{stroke:#333;stroke-width:8}.c-rim{fill:none;stroke:#e2541b;stroke-width:6}.c-out{fill:none;stroke:#333;stroke-width:10}
    .mk-ok{fill:${okc};stroke:#fff;stroke-width:6}.mk-ko{stroke:#c62828;stroke-width:10;stroke-linecap:round;fill:none}.zsep2 path{fill:none;stroke:rgba(0,0,0,.32);stroke-width:5}
-   .zl text{text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:12px;stroke-linejoin:round;font-family:Arial,Helvetica,sans-serif;font-weight:700}.zl-n{font-size:46px;fill:#333}.zl text.zl-c{font-size:34px}.zl-v{font-size:48px;fill:#111}.zl-v.cs{text-anchor:start}.zl-v.ce{text-anchor:end}</style>`;
+   .zl text{text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:12px;stroke-linejoin:round;font-family:Arial,Helvetica,sans-serif;font-weight:700}.zl-n{font-size:60px;fill:#333}.zl-v{font-size:48px;fill:#111}.zl-v.cs{text-anchor:start}.zl-v.ce{text-anchor:end}</style>`;
   const zs=zoneStats(shots);let s=courtSVG(shots,false,zs,null).replace(/fill="#111"/g,`fill="${floor}"`).replace(/^\s*<svg /,`<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1400" `).replace(/(<svg[^>]*>)/,"$1"+st);
   const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=1500;c.height=1400;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,1500,1400);x.drawImage(im,0,0,1500,1400);res(c.toDataURL("image/jpeg",.88))}catch(e){res(null)}};
   im.onerror=()=>res(null);im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s)}catch(e){res(null)}})}
@@ -2313,8 +2309,8 @@ function buildPDF(jsPDF,img){img=img||{};
   const side=(doc,list,head)=>{const zs={};for(let z=1;z<=9;z++)zs[z]=[0,0];list.forEach(e=>{const z=zoneN(e.x,e.y);zs[z][1]++;if(e.t.endsWith("+"))zs[z][0]++});
     const tb={theme:"grid",margin:{left:RX,right:M},tableWidth:RW,styles:{fontSize:8.3,cellPadding:1.25,halign:"center",lineColor:LINE},headStyles:{fillColor:head,textColor:255}};
     const ok=list.filter(e=>e.t.endsWith("+")).length;
-    doc.autoTable({...tb,startY:CY,head:[["Zona","C/T","%"]],body:Object.keys(zs).map(z=>[ZDESC[z],ca(...zs[z]),pc(...zs[z])]).concat([[{content:"Total de campo",styles:{fontStyle:"bold"}},{content:ca(ok,list.length),styles:{fontStyle:"bold"}},{content:pc(ok,list.length),styles:{fontStyle:"bold"}}]]),
-      columnStyles:{0:{halign:"left",cellWidth:RW*.58}},didParseCell:c=>{if(c.section==="body"&&c.column.index===0&&c.row.index<9){c.cell.styles.textColor=INK}}});
+    doc.autoTable({...tb,startY:CY,head:[["Zona","C/T","%"]],body:Object.keys(zs).map(z=>["Z"+z,ca(...zs[z]),pc(...zs[z])]).concat([[{content:"Total de campo",styles:{fontStyle:"bold"}},{content:ca(ok,list.length),styles:{fontStyle:"bold"}},{content:pc(ok,list.length),styles:{fontStyle:"bold"}}]]),
+      columnStyles:{0:{halign:"left",cellWidth:RW*.4}},didParseCell:c=>{if(c.section==="body"&&c.column.index===0&&c.row.index<9){c.cell.styles.textColor=INK}}});
     return doc.lastAutoTable.finalY};
   const courtImg=(doc,data,empty)=>{if(data){try{doc.addImage(data,"JPEG",M,CY,CW,CH)}catch(e){}doc.setDrawColor(60,60,60);doc.setLineWidth(.3);doc.rect(M,CY,CW,CH)}
     else{doc.setFillColor(244,244,244);doc.rect(M,CY,CW,CH,"F");doc.setTextColor(...MUT);doc.setFont("helvetica","normal");doc.setFontSize(11);doc.text(empty,M+CW/2,CY+CH/2,{align:"center",maxWidth:CW-20})}
@@ -2365,7 +2361,7 @@ function exportXLS(){const t=totals(),o=G.ost||STAT0(),np=G.np||4,AW=G.home===fa
   const row=(n,nm,st,s,min)=>[n,nm,st,min,s.pts,s.m2,s.a2,P(s.m2,s.a2),s.m3,s.a3,P(s.m3,s.a3),s.mf,s.af,P(s.mf,s.af),s.or,s.dr,s.or+s.dr,s.ast,s.stl,s.blk,s.tov,s.fp,s.di||0,s.fl||0,s.ft,s.pf,s.fd,s.pm,eff(s)];
   const bs=[head,...R.map(({p,s})=>row(num(p.num),p.name+(dq(s)?" (excluído)":""),s5.has(p.id)?"Sim":"",s,+(s.sec/60).toFixed(1))),row("","TOTAL FC GAIA","",t,""),[],row("",G.opp+" (equipa)","",o,"")];
   const zt=list=>{const zs={};for(let z=1;z<=9;z++)zs[z]=[0,0];list.forEach(e=>{const z=zoneN(e.x,e.y);zs[z][1]++;if(e.t.endsWith("+"))zs[z][0]++});const ok=list.filter(e=>e.t.endsWith("+")).length;
-    return [["POR ZONA","Convertidos","Tentados","%"],...Object.keys(zs).map(z=>[ZDESC[z],zs[z][0],zs[z][1],P(...zs[z])]),["Total de campo",ok,list.length,P(ok,list.length)]]};
+    return [["POR ZONA","Convertidos","Tentados","%"],...Object.keys(zs).map(z=>["Z"+z,zs[z][0],zs[z][1],P(...zs[z])]),["Total de campo",ok,list.length,P(ok,list.length)]]};
   const sl=list=>[["LANÇAMENTOS","Período","Tempo","Nº","Atleta","Valor","Resultado","Zona","X (m)","Y (m)"],...list.map((e,i)=>{const p=e.side==="o"?{}:pById(e.id)||{};return [i+1,ql(e.q),fmtT(e.c),num(p.num),p.name||"",+e.t[0],e.t.endsWith("+")?"Convertido":"Falhado",shotZone(e.x,e.y),+(e.x/100).toFixed(2),+(e.y/100).toFixed(2)]})];
   const usS=G.log.filter(e=>e.x!=null&&e.side!=="o"),thS=G.log.filter(e=>e.x!=null&&e.side==="o");
   const lanc=[["Lançamentos · FC Gaia"],[],...zt(usS),[],["POR TIPO","Convertidos","Tentados","%"],["2 pontos",t.m2,t.a2,P(t.m2,t.a2)],["3 pontos",t.m3,t.a3,P(t.m3,t.a3)],["Lances livres",t.mf,t.af,P(t.mf,t.af)],[],
