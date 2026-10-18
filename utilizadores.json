@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792346425785,
+ "atualizado": 1792346462682,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -202,6 +202,23 @@
    "dk": {
     "iv": "fVmKWTF7wWSQv5Nx",
     "ct": "hiDDuRirc+pkcW2IQGNYrM6raiff79UJR0F7eI5nxyOBAtYCWeinY2+LhveywEXnU6ESbe4Fgf+bu09I"
+   }
+  },
+  {
+   "utilizador": "alexandre.silva",
+   "nome": "Alexandre Silva",
+   "perfil": "consulta",
+   "cargo": "Treinador",
+   "escaloes": [
+    "Esperanças",
+    "Sub-18 Masc A"
+   ],
+   "ativo": true,
+   "salt": "KNNfdYdAmFCsB8Dllq//pQ==",
+   "hash": "QyEelw5Z/WUWAVyTSRgKy8dH7XO2ZsKJqd2ttALifuQ=",
+   "dk": {
+    "iv": "55GuJrd+2vdk5GN+",
+    "ct": "7YPb8M3z5YHpkSBbJFrWJ9sNhUR3qVCAnWq3gLm3eVmt4uhIa43OUA0hYHn01jc6EtunGHkKLDF8rgmL"
    }
   }
  ]
