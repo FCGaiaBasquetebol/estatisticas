@@ -1626,7 +1626,7 @@ function bindSeason(){bindCharts();bindSaved();const eg=$("#ep-games");if(eg)eg.
   const esl=$("#ep-sel");if(esl)esl.onchange=()=>{EP.sel=esl.value;const y=scrollY;renderSetup();scrollTo(0,y)};
   const t=$("#ep-team");if(t)t.onchange=e=>{EP.team=e.target.value;EP.sel="";renderSetup()};
   document.querySelectorAll("[data-epm]").forEach(b=>b.onclick=()=>{EP.mode=b.dataset.epm;renderSetup()});
-  document.querySelectorAll("[data-eps]").forEach(h=>h.onclick=()=>{EP.sort=h.dataset.eps;renderSetup()});
+  document.querySelectorAll("[data-eps]").forEach(h=>h.onclick=()=>{EP.sort=h.dataset.eps;keepScroll(renderSetup)});
   document.querySelectorAll("[data-epx]").forEach(c=>c.onchange=()=>{if(c.checked)delete EP.excl[c.dataset.epx];else EP.excl[c.dataset.epx]=1;renderSetup()});
   document.querySelectorAll("tr[data-ath]").forEach(r=>r.onclick=()=>{EP.sel=r.dataset.ath;renderSetup();const p=$("#athp");if(p)p.scrollIntoView({behavior:"smooth",block:"start"})});
   const ax=$("#ath-x");if(ax)ax.onclick=()=>{EP.sel="";renderSetup()};
@@ -1857,6 +1857,8 @@ function playerCard(id){const order=(BSORT.k?bsSorted():bsRows()).map(r=>r.p.id)
     pv.onclick=()=>{if(i>0){cur=order[i-1];draw()}};nx.onclick=()=>{if(i<order.length-1){cur=order[i+1];draw()}}};
   document.body.appendChild(m);draw();m.onclick=e=>{if(e.target===m)m.remove()};
   const k=e=>{if(!document.body.contains(m)){removeEventListener("keydown",k);return}if(e.key==="Escape")m.remove();if(e.key==="ArrowLeft")m.querySelector("#pc-prev").click();if(e.key==="ArrowRight")m.querySelector("#pc-next").click()};addEventListener("keydown",k)}
+/* volta a desenhar mantendo a posição da página e o deslizamento lateral das tabelas */
+function keepScroll(f){const y=scrollY,xs=[...document.querySelectorAll(".tblw")].map(e=>e.scrollLeft);f();scrollTo(0,y);document.querySelectorAll(".tblw").forEach((e,i)=>{if(xs[i]!=null)e.scrollLeft=xs[i]})}
 function totals(){const t=STAT0();Object.values(G.st).forEach(s=>Object.keys(t).forEach(k=>t[k]+=s[k]||0));return t}
 const pct=(m,a)=>a?Math.round(100*m/a)+"%":"–";
 const eff=s=>s.pts+s.or+s.dr+s.ast+s.stl+s.blk-(s.a2-s.m2)-(s.a3-s.m3)-(s.af-s.mf)-s.tov;
@@ -1982,7 +1984,7 @@ function bind(){
     if(!G.running&&!G.start5)G.start5=G.oncourt.slice();G.running=!G.running;store();render()};
   const ca=$("#clk");if(ca&&G.status!=="fim")ca.onclick=clockEdit;
   document.querySelectorAll("[data-bss]").forEach(h=>{const go=()=>{const k=h.dataset.bss,first=(k==="num"||k==="name")?1:-1;
-    if(BSORT.k!==k)BSORT={k,d:first};else if(BSORT.d===first)BSORT.d=-first;else BSORT={k:"",d:-1};const y=scrollY;render();scrollTo(0,y)};h.onclick=go;h.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
+    if(BSORT.k!==k)BSORT={k,d:first};else if(BSORT.d===first)BSORT.d=-first;else BSORT={k:"",d:-1};keepScroll(render)};h.onclick=go;h.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
   document.querySelectorAll("[data-pc]").forEach(r=>{r.onclick=()=>playerCard(r.dataset.pc);r.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();playerCard(r.dataset.pc)}}});
   const cn=$("#c-next");if(cn)cn.onclick=periodPick;const ce=$("#c-end");if(ce)ce.onclick=endBox;
   const bu=$("#b-undo");if(bu)bu.onclick=undo;
