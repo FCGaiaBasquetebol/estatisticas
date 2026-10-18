@@ -181,3 +181,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v65
 - Excel: sai o Atleta ▾ da Equipa; botão "Atletas: jogo a jogo ›" leva ao separador Atleta, que tem a sua caixa Atleta ▾ e o botão "‹ Voltar ao ecrã principal". A tabela de atletas da Equipa mostra sempre todos. Codigo.gs sem o gatilho onEdit.
+
+## v67
+- Início/Hoje: só jogos com data de hoje (deixa de mostrar jogos ao vivo das últimas 12 h de outros dias); setas ‹ › para andar para o lado quando não cabem todos.

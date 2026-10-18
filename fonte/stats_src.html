@@ -934,6 +934,7 @@ body.fit .demob{padding:3px 10px;margin:0 0 4px;font-size:12px}
 
 /* ===== v30: resultados de hoje ===== */
 .lvs{display:flex;align-items:center;gap:10px;min-height:52px;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px 6px 5px 14px;margin:0 0 12px}
+.lva{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:20px;font-weight:700;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}.lva[hidden]{display:none}.lva:hover{border-color:var(--gold)}.lva:disabled{opacity:.3;cursor:default}
 .lvh{font-family:var(--f-disp);text-transform:uppercase;font-size:15px;letter-spacing:.5px;color:var(--gold);flex:none}
 .lvl{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}.lvl::-webkit-scrollbar{display:none}
 .lv{display:inline-flex;align-items:center;gap:10px;flex:none;white-space:nowrap;text-align:left;font:inherit;color:var(--ink);background:var(--panel2);border:1px solid transparent;border-radius:10px;padding:5px 10px;min-height:40px;box-sizing:border-box}
@@ -1574,17 +1575,17 @@ function nextGames(){const today=new Date();today.setHours(0,0,0,0);const out=[]
   return out.sort((a,b)=>(a.date+(a.time||"")).localeCompare(b.date+(b.time||""))).slice(0,3)}
 function liveClock(x){return x.running&&x.status!=="fim"?Math.max(0,x.clock-(Date.now()-(x.upd||Date.now()))/1000):x.clock}
 function liveSection(){const now=Date.now(),dd=new Date(),p2=n=>String(n).padStart(2,"0"),today=dd.getFullYear()+"-"+p2(dd.getMonth()+1)+"-"+p2(dd.getDate()),mine=new Set(visGames().filter(g=>g.status!=="fim"&&!othersGame(g)).map(g=>g.id));
-  const L=Object.entries(LIVE).filter(([id,x])=>!mine.has(id)&&(x.date===today||now-(x.upd||0)<12*3600e3)).map(([id,x])=>({id,...x}));
+  const L=Object.entries(LIVE).filter(([id,x])=>!mine.has(id)&&x.date===today).map(([id,x])=>({id,...x}));
   /* jogos de hoje do calendário (todos os escalões) que ninguém está a registar */
   (DATA&&DATA.games||[]).filter(r=>r[5]===today&&!L.some(x=>x.team===r[0])).forEach(r=>{const h=String(r[7]).startsWith("FC Gaia"),m=String(r[11]||"").match(/(\d+)\s*-\s*(\d+)/);
     L.push({id:"",cal:1,team:r[0],home:h,opp:h?r[8]:r[7],time:r[6],status:m?"fim":"agendado",us:m?+(h?m[1]:m[2]):null,them:m?+(h?m[2]:m[1]):null})});
   if(!L.length)return "";const al=allowed();
   L.sort((a,b)=>{const o=x=>x.status==="fim"?2:x.status==="agendado"?1:0;return o(a)-o(b)||String(a.time||"").localeCompare(String(b.time||""))||(b.upd||0)-(a.upd||0)});
   const ql=x=>x.q>(x.np||4)?"P"+(x.q-(x.np||4)):x.q+(x.np===2?".ª p.":".º");
-  return `<div class="lvs" aria-label="Resultados de hoje"><span class="lvh">Hoje</span><div class="lvl">${L.map(x=>{const live=x.status!=="fim"&&x.status!=="agendado",can=!x.cal&&al.includes(x.team),T=can?"button":"div";
+  return `<div class="lvs" aria-label="Resultados de hoje"><span class="lvh">Hoje</span><button type="button" class="lva" data-lva="-1" aria-label="Anteriores" hidden>‹</button><div class="lvl">${L.map(x=>{const live=x.status!=="fim"&&x.status!=="agendado",can=!x.cal&&al.includes(x.team),T=can?"button":"div";
     const sc=x.us==null?`<i class="lvx">x</i>`:`<b class="${x.home===false?"":"fc"}">${x.home===false?x.them:x.us}</b><i>–</i><b class="${x.home===false?"fc":""}">${x.home===false?x.us:x.them}</b>`;
     const st=live?`<span class="hdot${x.running?"":" off"}"></span>${ql(x)} <span data-lvc="${esc(x.id)}">${fmtT(liveClock(x))}</span>`:x.status==="fim"?"Final":esc(x.time||"");
-    return `<${T} class="lv${live?" on":""}${can?" can":""}"${can?` data-lv="${esc(x.id)}" title="Acompanhar"`:""}><span class="lv-t">${esc(TN[x.team]||x.teamName||x.team)}</span><span class="lv-s"><span>${esc(x.home===false?x.opp:"FC Gaia")}</span>${sc}<span>${esc(x.home===false?"FC Gaia":x.opp)}</span></span><span class="lv-st">${st}</span></${T}>`}).join("")}</div></div>`}
+    return `<${T} class="lv${live?" on":""}${can?" can":""}"${can?` data-lv="${esc(x.id)}" title="Acompanhar"`:""}><span class="lv-t">${esc(TN[x.team]||x.teamName||x.team)}</span><span class="lv-s"><span>${esc(x.home===false?x.opp:"FC Gaia")}</span>${sc}<span>${esc(x.home===false?"FC Gaia":x.opp)}</span></span><span class="lv-st">${st}</span></${T}>`}).join("")}</div><button type="button" class="lva" data-lva="1" aria-label="Seguintes" hidden>›</button></div>`}
 function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];const now=new Date();
   const open=visGames().filter(g=>g.status!=="fim"&&!othersGame(g)).sort((a,b)=>(b.upd||0)-(a.upd||0));
   const nG=visGames().length,ng=ro?[]:nextGames();const today=new Date();today.setHours(0,0,0,0);
@@ -1605,6 +1606,10 @@ function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];co
   ${ng.length?`<div class="hnext"><h3>Próximos jogos</h3>${ng.map(g=>{const home=g.home.startsWith("FC Gaia");return `<button class="hng" data-ng="${esc(g.team)}|${esc(g.num)}"><span class="hd"><b>${dl(g.d)}</b><small>${esc(g.time||"")}</small></span><span class="htx"><b>${esc(home?g.away:g.home)}</b><small>${esc(TN[g.team]||g.team)} · ${home?"Em casa":"Fora"}</small></span><span class="hgo">Preparar ›</span></button>`}).join("")}</div>`:""}
   <p class="ver">Versão ${esc(VER||"local")}</p></section>`}
 function bindHome(){
+  const lvl=document.querySelector(".lvl");if(lvl){const bs=document.querySelectorAll("[data-lva]");
+    const upd=()=>{const over=lvl.scrollWidth>lvl.clientWidth+2;bs.forEach(b=>{b.hidden=!over;b.disabled=b.dataset.lva<0?lvl.scrollLeft<4:lvl.scrollLeft+lvl.clientWidth>=lvl.scrollWidth-4})};
+    bs.forEach(b=>b.onclick=()=>{const c=lvl.querySelector(".lv");lvl.scrollBy({left:(+b.dataset.lva)*((c?c.offsetWidth:200)+6),behavior:"smooth"})});
+    lvl.addEventListener("scroll",upd,{passive:true});addEventListener("resize",upd);upd();setTimeout(upd,300)}
   document.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>{const id=b.dataset.lv;if(readAll()[id]){openGame(id);return}toast("A carregar o jogo…",3000,"busy");Sync.soon(0);setTimeout(()=>{if(readAll()[id]&&!G&&SETVIEW==="inicio")openGame(id)},4000)});
   if(!HPOLL)HPOLL=setInterval(async()=>{if(G||SETVIEW!=="inicio"||document.hidden)return;if(await Sync.pullLive()){const y=scrollY;renderSetup();scrollTo(0,y)}},45000);
   if(!HTICK)HTICK=setInterval(()=>{document.querySelectorAll("[data-lvc]").forEach(e=>{const x=LIVE[e.dataset.lvc];if(x)e.textContent=fmtT(liveClock(x))})},1000);
