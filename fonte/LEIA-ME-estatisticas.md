@@ -122,3 +122,12 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Acompanhar ao vivo: jogo em curso registado por outra pessoa (lk = quem regista, heartbeat em store) abre só em consulta, atualiza de 15 em 15 s (Sync.pullOne); relógio estimado; no fim do tempo "Terminar e gravar jogo" (takeOver); parado >15 min "Assumir o registo". Durante o jogo o envio é de 15 em 15 s (Sync.later).
 - Resultados de hoje: índice live/index.json na base de dados (resultado, período, relógio de cada jogo); todos os utilizadores veem no Início, só quem tem o escalão pode abrir para acompanhar. Atualiza de 45 em 45 s no Início.
 - Jogos FIBA LiveStats (source:"fiba", qs = parciais) vêm do repositório de dados (scripts/fiba.py + Actions). Só consulta; na época, um registo manual do mesmo escalão e data é ignorado se houver ficha FIBA.
+
+## v49 — feedback dos treinadores (18/10)
+- Marcador pela ordem casa/fora (casa à esquerda); igual nos resultados do Início, ficha, PDF e Excel. “Outro jogo” tem Em casa / Fora.
+- Faltas de equipa maiores no marcador (vermelho a partir da 4.ª) e bolas dos descontos de tempo usados/disponíveis.
+- Desconto de tempo: botão ao lado de “Técnica banco”, escolhe a equipa; regras FIBA 2/3/1; pára o relógio; fica nas jogadas (evento `to`).
+- Qualquer falta pára o relógio com aviso. Falta recebida junta automaticamente uma falta pessoal ao adversário (evento `fp` com `side:"o",auto:1`).
+- Tema claro: a 4.ª e 5.ª falta do atleta já se veem (laranja / vermelho).
+- Substituir: escolhe vários a sair e vários a entrar, “Sair os 5”, Confirmar. Arrastar continua a ser um de cada vez.
+- PDF ao lado do Excel: nas Estatísticas (respeita escalões, jogos, atleta, totais/médias) e em cada jogo da lista.
