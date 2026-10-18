@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792347206585,
+ "atualizado": 1792347237616,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -250,6 +250,21 @@
    "dk": {
     "iv": "0XBF4P4Sh82xj42b",
     "ct": "Oh95tgAtUuj7cgUqVepmOlubgpbmZNy/aQaA3uHZ+OwSr1eMcDWwZi1GSyLgFMQuziDZxqwGFGZ9vYbB"
+   }
+  },
+  {
+   "utilizador": "jorge.vilar",
+   "nome": "Jorge Vilar",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-16 Masc A"
+   ],
+   "ativo": true,
+   "salt": "Wlsv0FlBX7m3WFqyAAXeYA==",
+   "hash": "NILR3fUes7gXyzh8wTtlxgpagNan+X6rGxeaDmMxAjM=",
+   "dk": {
+    "iv": "WbHgDJuT1xzuM54C",
+    "ct": "x6E65BnPlyKKuBH8ecOUfb7YpYKT9HM4fc4N5ejqmvyXwYEEXq/CWL7bkoH+mLZ1st4R/XIt/nd1Ffq8"
    }
   }
  ]
