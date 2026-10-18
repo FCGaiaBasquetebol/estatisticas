@@ -147,3 +147,7 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 ## v54 — Excel numa folha
 - ExcelJS (exceljs.min.js, carregado só quando se exporta; em cache no SW). Folha "Estatísticas" com cores do clube em tom claro: filtros Jogo ▾ e Atleta ▾ (validação de dados), EQUIPA (FC Gaia vs Adversários), ATLETAS com Total, JOGOS. Tudo por fórmulas (SUMIFS/COUNTIFS) sobre a folha escondida "Dados" (uma linha por atleta por jogo + "Adversário"), com margem de 400 linhas para o Drive ir juntando jogos. "Listas" (escondida) alimenta os filtros.
 - O botão Excel do jogo exporta só esse jogo; o das Estatísticas exporta os jogos escolhidos.
+
+## v55
+- Excel: um ficheiro por escalão ("FC Gaia <escalão>_Estatisticas <época>.xlsx"), filtro Valores (Totais / Médias por jogo), JOGOS agrupados por prova › fase › jogos. Nomes de ficheiro sem acentos.
+- Registo de atividade (`Act`): fila local (fcgaia-stats-atividade) enviada no fim de cada sincronização para atividade/<utilizador>/<AAAA-MM>.json no repositório de dados. Regista entradas/saídas, jogos (começou, terminou, correções — no máx. 1 a cada 15 min), pedidos/apagar, contas, troca de token e importação. Administrador → Utilizadores → Atividade (filtro por pessoa e tipo; ficheiros com mais de 12 meses são apagados quando o administrador abre a atividade).

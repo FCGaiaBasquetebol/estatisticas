@@ -519,6 +519,7 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
 .ua{grid-column:4;grid-row:1/3;margin:0;justify-content:flex-end;align-self:center}
 .usec{margin-top:36px;border-top:1px solid var(--line);padding-top:18px}
 .usec>.hint{margin:4px 0 14px}
+.actf{margin-bottom:10px}.actt td{white-space:nowrap}.actt td:nth-child(4){white-space:normal;min-width:220px}.actt tr.apagar td:nth-child(3){color:var(--ko);font-weight:700}.actt tr.contas td:nth-child(3){color:var(--gold-ink,var(--gold))}
 .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.lgrid .card{margin:0!important}
 @media (max-width:1100px){.ugrid{grid-template-columns:1fr}.ugrid .uform{order:0;position:static}.lgrid{grid-template-columns:1fr}
  .uth{display:none}.urow{grid-template-columns:44px minmax(0,1fr)}.ui .tags{grid-column:2;grid-row:auto}.ua{grid-column:2;grid-row:auto;justify-content:flex-start}}
@@ -1085,11 +1086,13 @@ const Acc={
     if(u.dk){try{const x=await unwrapTok(u.dk,pw,u.salt);if(UFILE&&UFILE.tk){lsSet(KK,x);lsSet(DTK,await decK(UFILE.tk,x))}else lsSet(DTK,x)}catch(e){}}return {...u}},
   async logout(){lsSet(US,null);try{sessionStorage.removeItem(US)}catch(e){}lsSet(DTK,null);lsSet(KK,null);PWMEM=""},
   async createUser(o){if(USERS.some(u=>u.utilizador===o.utilizador))throw new Error("Já existe esse nome de utilizador.");
-    const c=await newCred(o.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",...(o.cargo?{cargo:o.cargo}:{}),escaloes:o.escaloes||[],ativo:true,...c}]))},
+    const c=await newCred(o.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",...(o.cargo?{cargo:o.cargo}:{}),escaloes:o.escaloes||[],ativo:true,...c}]));if(USER)Act.add("conta_nova",`${o.nome} (${o.utilizador})`)},
   async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),patch.pw,c.salt);Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
+    const who=USERS.find(u=>u.utilizador===un),wl=who?`${who.nome} (${un})`:un;
+    if(USER)Act.add(patch.hash?"conta_pw":"ativo" in patch?(patch.ativo?"conta_on":"conta_off"):"conta_edit",wl);
     this.save(USERS.map(u=>u.utilizador===un?{...u,...patch}:u));
     if(USER&&USER.utilizador===un){USER={...USER,...patch};if(patch.hash)lsSet(US,sessKey(USER))}},
-  removeUser(un){this.save(USERS.filter(u=>u.utilizador!==un))},
+  removeUser(un){const w=USERS.find(u=>u.utilizador===un);if(USER)Act.add("conta_del",w?`${w.nome} (${un})`:un);this.save(USERS.filter(u=>u.utilizador!==un))},
   discard(){lsSet(UK,null);UFILE=UPUB;USERS=UPUB.utilizadores},
   download(){const blob=new Blob([JSON.stringify(UFILE,null,1)+"\n"],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="utilizadores.json";document.body.appendChild(a);a.click();a.remove()},
@@ -1125,7 +1128,7 @@ function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who
   const lc=$("#l-cont");if(lc)lc.onclick=()=>{const u=savedUser();LOGIN_FORM=false;if(u)onUser({...u});else renderLogin()};
   const lo=$("#l-other");if(lo)lo.onclick=()=>{LOGIN_FORM=true;renderLogin()};
   const lf=$("#lf");if(lf){if(lsGet("fcgaia-stats-ultimo"))setTimeout(()=>{const p=$("#l-p");if(p)p.focus()},50);
-   lf.onsubmit=async e=>{e.preventDefault();$("#l-err").textContent="";LOGIN_KEEP=$("#l-k").checked;try{const u=await Acc.login($("#l-e").value,$("#l-p").value);LOGIN_FORM=false;
+   lf.onsubmit=async e=>{e.preventDefault();$("#l-err").textContent="";LOGIN_KEEP=$("#l-k").checked;try{const u=await Acc.login($("#l-e").value,$("#l-p").value);LOGIN_FORM=false;Act.add("login","",u);
     try{if(window.PasswordCredential&&navigator.credentials)navigator.credentials.store(new PasswordCredential({id:u.utilizador,password:$("#l-p").value,name:u.nome}))}catch(x){}onUser(u)}catch(x){$("#l-err").textContent=x.message}}}
 }
 function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":esc(roleLabel(USER).replace(" · consulta",""))+" · "+esc((USER.escaloes||[]).includes("*")?"todos os escalões":(USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
@@ -1185,7 +1188,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     if(g._sha)body.sha=g._sha;let r=await this.api(this.file(g),{method:"PUT",body});
     if(r.status===409||r.status===422){const cur=await this.api(this.file(g));if(cur.ok){const j=await cur.json();const rem=JSON.parse(unb64s(j.content));
         if((rem.upd||0)>(g.upd||0)){this.adopt(rem,j.sha);return}body.sha=j.sha}else delete body.sha;r=await this.api(this.file(g),{method:"PUT",body})}
-    if(!r.ok)throw new Error("envio "+r.status);const j=await r.json();this.mark(g.id,j.content.sha,g.upd);if(!g.demo)this.pushLive(g).catch(()=>{})},
+    if(!r.ok)throw new Error("envio "+r.status);const j=await r.json();this.mark(g.id,j.content.sha,g.upd);try{const me=USER&&USER.utilizador;if(me&&((g.ed&&g.ed.u===me)||(!g.ed&&(!g.by||g.by.u===me))))Act.game(g)}catch(e){}if(!g.demo)this.pushLive(g).catch(()=>{})},
   /* resultados ao vivo: um índice pequeno (live/index.json) com o resultado de cada jogo, visível para todos */
   async liveEdit(fn){for(let k=0;k<3;k++){const r=await this.api("live/index.json");let sha,games={};
       if(r.ok){const j=await r.json();sha=j.sha;try{games=JSON.parse(unb64s(j.content)).games||{}}catch(e){}}else if(r.status!==404)return;
@@ -1211,6 +1214,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
         const x=await this.api(f.path);if(!x.ok)continue;const j=await x.json();const rem=JSON.parse(unb64s(j.content));if(!loc||(rem.upd||0)>=(loc.upd||0)){if(this.adopt(rem,j.sha))changed=true}else this.mark(id,j.sha,loc._sup)}
       const m2=readAll();Object.values(m2).forEach(g=>{if(g._sha&&!seen.has(g.id)&&canSee(g)&&!(G&&G.id===g.id)){delete m2[g.id];changed=true}});if(changed)writeAll(m2);
       try{if(await this.pullLive()&&!G&&SETVIEW==="inicio")renderSetup()}catch(e){}
+      try{await Act.flush()}catch(e){}
       this.st="ok";this.last=Date.now()}
     catch(e){console.warn("sync",e);if(this.st!=="erro")this.st=navigator.onLine?"falha":"offline"}
     this.busy=false;this.paint();const left=this.pending();
@@ -1226,6 +1230,60 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
       :n&&!this.busy?[`${n===1?"1 jogo":n+" jogos"} por enviar`,"off",navigator.onLine?"Toca para tentar enviar agora.":"Sem internet. Seguem sozinhos quando houver ligação."]:null;
     if(!S&&isCoord()){const A=this.busy||this.st==="sync"?["A sincronizar…","on"]:!navigator.onLine?["Offline","off"]:["Sincronizado","ok"];e.hidden=false;e.textContent="☁︎ "+A[0];e.className="sync "+A[1];e.title="Base de dados dos jogos: toca para sincronizar agora";return}
     e.hidden=!S;if(!S)return;e.textContent="⚠ "+S[0];e.className="sync "+S[1];e.title=S[2]}};
+
+/* ---------- registo de atividade ----------
+   Cada ação fica numa fila no tablet e segue para a base de dados privada em atividade/<utilizador>/<AAAA-MM>.json
+   (um ficheiro por pessoa e por mês, para os tablets não chocarem). Só o administrador vê; apaga-se ao fim de 12 meses. */
+const AQK="fcgaia-stats-atividade",ASTK="fcgaia-stats-atividade-jogos";
+const ACTL={login:["Entrou","entradas"],logout:["Saiu","entradas"],jogo_novo:["Começou a registar","jogos"],jogo_env:["Enviou jogo","jogos"],jogo_fim:["Terminou e enviou","jogos"],jogo_cor:["Corrigiu estatística","jogos"],
+  del_req:["Pediu para apagar","apagar"],del_can:["Cancelou pedido de apagar","apagar"],del_rec:["Manteve jogo (recusou apagar)","apagar"],del:["Apagou jogo","apagar"],
+  conta_nova:["Criou conta","contas"],conta_del:["Apagou conta","contas"],conta_pw:["Mudou palavra-passe","contas"],conta_off:["Desativou conta","contas"],conta_on:["Reativou conta","contas"],conta_edit:["Editou conta","contas"],
+  token:["Trocou token da base de dados","contas"],import:["Pediu importação dos Seniores","outros"]};
+const devName=()=>{const u=navigator.userAgent;return /iPad|Macintosh/.test(u)&&navigator.maxTouchPoints>1?"iPad":/iPhone/.test(u)?"iPhone":/Android/.test(u)?(/Mobile/.test(u)?"Telemóvel Android":"Tablet Android"):"Computador"};
+const gameAct=g=>`${TN[g.team]||g.teamName||g.team} · ${scoreTxt(g,"FC Gaia")}${g.date?" ("+g.date.slice(8,10)+"/"+g.date.slice(5,7)+")":""}`;
+const Act={
+  q(){try{return JSON.parse(lsGet(AQK)||"[]")}catch(e){return []}},
+  add(a,d,who){const u=who||USER;if(!u)return;const q=this.q();q.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),t:Date.now(),u:u.utilizador,n:u.nome||u.utilizador,a,d:d||"",dev:devName()});
+    lsSet(AQK,JSON.stringify(q.slice(-800)));if(typeof Sync!=="undefined")Sync.later(4000)},
+  /* jogos: só regista começar, terminar, primeira vez e correções (no máximo uma por jogo a cada 15 min) */
+  game(g){if(!USER||g.demo)return;let m={};try{m=JSON.parse(lsGet(ASTK)||"{}")}catch(e){}const p=m[g.id],now=Date.now();let a=null;
+    if(!p)a=g.status==="fim"?"jogo_env":"jogo_novo";else if(g.status==="fim"&&p.s!=="fim")a="jogo_fim";else if(g.status==="fim"&&now-p.t>15*60e3)a="jogo_cor";
+    if(a)this.add(a,gameAct(g));if(a||!p)m[g.id]={s:g.status,t:a?now:(p?p.t:now)};else m[g.id]={...p,s:g.status};
+    const lim=now-120*864e5;Object.keys(m).forEach(k=>{if(m[k].t<lim)delete m[k]});lsSet(ASTK,JSON.stringify(m))},
+  async flush(){const q=this.q();if(!q.length)return;const grp={};q.forEach(e=>{const k=e.u+"/"+new Date(e.t).toISOString().slice(0,7);(grp[k]=grp[k]||[]).push(e)});const done=new Set();
+    for(const [k,evs] of Object.entries(grp)){const path=`atividade/${k}.json`;
+      for(let tr=0;tr<3;tr++){const r=await Sync.api(path);let sha,list=[];if(r.ok){const j=await r.json();sha=j.sha;try{list=JSON.parse(unb64s(j.content)).ev||[]}catch(e){}}else if(r.status!==404)break;
+        const have=new Set(list.map(e=>e.id));evs.forEach(e=>{if(!have.has(e.id))list.push(e)});list.sort((a,b)=>a.t-b.t);
+        const w=await Sync.api(path,{method:"PUT",body:{message:"Atividade "+k,branch:GD.branch,content:b64s(JSON.stringify({ev:list})),...(sha?{sha}:{})}});
+        if(w.ok){evs.forEach(e=>done.add(e.id));break}if(w.status!==409&&w.status!==422)break}}
+    if(done.size)lsSet(AQK,JSON.stringify(this.q().filter(e=>!done.has(e.id))))}};
+/* vista do administrador */
+let ACTV={list:null,busy:false,err:"",u:"",k:"",months:2,dirs:null};
+async function loadActivity(more){if(ACTV.busy)return;if(!Sync.tok()||!navigator.onLine){ACTV.err=navigator.onLine?"Sem acesso à base de dados.":"Sem internet: liga-te para ver a atividade.";refreshAct();return}
+  ACTV.busy=true;ACTV.err="";if(more)ACTV.months+=3;refreshAct();
+  try{const r=await Sync.api("atividade");const dirs=r.status===404?[]:await r.json();const now=new Date(),keep=[],cut=new Date(now.getFullYear(),now.getMonth()-12,1).toISOString().slice(0,7);
+    for(let i=0;i<ACTV.months;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);keep.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"))}
+    const out=[];for(const d of (Array.isArray(dirs)?dirs:[]).filter(x=>x.type==="dir")){const fr=await Sync.api(d.path);if(!fr.ok)continue;const files=await fr.json();
+      for(const f of files){const ym=f.name.replace(/\.json$/,"");
+        if(ym<cut){Sync.api(f.path,{method:"DELETE",body:{message:"Atividade com mais de 12 meses",sha:f.sha,branch:GD.branch}}).catch(()=>{});continue}
+        if(!keep.includes(ym))continue;const x=await Sync.api(f.path);if(!x.ok)continue;const j=await x.json();try{out.push(...(JSON.parse(unb64s(j.content)).ev||[]))}catch(e){}}}
+    const ids=new Set(out.map(e=>e.id));Act.q().forEach(e=>{if(!ids.has(e.id))out.push({...e,local:1})});
+    ACTV.list=out.sort((a,b)=>b.t-a.t)}catch(e){ACTV.err="Não foi possível carregar a atividade ("+e.message+")."}
+  ACTV.busy=false;refreshAct()}
+function actCard(){const L=ACTV.list,users=L?[...new Map(L.map(e=>[e.u,e.n])).entries()].sort((a,b)=>a[1].localeCompare(b[1])):[];
+  const vis=L?L.filter(e=>(!ACTV.u||e.u===ACTV.u)&&(!ACTV.k||(ACTL[e.a]||[,"outros"])[1]===ACTV.k)):[];
+  const fd=t=>{const d=new Date(t);return d.toLocaleDateString("pt-PT",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})};
+  return `<div class="actw" id="actw">${!L?`<div class="bar" style="margin:0"><button class="btn gold" id="act-load"${ACTV.busy?" disabled":""}>${ACTV.busy?"A carregar…":"Ver atividade"}</button></div>`:`
+   <div class="fbar actf"><label class="f">Pessoa<select id="act-u"><option value="">Todas</option>${users.map(([u,n])=>`<option value="${esc(u)}"${ACTV.u===u?" selected":""}>${esc(n)}</option>`).join("")}</select></label>
+    <label class="f">Tipo<select id="act-k">${[["","Tudo"],["entradas","Entradas"],["jogos","Jogos enviados"],["apagar","Apagar jogos"],["contas","Contas"],["outros","Outros"]].map(([k,l])=>`<option value="${k}"${ACTV.k===k?" selected":""}>${l}</option>`).join("")}</select></label>
+    <button class="btn sm" id="act-re"${ACTV.busy?" disabled":""}>${ACTV.busy?"A carregar…":"↻ Atualizar"}</button></div>
+   <div class="tblw"><table class="bs actt"><thead><tr><th class="l">Quando</th><th class="l">Pessoa</th><th class="l">O quê</th><th class="l">Detalhe</th><th class="l">Aparelho</th></tr></thead><tbody>
+    ${vis.slice(0,400).map(e=>`<tr class="${(ACTL[e.a]||[,"outros"])[1]}"><td class="l">${fd(e.t)}${e.local?' <small class="warn">por enviar</small>':""}</td><td class="l"><b>${esc(e.n)}</b></td><td class="l">${esc((ACTL[e.a]||[e.a])[0])}</td><td class="l">${esc(e.d||"")}</td><td class="l"><small>${esc(e.dev||"")}</small></td></tr>`).join("")||'<tr><td class="l" colspan="5">Sem atividade neste período.</td></tr>'}</tbody></table></div>
+   <div class="bar"><span class="hint" style="margin:0">Últimos ${ACTV.months} meses · ${vis.length} registos</span><button class="btn sm" id="act-more"${ACTV.busy||ACTV.months>=12?" disabled":""}>Ver mais antigos</button></div>`}
+   ${ACTV.err?`<p class="err">${esc(ACTV.err)}</p>`:""}</div>`}
+function refreshAct(){const w=$("#actw");if(!w)return;const y=scrollY;w.outerHTML=actCard();bindAct();scrollTo(0,y)}
+function bindAct(){const l=$("#act-load");if(l)l.onclick=()=>loadActivity();const re=$("#act-re");if(re)re.onclick=()=>loadActivity();const mo=$("#act-more");if(mo)mo.onclick=()=>loadActivity(true);
+  const u=$("#act-u");if(u)u.onchange=()=>{ACTV.u=u.value;refreshAct()};const k=$("#act-k");if(k)k.onchange=()=>{ACTV.k=k.value;refreshAct()}}
 /* cartão com os dados de acesso, para fazer print ou copiar (a palavra-passe só existe neste momento) */
 /* pessoas do clube (do calendário): treinadores, team managers, coordenação e direção, para dar acesso com um toque */
 const nrm=x=>String(x||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
@@ -1352,14 +1410,15 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
      <div class="ua">${adm?"":`<button class="btn sm" data-ue="${esc(u.utilizador)}">Editar</button>`}<button class="btn sm" data-up="${esc(u.utilizador)}">Palavra-passe</button>${me?"":`<button class="btn sm${off?"":" danger"}" data-ua="${esc(u.utilizador)}" data-on="${off?1:0}">${off?"Reativar":"Desativar"}</button><button class="btn sm danger" data-ux="${esc(u.utilizador)}" aria-label="Apagar ${esc(u.nome)}">Apagar</button>`}</div></div>`}).join("")}
    </section>
   </div>
+  <div class="usec" id="atividade"><h2>Atividade</h2><p class="hint">Quem entrou, quem enviou ou corrigiu jogos, pedidos para apagar e alterações às contas. Fica guardado 12 meses.</p>${actCard()}</div>
   <div class="usec" id="ligacoes"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
    <div class="lgrid">${pubCard(pend)}${dbCard()}</div></div>`}
-function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
+function bindUsers(){const err=$("#u-err");bindAct();const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
   bindPeople();
   const gl=$("#u-golig");if(gl)gl.onclick=()=>$("#ligacoes").scrollIntoView({behavior:"smooth",block:"start"});
   const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox(UFILE.tk?"Trocar o token da base de dados (por exemplo, quando expira)? Colas o novo a seguir e todos os utilizadores continuam com acesso.":"Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso vai precisar de uma palavra-passe nova (só desta vez).",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
-    const go=async pw=>{dbo.disabled=true;try{const keep=await dbConnect(t,pw);toast(keep?"Token trocado. Todos mantêm o acesso.":"Base de dados ligada",3000,"ok");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
+    const go=async pw=>{dbo.disabled=true;try{const keep=await dbConnect(t,pw);toast(keep?"Token trocado. Todos mantêm o acesso.":"Base de dados ligada",3000,"ok");Act.add("token");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
     if(PWMEM)return go(PWMEM);askPw(async pw=>{const me=USERS.find(u=>u.utilizador===USER.utilizador);if(await pwHash(pw,me.salt)!==me.hash)throw new Error("Palavra-passe errada.");PWMEM=pw;go(pw)})};
   const dl=$("#u-dl");if(dl)dl.onclick=()=>{Acc.download();toast("utilizadores.json descarregado")};
   const on=$("#gh-on");if(on)on.onclick=async()=>{const t=$("#gh-t").value.trim();if(!t){$("#gh-e").textContent="Cola o token.";return}
@@ -1389,7 +1448,7 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
   const keepY=f=>{const y=scrollY;f();renderSetup();scrollTo(0,y)};
   const uo=$("#us-on");if(uo)uo.onclick=()=>keepY(()=>{USELM=true;USEL={}});const ux=$("#us-x");if(ux)ux.onclick=()=>keepY(()=>{USELM=false;USEL={}});
   document.querySelectorAll("[data-us]").forEach(b=>b.onclick=()=>keepY(()=>{const k=b.dataset.us;if(USEL[k])delete USEL[k];else USEL[k]=1}));
-  const ud=$("#us-del");if(ud)ud.onclick=()=>{const ks=Object.keys(USEL);confirmBox(`Apagar ${ks.length} ${ks.length===1?"conta":"contas"}? Essas pessoas deixam de conseguir entrar. Os jogos não são apagados.`,()=>{Acc.save(USERS.filter(u=>!ks.includes(u.utilizador)));USELM=false;USEL={};renderSetup();toast(`${ks.length} ${ks.length===1?"conta apagada":"contas apagadas"}`)})};
+  const ud=$("#us-del");if(ud)ud.onclick=()=>{const ks=Object.keys(USEL);confirmBox(`Apagar ${ks.length} ${ks.length===1?"conta":"contas"}? Essas pessoas deixam de conseguir entrar. Os jogos não são apagados.`,()=>{ks.forEach(k=>{const w=USERS.find(u=>u.utilizador===k);Act.add("conta_del",w?`${w.nome} (${k})`:k)});Acc.save(USERS.filter(u=>!ks.includes(u.utilizador)));USELM=false;USEL={};renderSetup();toast(`${ks.length} ${ks.length===1?"conta apagada":"contas apagadas"}`)})};
   document.querySelectorAll("[data-ux]").forEach(b=>b.onclick=()=>confirmBox("Apagar esta conta da lista? Os jogos não são apagados.",()=>{Acc.removeUser(b.dataset.ux);renderSetup()}))}
 
 
@@ -1400,7 +1459,7 @@ function applyTheme(t){document.documentElement.dataset.theme=t;const b=$("#thm"
   const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content="#000000"}
 applyTheme(lsGet("fcgaia-stats-tema")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"));
 function goLogin(){const go=async()=>{if(WATCH){stopWatch();WATCH=false}else if(G&&!isRO()){if(G.running)G.running=false;store()}G=null;stopTick();SEL=null;SUB=null;SIDE="us";SETVIEW="inicio";try{localStorage.removeItem(KC)}catch(e){}
-    USER=null;LOGIN_FORM=false;document.body.classList.remove("fit");renderLogin()};
+    if(USER)Act.add("logout");USER=null;LOGIN_FORM=false;document.body.classList.remove("fit");renderLogin()};
   if(!USER){renderLogin();return}
   if(G&&G.status!=="fim"&&!roG())confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
   else go()}
@@ -1619,7 +1678,7 @@ let JSEL=null;
 async function sharePDFs(ids,share=true){let jsPDF;try{toast(ids.length>1?`A preparar ${ids.length} PDF…`:"A preparar o PDF…",15000,"busy");jsPDF=await pdfLibs()}catch(e){toast("Não foi possível preparar o PDF: "+e.message,4000,"warn");return}
   const m=readAll(),files=[];for(const id of ids){const g=m[id];if(g)files.push(await makeGamePDF(jsPDF,fixGame(JSON.parse(JSON.stringify(g)))))}
   await shareFiles(files,share)}
-function delReq(id,on){const m=readAll(),g=m[id];if(!g)return;if(on)g.delReq={u:USER.utilizador,n:USER.nome||USER.utilizador,t:Date.now()};else delete g.delReq;g.upd=Date.now();writeAll(m);Sync.soon(0);
+function delReq(id,on){const m=readAll(),g=m[id];if(!g)return;Act.add(on?"del_req":isCoord()?"del_rec":"del_can",gameAct(g));if(on)g.delReq={u:USER.utilizador,n:USER.nome||USER.utilizador,t:Date.now()};else delete g.delReq;g.upd=Date.now();writeAll(m);Sync.soon(0);
   toast(on?"Pedido enviado: o administrador decide se apaga. As estatísticas ficam guardadas até lá.":isCoord()?"Pedido recusado: o jogo fica guardado.":"Pedido cancelado",4000,"ok")}
 function bindSaved(){
   document.querySelectorAll("[data-dreq]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.dreq];confirmBox(`Pedir ao administrador para apagar o jogo vs ${g.opp} (${g.date})? Fica guardado até ele confirmar.`,()=>{delReq(b.dataset.dreq,true);keepScroll(renderSetup)})});
@@ -1632,7 +1691,7 @@ function bindSaved(){
   document.querySelectorAll("[data-shr]").forEach(b=>b.onclick=()=>sharePDFs([b.dataset.shr]));document.querySelectorAll("[data-pdf]").forEach(b=>b.onclick=()=>sharePDFs([b.dataset.pdf],false));
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openGame(b.dataset.open));
   document.querySelectorAll("[data-xls]").forEach(b=>b.onclick=()=>{const keep=G;G=fixGame(readAll()[b.dataset.xls]);exportXLS();G=keep});
-  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();Sync.del(m[b.dataset.del]);delete m[b.dataset.del];writeAll(m);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const g=readAll()[b.dataset.del];confirmBox(`Apagar o jogo vs ${g.opp} (${g.date})? Esta ação não se pode desfazer.`,()=>{const m=readAll();Act.add("del",gameAct(g));Sync.del(m[b.dataset.del]);delete m[b.dataset.del];writeAll(m);try{if(localStorage.getItem(KC)===b.dataset.del)localStorage.removeItem(KC)}catch(e){}renderSetup()})});
   const bo=$("#bk-out");if(bo)bo.onclick=()=>{const blob=new Blob([JSON.stringify({app:"fcgaia-estatisticas",v:3,exportado:new Date().toISOString(),jogos:readAll()})],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="fcgaia-estatisticas-copia-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();toast("Cópia de segurança exportada")};
   const bi=$("#bk-in");if(bi)bi.onchange=()=>{const f=bi.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);const js=o.jogos||{};const m=readAll();let n=0;Object.entries(js).forEach(([k,g])=>{if(g&&g.st&&g.roster&&canSee(g)&&(!m[k]||(g.upd||0)>=(m[k].upd||0))){m[k]=g;n++}});writeAll(m);toast(n+" jogo(s) importado(s)");renderSetup()}catch(e){toast("Ficheiro inválido")}};r.readAsText(f)}}
@@ -1736,7 +1795,7 @@ async function runImport(btn){const wf=`https://api.github.com/repos/${GD.owner}
   try{const r=await fetch(wf+"/dispatches",{method:"POST",headers:{...h,"Content-Type":"application/json"},body:JSON.stringify({ref:GD.branch})});
     if(r.status===403||r.status===404){toast("O token da base de dados não pode correr a importação. No GitHub, edita o token “dados” e junta Actions: Read and write.",7000,"warn");return}
     if(!r.ok)throw new Error("GitHub "+r.status);
-    toast("Importação pedida. Demora 1 a 2 minutos; os jogos novos aparecem sozinhos.",5000,"ok");btn.textContent="A importar…";
+    toast("Importação pedida. Demora 1 a 2 minutos; os jogos novos aparecem sozinhos.",5000,"ok");Act.add("import");btn.textContent="A importar…";
     setTimeout(()=>Sync.soon(0),90000);setTimeout(()=>Sync.soon(0),150000);setTimeout(()=>{btn.disabled=false;btn.textContent=old},150000)}
   catch(e){toast("Não foi possível pedir a importação: "+e.message,5000,"warn")}finally{if(btn.textContent==="A pedir…"){btn.disabled=false;btn.textContent=old}}}
 function bindSeason(){const fr=$("#fiba-run");if(fr)fr.onclick=()=>runImport(fr);bindCharts();bindSaved();const eg=$("#ep-games");if(eg)eg.onclick=gamesSheet;
