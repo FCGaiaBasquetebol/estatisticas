@@ -962,7 +962,7 @@ body.fit .demob{padding:3px 10px;margin:0 0 4px;font-size:12px}
 const CREST=/*CREST*/"";
 const VER=/*VER*/"";
 let DATA=/*DATA*/null;
-const TEAMS=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Masters","Masters"],["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"],["Sub-12","Sub 12"],["Sub-10","Sub 10"],["Sub-8","Sub 8"]];
+const TEAMS=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Masters","Masters"],["Sub-18 Masc A","Sub18 A"],["Sub-18 Masc B","Sub18 B"],["Sub-16 Masc A","Sub16 A"],["Sub-16 Masc B","Sub16 B"],["Sub-14 Masc A","Sub14 A"],["Sub-14 Masc B","Sub14 B"],["Sub-12","Sub12"],["Sub-10","Sub10"],["Sub-8","Sub8"]];
 const TN=Object.fromEntries(TEAMS);
 const KEY="fcgaia-stats-v1";
 const $=s=>document.querySelector(s);
@@ -1009,7 +1009,7 @@ function store(){if(!G||WATCH)return;if(G.demo){G.upd=Date.now();try{localStorag
   try{if(G.status==="fim")localStorage.removeItem(KC);else localStorage.setItem(KC,G.id)}catch(e){}}
 function load(){try{const old=localStorage.getItem(KEY);if(old){const g=JSON.parse(old);if(g){g.id=g.id||"j"+(g.created||Date.now());const m=readAll();m[g.id]=g;writeAll(m);localStorage.setItem(KC,g.id)}localStorage.removeItem(KEY)}}catch(e){}
   try{const id=localStorage.getItem(KC);return id?readAll()[id]||null:null}catch(e){return null}}
-function fixGame(g){if(!g)return g;g.ost=g.ost||STAT0();[...Object.values(g.st),g.ost].forEach(x=>["fp","fu","di","fl","ft","fd"].forEach(k=>{if(x[k]==null)x[k]=0}));return g}
+function fixGame(g){if(!g)return g;if(TN[g.team])g.teamName=TN[g.team];g.ost=g.ost||STAT0();[...Object.values(g.st),g.ost].forEach(x=>["fp","fu","di","fl","ft","fd"].forEach(k=>{if(x[k]==null)x[k]=0}));return g}
 const pname=n=>n&&n===n.toUpperCase()?n.toLowerCase().replace(/(^|\s)(\S)/g,(m,a,b)=>a+b.toUpperCase()):n;
 
 let G=null;            // jogo em curso
@@ -1029,7 +1029,7 @@ let SIDE="us";          // us | them — a quem se atribuem as ações
 const USERS_EMB=/*USERS*/null;      // cópia de utilizadores.json embutida quando a app é gerada
 const UK="fcgaia-stats-utilizadores-local",US="fcgaia-stats-sessao";
 const validUser=u=>/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u);
-const ESC=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Masters","Masters"],["Sub-18 Masc A","Sub 18 A"],["Sub-18 Masc B","Sub 18 B"],["Sub-16 Masc A","Sub 16 A"],["Sub-16 Masc B","Sub 16 B"],["Sub-14 Masc A","Sub 14 A"],["Sub-14 Masc B","Sub 14 B"]];
+const ESC=[["Seniores Masc","Seniores"],["Esperanças","Esperanças"],["Masters","Masters"],["Sub-18 Masc A","Sub18 A"],["Sub-18 Masc B","Sub18 B"],["Sub-16 Masc A","Sub16 A"],["Sub-16 Masc B","Sub16 B"],["Sub-14 Masc A","Sub14 A"],["Sub-14 Masc B","Sub14 B"]];
 const PBK=150000,PWMIN=8;
 // repositório da app: deduzido do endereço (funciona em andreferraz12.github.io/fcgaia-estatisticas e em fcgaiaestatisticas.github.io)
 // calendário (jogos e planteis): endereço novo primeiro, o antigo como recurso durante a mudança
@@ -1271,7 +1271,7 @@ const Act={
    do escalão (PDF) e atualiza o Google Sheets "Estatisticas de Jogo_<escalão>_<época>". */
 const XQK="fcgaia-stats-export";
 const epocaSl=d=>{const y=+String(d||"").slice(0,4),m=+String(d||"").slice(5,7);if(!y)return "";const a=m>=8?y:y-1;return a+"/"+(a+1)};
-const shortTeam=t=>String(TN[t]||t).replace(/^Sub (\d+)/,"Sub$1");
+const shortTeam=t=>String(TN[t]||t);
 const blobB64=b=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=ko;r.readAsDataURL(b)});
 const Exp={
   q(){try{return JSON.parse(lsGet(XQK)||"{}")}catch(e){return {}}},
@@ -2317,7 +2317,7 @@ async function pdfLibs(){if(!window.jspdf)await loadJS("jspdf.umd.min.js");if(!(
 function gameMeta(g){const r=(DATA&&DATA.games||[]).find(r=>r[0]===g.team&&g.gameNum&&String(r[3])===String(g.gameNum));return {fase:g.fase||(r?r[12]:"")||"",jor:g.jor||(r?r[4]:"")||""}}
 function gameTitle(g){const m=gameMeta(g),tc=/taça/i.test(m.fase+" "+(g.comp||""));
   const fj=tc?"Taça":m.fase?`F${(String(m.fase).match(/\d+/)||["1"])[0]}${m.jor?" J"+String(m.jor).padStart(2,"0"):""}`:(!g.gameNum?"Amigável":"");
-  const us="FC Gaia "+(g.teamName||TN[g.team]||g.team||""),teams=g.home===false?`${g.opp} x ${us}`:`${us} x ${g.opp}`;
+  const us="FC Gaia "+(TN[g.team]||g.teamName||g.team||""),teams=g.home===false?`${g.opp} x ${us}`:`${us} x ${g.opp}`;
   return [fj,g.gameNum?"Jogo "+g.gameNum:"",teams,String(g.comp||"").split("·")[0].trim()].filter(Boolean).join("_")}
 const noAcc=x=>String(x).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[ªº]/g,"");
 const gameFile=(g,ext)=>noAcc([g.date,gameTitle(g)].filter(Boolean).join("_")).replace(/[\/\\:*?"<>|]+/g,"-").replace(/\s+/g," ").trim()+"."+ext;

@@ -166,3 +166,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 ## v59 — exportação para o Drive
 - `Exp`: depois de enviar um jogo terminado (quem registou/corrigiu) ou apagar um jogo, a sincronização gera o PDF do jogo e o Excel do escalão e grava em export/<escalão>/<AAAA-AAAA>/ (jogos/*.pdf, estatisticas.xlsx, info.json com a lista de PDF e upd). Só regenera os PDF de jogos alterados; apaga PDF de jogos apagados.
 - drive/Codigo.gs (novo): copia PDF para as pastas 1. Sub14 B … 6. Sub18 A e atualiza o Google Sheets "Estatisticas de Jogo_<escalão>_<época>" (Drive API v3, conversão no mesmo ficheiro). Ver drive/LEIA-ME.md.
+
+## v60
+- Escalões escritos sem espaço (Sub14 B, Sub16 A…) em toda a app, PDF, Excel e Drive; fixGame acerta g.teamName pelo nome atual.
