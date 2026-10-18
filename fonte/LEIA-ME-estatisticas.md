@@ -155,3 +155,7 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 ## v56
 - "Utilizadores" passa a "Backoffice", com separadores Utilizadores e Atividade (a atividade carrega sozinha ao abrir).
 - Início: "Experimentar" é um botão pequeno ao lado da Ajuda; "Hoje" é uma faixa compacta (altura do botão Ajuda, largura total) com todos os jogos do dia: ao vivo (LIVE), resultados e horas do calendário, para todos os utilizadores.
+
+## v57 — Excel do escalão (base do Google Sheets)
+- Separadores Equipa e Atleta (visíveis); Dados e Listas ocultos. Filtros: Prova / fase (lista "Prova" e "Prova · Fase"), Jogo, Valores (Totais/Médias) e coluna Contar (Sim/Não) na lista de jogos. Critérios em Listas!F1:F4.
+- Atleta ▾ na Equipa + ligação "Ver jogo a jogo ›" → separador Atleta (linha por jogo, Total, Média por jogo, ligação "‹ Equipa"). `buildXLSX(games,title,fname,{buffer:true})` devolve o ficheiro sem descarregar (para o envio automático).
