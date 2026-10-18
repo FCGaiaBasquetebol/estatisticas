@@ -1061,7 +1061,7 @@ function renderLogin(msg){$("#b-new").hidden=true;$("#gact").hidden=true;$("#who
 }
 function whoBar(){$("#who").innerHTML=USER?`<button class="sync" id="sync" type="button"></button><span class="wn"><b>${esc(USER.nome||USER.utilizador)}</b><small>${USER.perfil==="coordenador"?"Administrador":esc(roleLabel(USER).replace(" · consulta",""))+" · "+esc((USER.escaloes||[]).includes("*")?"todos os escalões":(USER.escaloes||[]).map(t=>TN[t]).join(", "))}</small></span><button class="btn sm ghost" id="b-out">Sair</button>`:"";
   const sy=$("#sync");if(sy){sy.onclick=()=>{if(!Sync.tok()){toast("Os jogos ficam só neste tablet. Pede ao administrador acesso à base de dados.",4500,"warn");return}if(!navigator.onLine){toast("Sem internet. Liga o Wi-Fi ou os dados e os jogos seguem sozinhos.",4500,"warn");return}Sync.announce="manual";toast(Sync.pending()?"A enviar estatísticas…":"A sincronizar…",15000,"busy");Sync.soon(0)};Sync.paint()}
-  const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo? Da próxima vez será preciso a palavra-passe.",async()=>{await Acc.logout();USER=null;G=null;LOGIN_FORM=false;renderLogin()})}}
+  const o=$("#b-out");if(o)o.onclick=()=>{if(G&&G.status!=="fim"&&!roG()){toast("Grava ou termina o jogo antes de sair da conta");return}if(Sync.pending()&&Sync.tok()){toast("Ainda há jogos por enviar. Liga a internet antes de sair.");}confirmBox("Sair da conta neste dispositivo? Da próxima vez será preciso a palavra-passe.",async()=>{stopWatch();WATCH=false;await Acc.logout();USER=null;G=null;LOGIN_FORM=false;renderLogin()})}}
 function netState(){}
 function onUser(u){USER=u;stopTick();
   if(!u){renderLogin();return}
@@ -1315,10 +1315,10 @@ const TK="fcgaia-stats-tema";
 function applyTheme(t){document.documentElement.dataset.theme=t;const b=$("#thm");if(b){b.textContent=t==="light"?"☾":"☀";b.title=t==="light"?"Mudar para tema escuro":"Mudar para tema claro";b.setAttribute("aria-label",b.title)}
   const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.content="#000000"}
 applyTheme(lsGet("fcgaia-stats-tema")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"));
-function goLogin(){const go=async()=>{if(G){if(G.running)G.running=false;store()}G=null;stopTick();SEL=null;SUB=null;SIDE="us";SETVIEW="inicio";try{localStorage.removeItem(KC)}catch(e){}
+function goLogin(){const go=async()=>{if(WATCH){stopWatch();WATCH=false}else if(G&&!isRO()){if(G.running)G.running=false;store()}G=null;stopTick();SEL=null;SUB=null;SIDE="us";SETVIEW="inicio";try{localStorage.removeItem(KC)}catch(e){}
     USER=null;LOGIN_FORM=false;document.body.classList.remove("fit");renderLogin()};
   if(!USER){renderLogin();return}
-  if(G&&G.status!=="fim")confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
+  if(G&&G.status!=="fim"&&!roG())confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
   else go()}
 /* guia rápido */
 const HELP=[["Convoca no Plantel","No separador Plantel marca quem vai a jogo e carrega em “Convocar → escolher jogo”. O ✎ corrige nome e número; “+ Adicionar jogador” junta quem não está no plantel. A convocatória fica guardada para o jogo seguinte.","1"],
