@@ -1,6 +1,6 @@
 // Funcionamento offline da página de estatísticas
-const CACHE = "fcgaia-estatisticas-v34";
-const CORE = ["./", "./index.html", "./xlsx.full.min.js", "./jspdf.umd.min.js", "./jspdf.plugin.autotable.min.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./utilizadores.json", "./ajuda/1.jpg", "./ajuda/2.jpg", "./ajuda/3.jpg", "./ajuda/4.jpg", "./ajuda/5.jpg", "./ajuda/6.jpg", "./ajuda/7.jpg", "./ajuda/8.jpg", "https://andreferraz12.github.io/Fcgaiacalendario/data/jogos.json", "https://fcgaiabasquetebol.github.io/data/jogos.json"];
+const CACHE = "fcgaia-estatisticas-v35";
+const CORE = ["./", "./index.html", "./xlsx.full.min.js", "./jspdf.umd.min.js", "./jspdf.plugin.autotable.min.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./utilizadores.json", "./ajuda/1.jpg", "./ajuda/2.jpg", "./ajuda/3.jpg", "./ajuda/4.jpg", "./ajuda/5.jpg", "./ajuda/6.jpg", "./ajuda/7.jpg", "./ajuda/8.jpg", "./ajuda/9.jpg", "https://andreferraz12.github.io/Fcgaiacalendario/data/jogos.json", "https://fcgaiabasquetebol.github.io/data/jogos.json"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(CORE.map(u => c.add(u).catch(() => null)))).then(() => self.skipWaiting()));
 });
