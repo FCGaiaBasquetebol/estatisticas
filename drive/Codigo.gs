@@ -1,7 +1,7 @@
 /**
  * FC Gaia · Estatísticas → Google Drive
  * ------------------------------------------------------------
- * Corre na conta Google do clube (script.google.com), de 15 em 15 minutos.
+ * Corre na conta Google do clube (script.google.com), uma vez por dia (às 3h da manhã).
  * Quando um jogo terminado é enviado na app, o tablet deixa na base de dados (GitHub, privado):
  *     export/<escalão>/<época>/jogos/<jogo>.pdf      ← ficha do jogo (o mesmo PDF da app)
  *     export/<escalão>/<época>/estatisticas.xlsx     ← estatísticas do escalão (separadores Equipa, Jogos, Atleta)
@@ -19,7 +19,7 @@ const CFG = {
   owner: "FCGaiaBasquetebol",
   repo: "fcgaia-estatisticas-dados",
   branch: "main",
-  minutos: 15,
+  hora: 3,          // hora a que corre todos os dias (hora de Lisboa)
   /* escalão da app → nome da pasta no Drive. Se o nome não chegar (pastas repetidas),
      cria a propriedade PASTA_<escalão> com o ID da pasta (o código no fim do link da pasta),
      por exemplo PASTA_sub-14-masc-b = 1AbCdEf... */
@@ -37,8 +37,8 @@ const CFG = {
 function instalar() {
   if (!token_()) throw new Error("Falta a propriedade GITHUB_TOKEN (Definições do projeto → Propriedades do script).");
   ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
-  ScriptApp.newTrigger("sincronizar").timeBased().everyMinutes(CFG.minutos).create();
-  Logger.log("Instalado: corre de " + CFG.minutos + " em " + CFG.minutos + " minutos.");
+  ScriptApp.newTrigger("sincronizar").timeBased().everyDays(1).atHour(CFG.hora).inTimezone("Europe/Lisbon").create();
+  Logger.log("Instalado: corre todos os dias por volta das " + CFG.hora + "h. Para atualizar já, executa «sincronizar».");
   Logger.log(JSON.stringify(sincronizar()));
 }
 function desinstalar() {

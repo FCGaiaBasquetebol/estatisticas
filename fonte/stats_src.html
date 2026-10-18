@@ -1295,7 +1295,7 @@ const Exp={
       if(list.length){const buf=await buildXLSX(list,String(TN[team]||team).toUpperCase()+" · ÉPOCA "+ep,nome+".xlsx",{buffer:true,quiet:true});await this.put(`${base}/estatisticas.xlsx`,await blobB64(new Blob([buf])),"Excel "+nome)}
       await this.put(`${base}/info.json`,b64s(JSON.stringify({team,nome:shortTeam(team),epoca:ep,ficheiro:nome,upd:Date.now(),jogos:list.length,pdfs},null,1)),"Exportação "+nome);
       const q2=this.q();if(q2[k]===q[k])delete q2[k];lsSet(XQK,JSON.stringify(q2))}
-    if(this.manual){this.manual=false;this.done=Date.now();toast("✓ Tudo enviado. O Drive atualiza nos próximos 15 minutos.",5000,"ok");if(SETVIEW==="users"&&!G)renderSetup()}}};
+    if(this.manual){this.manual=false;this.done=Date.now();toast("✓ Tudo enviado. O Drive atualiza esta noite (por volta das 3h).",5000,"ok");if(SETVIEW==="users"&&!G)renderSetup()}}};
 /* vista do administrador */
 let BOTAB="users",ACTV={list:null,busy:false,err:"",u:"",k:"",months:2,dirs:null};
 async function loadActivity(more){if(ACTV.busy)return;if(!Sync.tok()||!navigator.onLine){ACTV.err=navigator.onLine?"Sem acesso à base de dados.":"Sem internet: liga-te para ver a atividade.";refreshAct();return}
@@ -1396,7 +1396,7 @@ function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&
    <p class="hint" style="margin-top:0">${busy?"A enviar utilizadores.json para o GitHub.":err?esc(PUBST):pend?"Há alterações que ainda não foram enviadas.":"Cada alteração é enviada automaticamente para o GitHub e fica ativa nos outros dispositivos em 1 a 2 minutos."}</p>
    <div class="bar">${pend||err?`<button class="btn gold" id="gh-pub"${busy?" disabled":""}>Publicar agora</button><button class="btn" id="u-disc">Descartar alterações</button>`:""}<button class="btn sm ghost" id="gh-off">Desligar GitHub neste dispositivo</button></div></div>`}
 function driveCard(){const n=Object.values(readAll()).filter(g=>g.status==="fim"&&!g.demo).length,q=Object.keys(Exp.q()).length;
-  return `<div class="card pub"><h3 style="margin-top:0">📁 Google Drive do clube</h3><p class="hint" style="margin-top:0">Depois de cada jogo terminado, o PDF e o Excel do escalão seguem para o Drive (pasta do escalão). Para enviar também os jogos que já existiam, usa o botão. Demora alguns segundos por jogo; deixa a app aberta.${q?` <b>Na fila:</b> ${q} ${q===1?"escalão":"escalões"}.`:""}</p>
+  return `<div class="card pub"><h3 style="margin-top:0">📁 Google Drive do clube</h3><p class="hint" style="margin-top:0">Depois de cada jogo terminado, o PDF e o Excel do escalão ficam prontos e o Drive (pasta do escalão) é atualizado uma vez por dia, por volta das 3h. Para enviar também os jogos que já existiam, usa o botão. Demora alguns segundos por jogo; deixa a app aberta.${q?` <b>Na fila:</b> ${q} ${q===1?"escalão":"escalões"}.`:""}</p>
    <div class="bar" style="margin-bottom:0"><button class="btn sm gold" id="dr-all"${n&&Sync.tok()?"":" disabled"}>Enviar tudo para o Drive (${n} ${n===1?"jogo":"jogos"})</button></div></div>`}
 function exportAll(){if(!Sync.tok()){toast("Liga primeiro a base de dados.",3000,"warn");return}if(!navigator.onLine){toast("Sem internet: tenta quando houver ligação.",3000,"warn");return}
   const gs=Object.values(readAll()).filter(g=>g.status==="fim"&&!g.demo);gs.forEach(g=>Exp.mark(g.team,g.date));Exp.manual=true;
