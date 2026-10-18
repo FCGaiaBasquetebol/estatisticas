@@ -897,6 +897,16 @@ body.fit .demob{padding:3px 10px;margin:0 0 4px;font-size:12px}
 .sv{flex-wrap:wrap}.btn.ghostd{color:var(--ko);border-color:rgba(220,60,50,.35)}
 .hreq{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--ink);cursor:pointer;padding:12px 18px;margin-bottom:10px;border-radius:14px;border:2px solid var(--ko);background:rgba(220,60,50,.08)}
 .hreq>span:first-child{font-size:26px;text-align:center}.hreq .htx b{font-size:20px}
+
+/* ===== v30: resultados de hoje ===== */
+.lvs h3{margin:6px 0 8px}.lvl{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;margin-bottom:12px}
+.lv{display:grid;gap:4px;text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.lv.can{cursor:pointer}.lv.can:hover{border-color:var(--gold)}.lv.on{border-color:var(--ko)}
+.lv-t{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.lv-s{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto minmax(0,1fr);align-items:center;gap:8px}.lv-s span{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lv-s span:last-child{text-align:right}
+.lv-s b{font-family:var(--f-disp);font-weight:400;font-size:30px;line-height:1}.lv-s b:first-of-type{color:var(--gold)}.lv-s i{font-style:normal;color:var(--muted)}
+.lv-st{font-size:13px;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:6px}.lv.on .lv-st{color:var(--ko)}.hdot.off{animation:none;background:var(--muted);box-shadow:none}
+:root[data-theme=light] .lv{background:#fff}:root[data-theme=light] .lv-s b:first-of-type{color:var(--gold-ink)}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1116,6 +1126,7 @@ async function decK(w,K){return new TextDecoder().decode(await crypto.subtle.dec
 const dkSecret=()=>{const K=lsGet(KK);return UFILE&&UFILE.tk&&K?K:Sync.tok()};
 async function refreshTok(){const K=lsGet(KK);if(K&&UFILE&&UFILE.tk){try{const t=await decK(UFILE.tk,K);if(t&&t!==lsGet(DTK)){lsSet(DTK,t);Sync.st="";Sync.soon(300)}}catch(e){}}}
 async function unwrapTok(w,pw,salt){return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(w.iv)},await wrapKey(pw,salt),unb64(w.ct)))}
+const LIVEK="fcgaia-stats-live";let LIVE=(()=>{try{return JSON.parse(localStorage.getItem(LIVEK)||"{}")}catch(e){return {}}})(),LIVESHA="",HPOLL=null,HTICK=null;
 const Sync={st:"",busy:false,t:null,last:0,announce:false,
   tok(){return lsGet(DTK)},
   file(g){return `${GD.dir}/${slug(g.team)}__${g.id}.json`},
@@ -1137,12 +1148,24 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     if(g._sha)body.sha=g._sha;let r=await this.api(this.file(g),{method:"PUT",body});
     if(r.status===409||r.status===422){const cur=await this.api(this.file(g));if(cur.ok){const j=await cur.json();const rem=JSON.parse(unb64s(j.content));
         if((rem.upd||0)>(g.upd||0)){this.adopt(rem,j.sha);return}body.sha=j.sha}else delete body.sha;r=await this.api(this.file(g),{method:"PUT",body})}
-    if(!r.ok)throw new Error("envio "+r.status);const j=await r.json();this.mark(g.id,j.content.sha,g.upd)},
+    if(!r.ok)throw new Error("envio "+r.status);const j=await r.json();this.mark(g.id,j.content.sha,g.upd);if(!g.demo)this.pushLive(g).catch(()=>{})},
+  /* resultados ao vivo: um índice pequeno (live/index.json) com o resultado de cada jogo, visível para todos */
+  async liveEdit(fn){for(let k=0;k<3;k++){const r=await this.api("live/index.json");let sha,games={};
+      if(r.ok){const j=await r.json();sha=j.sha;try{games=JSON.parse(unb64s(j.content)).games||{}}catch(e){}}else if(r.status!==404)return;
+      fn(games);const lim=Date.now()-36*3600e3;Object.keys(games).forEach(id=>{if((games[id].upd||0)<lim)delete games[id]});
+      const w=await this.api("live/index.json",{method:"PUT",body:{message:"Resultados ao vivo",branch:GD.branch,content:b64s(JSON.stringify({games})),...(sha?{sha}:{})}});
+      if(w.ok){LIVE=games;try{lsSet(LIVEK,JSON.stringify(LIVE))}catch(e){}return}if(w.status!==409&&w.status!==422)return}},
+  async pushLive(g){this._lt=this._lt||{};const now=Date.now();if(g.status==="fim"&&now-(g.upd||0)>12*3600e3)return;
+    const prev=LIVE[g.id];if(g.status!=="fim"&&now-(this._lt[g.id]||0)<25000&&prev&&prev.status===g.status)return;this._lt[g.id]=now;
+    const r=recOf(g)||{};const sum={team:g.team,teamName:g.teamName,opp:g.opp,us:g.us,them:g.them,q:g.q,np:g.np,clock:Math.round(g.clock||0),running:!!g.running,upd:g.upd||now,status:g.status,date:g.date,by:r.n||""};
+    await this.liveEdit(games=>{games[g.id]=sum})},
+  async pullLive(){if(!this.tok()||!navigator.onLine)return false;try{const r=await this.api("live/index.json");if(!r.ok)return false;const j=await r.json();if(j.sha===LIVESHA)return false;LIVESHA=j.sha;
+    LIVE=JSON.parse(unb64s(j.content)).games||{};lsSet(LIVEK,JSON.stringify(LIVE));return true}catch(e){return false}},
   adopt(rem,sha){const m=readAll(),loc=m[rem.id];if(G&&G.id===rem.id&&G.status!=="fim"&&loc&&this.dirty(loc))return false;
     m[rem.id]={...rem,undo:(loc&&loc.undo)||[],_sha:sha,_sup:rem.upd};writeAll(m);if(G&&G.id===rem.id&&!G.running){G=fixGame(m[rem.id])}return true},
   async run(){if(this.busy||!USER)return this.paint();if(!this.tok()){this.st="semtoken";return this.paint()}if(!navigator.onLine){this.st="offline";return this.paint()}
     this.busy=true;this.st="sync";this.paint();let changed=false,sent=0;const wasPending=this.pending();
-    try{/* 1. apagar */const q=this.dq(),left=[];for(const d of q){const r=await this.api(d.path);if(r.ok){const j=await r.json();const x=await this.api(d.path,{method:"DELETE",body:{message:"Jogo apagado",sha:j.sha,branch:GD.branch}});if(!x.ok&&x.status!==404)left.push(d)}}lsSet(DQK,left.length?JSON.stringify(left):null);
+    try{/* 1. apagar */const q=this.dq(),left=[];for(const d of q){const r=await this.api(d.path);if(r.ok){const j=await r.json();const x=await this.api(d.path,{method:"DELETE",body:{message:"Jogo apagado",sha:j.sha,branch:GD.branch}});if(!x.ok&&x.status!==404)left.push(d);else if(d.id&&LIVE[d.id])await this.liveEdit(gs=>{delete gs[d.id]}).catch(()=>{})}else if(r.status===404&&d.id&&LIVE[d.id])await this.liveEdit(gs=>{delete gs[d.id]}).catch(()=>{})}lsSet(DQK,left.length?JSON.stringify(left):null);
       /* 2. enviar */for(const g of Object.values(readAll()).filter(g=>canSee(g)&&this.dirty(g))){if(G&&G.id===g.id&&G.running&&Date.now()-this.last<12000)continue;await this.push(g);sent++}
       /* 3. receber */const r=await this.api(GD.dir);if(r.status===404){const rr=await this.api("");if(!rr.ok&&rr.status===404){this.st="erro";throw new Error("repositório inacessível")}}const list=r.status===404?[]:await r.json();if(!Array.isArray(list))throw new Error("lista");
       const ok=new Set(allowed().map(slug)),seen=new Set(),m=readAll();
@@ -1150,6 +1173,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
         if(loc&&loc._sha===f.sha)continue;if(loc&&this.dirty(loc)&&loc._sha)continue;
         const x=await this.api(f.path);if(!x.ok)continue;const j=await x.json();const rem=JSON.parse(unb64s(j.content));if(!loc||(rem.upd||0)>=(loc.upd||0)){if(this.adopt(rem,j.sha))changed=true}else this.mark(id,j.sha,loc._sup)}
       const m2=readAll();Object.values(m2).forEach(g=>{if(g._sha&&!seen.has(g.id)&&canSee(g)&&!(G&&G.id===g.id)){delete m2[g.id];changed=true}});if(changed)writeAll(m2);
+      try{if(await this.pullLive()&&!G&&SETVIEW==="inicio")renderSetup()}catch(e){}
       this.st="ok";this.last=Date.now()}
     catch(e){console.warn("sync",e);if(this.st!=="erro")this.st=navigator.onLine?"falha":"offline"}
     this.busy=false;this.paint();const left=this.pending();
@@ -1403,8 +1427,18 @@ const ICO={
 function nextGames(){const today=new Date();today.setHours(0,0,0,0);const out=[];
   allowed().forEach(t=>teamGames(t).forEach(g=>{const d=g.date?new Date(g.date+"T12:00"):null;if(d&&d>=today&&!g.res)out.push({...g,team:t,d})}));
   return out.sort((a,b)=>(a.date+(a.time||"")).localeCompare(b.date+(b.time||""))).slice(0,3)}
+function liveClock(x){return x.running&&x.status!=="fim"?Math.max(0,x.clock-(Date.now()-(x.upd||Date.now()))/1000):x.clock}
+function liveSection(){const now=Date.now(),today=new Date().toISOString().slice(0,10),mine=new Set(visGames().filter(g=>g.status!=="fim"&&!othersGame(g)).map(g=>g.id));
+  const L=Object.entries(LIVE).filter(([id,x])=>!mine.has(id)&&(x.date===today||now-(x.upd||0)<12*3600e3)).map(([id,x])=>({id,...x}))
+    .sort((a,b)=>(a.status==="fim")-(b.status==="fim")||(b.upd||0)-(a.upd||0));
+  if(!L.length)return "";const al=allowed();
+  const ql=x=>x.q>(x.np||4)?"Prol. "+(x.q-(x.np||4)):x.q+(x.np===2?".ª parte":".º período");
+  return `<div class="lvs"><h3>Resultados de hoje</h3><div class="lvl">${L.map(x=>{const live=x.status!=="fim",can=al.includes(x.team);
+    return `<${can?"button":"div"} class="lv${live?" on":""}${can?" can":""}"${can?` data-lv="${esc(x.id)}"`:""}><span class="lv-t">${esc(TN[x.team]||x.teamName||x.team)}</span>
+     <span class="lv-s"><span>FC Gaia</span><b>${x.us}</b><i>–</i><b>${x.them}</b><span>${esc(x.opp)}</span></span>
+     <span class="lv-st">${live?`<span class="hdot${x.running?"":" off"}"></span>${ql(x)} · <span data-lvc="${esc(x.id)}">${fmtT(liveClock(x))}</span>`:"Final"}${can&&live?" · Acompanhar ›":""}</span></${can?"button":"div"}>`}).join("")}</div></div>`}
 function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];const now=new Date();
-  const open=visGames().filter(g=>g.status!=="fim").sort((a,b)=>(b.upd||0)-(a.upd||0));
+  const open=visGames().filter(g=>g.status!=="fim"&&!othersGame(g)).sort((a,b)=>(b.upd||0)-(a.upd||0));
   const nG=visGames().length,ng=ro?[]:nextGames();const today=new Date();today.setHours(0,0,0,0);
   const dl=d=>{const n=Math.round((d-today)/864e5);return n===0?"Hoje":n===1?"Amanhã":["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"][d.getDay()]+" "+d.getDate()+" "+MSH[d.getMonth()]};
   const conv=(()=>{try{return JSON.parse(localStorage.getItem(KCV)||"{}")}catch(e){return {}}})();const nConv=Object.values(conv).reduce((t,c)=>t+Object.values(c.picked||{}).filter(Boolean).length,0);
@@ -1412,6 +1446,7 @@ function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];co
   return `<section class="home">
   <div class="hhello"><h2>Olá${first?", "+esc(first):""}</h2><button class="hhelp" data-home="ajuda"><span class="hic">${ICO.ajuda}</span>Ajuda</button><p>${["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"][now.getDay()]}, ${now.getDate()} ${MSH[now.getMonth()]}</p></div>
   ${open.map(g=>`<button class="hopen" data-open="${esc(g.id)}"><span class="hdot"></span><span class="htx"><small>${othersGame(g)?`A decorrer · regista ${esc((recOf(g)||{}).n||"")}`:"Jogo por terminar"}</small><b>${esc(TN[g.team]||g.teamName)} vs ${esc(g.opp)}</b></span><span class="hsc">${g.us}–${g.them}</span><span class="hgo">${othersGame(g)?"Acompanhar":"Continuar"} ›</span></button>`).join("")}
+  ${liveSection()}
   ${isCoord()&&visGames().some(g=>g.delReq)?`<button class="hreq" data-home="epoca"><span>🗑</span><span class="htx"><b>${visGames().filter(g=>g.delReq).length} ${visGames().filter(g=>g.delReq).length===1?"pedido":"pedidos"} para apagar jogos</b><small>Os jogos continuam guardados até decidires. Abre Estatísticas → Jogos.</small></span><span class="hgo">Ver ›</span></button>`:""}
   <div class="hgrid">
    ${ro?"":tile("novo","jogo","Novo jogo","Registar um jogo ao vivo","main")}
@@ -1422,7 +1457,11 @@ function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];co
   </div>
   ${ng.length?`<div class="hnext"><h3>Próximos jogos</h3>${ng.map(g=>{const home=g.home.startsWith("FC Gaia");return `<button class="hng" data-ng="${esc(g.team)}|${esc(g.num)}"><span class="hd"><b>${dl(g.d)}</b><small>${esc(g.time||"")}</small></span><span class="htx"><b>${esc(home?g.away:g.home)}</b><small>${esc(TN[g.team]||g.team)} · ${home?"Em casa":"Fora"}</small></span><span class="hgo">Preparar ›</span></button>`}).join("")}</div>`:""}
   <p class="ver">Versão ${esc(VER||"local")}</p></section>`}
-function bindHome(){document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{const k=b.dataset.home;if(k==="ajuda"){helpBox();return}if(k==="demo"){startDemo();return}SETVIEW=k;renderSetup();scrollTo(0,0)});
+function bindHome(){
+  document.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>{const id=b.dataset.lv;if(readAll()[id]){openGame(id);return}toast("A carregar o jogo…",3000,"busy");Sync.soon(0);setTimeout(()=>{if(readAll()[id]&&!G&&SETVIEW==="inicio")openGame(id)},4000)});
+  if(!HPOLL)HPOLL=setInterval(async()=>{if(G||SETVIEW!=="inicio"||document.hidden)return;if(await Sync.pullLive()){const y=scrollY;renderSetup();scrollTo(0,y)}},45000);
+  if(!HTICK)HTICK=setInterval(()=>{document.querySelectorAll("[data-lvc]").forEach(e=>{const x=LIVE[e.dataset.lvc];if(x)e.textContent=fmtT(liveClock(x))})},1000);
+  Sync.pullLive().then(c=>{if(c&&!G&&SETVIEW==="inicio"){const y=scrollY;renderSetup();scrollTo(0,y)}});document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{const k=b.dataset.home;if(k==="ajuda"){helpBox();return}if(k==="demo"){startDemo();return}SETVIEW=k;renderSetup();scrollTo(0,0)});
   document.querySelectorAll(".hopen[data-open]").forEach(b=>b.onclick=()=>openGame(b.dataset.open));
   document.querySelectorAll("[data-ng]").forEach(b=>b.onclick=()=>{const [t,n]=b.dataset.ng.split("|");const S=SETUP;S.team=t;S.game=n;S.np=4;S.per=10;SETVIEW="novo";renderSetup();scrollTo(0,0)})}
 function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW==="novo"||SETVIEW==="users"||SETVIEW==="plantel"))SETVIEW="epoca";$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
