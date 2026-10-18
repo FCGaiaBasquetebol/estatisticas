@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792347237616,
+ "atualizado": 1792347261592,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -265,6 +265,21 @@
    "dk": {
     "iv": "WbHgDJuT1xzuM54C",
     "ct": "x6E65BnPlyKKuBH8ecOUfb7YpYKT9HM4fc4N5ejqmvyXwYEEXq/CWL7bkoH+mLZ1st4R/XIt/nd1Ffq8"
+   }
+  },
+  {
+   "utilizador": "manuel.amaral",
+   "nome": "Manuel Amaral",
+   "perfil": "treinador",
+   "escaloes": [
+    "Sub-18 Masc B"
+   ],
+   "ativo": true,
+   "salt": "ZSc9ifJ7jIPaMUvyFBSshw==",
+   "hash": "5qSHAD8eqbGg5xkI7n19k+lyB5T9soB8gk2SO/OCfiY=",
+   "dk": {
+    "iv": "XYuABUU0ONfT43kv",
+    "ct": "E2alRmj4pYR7CisX6oPRvjuDo3YiYel/8DHUQ5Wrs+P8XukLCwzM3SRn3YuY9w9mG8w/3e1RCsatbQgh"
    }
   }
  ]
