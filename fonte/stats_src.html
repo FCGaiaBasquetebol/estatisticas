@@ -864,6 +864,11 @@ body.fit .tsw-b{min-height:48px}body.fit .tsw-b b{font-size:18px}
 .watchb .wtx{flex:1;min-width:220px}.watchb small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 .wdot{width:12px;height:12px;border-radius:50%;background:var(--muted);flex:none}.wdot.on{background:var(--ko);box-shadow:0 0 0 4px rgba(220,60,50,.2);animation:hpulse 1.6s infinite}
 :root[data-theme=light] .watchb{background:#eaf2ff;border-color:#2f6fd6}
+
+/* ===== v26: ordenar a ficha dos atletas ===== */
+table.bs th.srt-h{cursor:pointer;user-select:none;-webkit-user-select:none;white-space:nowrap}table.bs th.srt-h:hover{color:var(--ink)}
+table.bs th.srt{color:var(--gold);background:rgba(226,184,18,.12)}table.bs th i{font-style:normal;font-size:9px;margin-left:3px}
+:root[data-theme=light] table.bs th.srt{color:var(--gold-ink);background:#fff6cf}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1816,6 +1821,11 @@ const LBL={pausa:"Jogo gravado (relógio parado)",di:"Falta disruptiva",fl:"Falt
 function logText(e){if(e.side==="o")return "Adversário — "+(LBL[e.t]||e.t);const p=e.id?pById(e.id):null;
   if(e.t==="sub"){const o=e.out?pById(e.out):null;return `Entra ${p?"#"+p.num+" "+p.name:""}${o?" · sai #"+o.num+" "+o.name:""}`}
   return (p?`#${p.num} ${p.name} — `:"")+(LBL[e.t]||e.t)}
+const BSCOLS=[["num","Nº"],["name","Atleta"],["sec","MIN"],["pts","PTS"],["m2","2PT"],["m3","3PT"],["mf","LL"],["or","RO"],["dr","RD"],["rt","RT"],["ast","AST"],["stl","ROU"],["blk","DL"],["tov","PER"],["fp","FP"],["di","DI"],["fl","FL"],["ft","T"],["pf","F"],["fd","FR"],["pm","+/-"],["val","VAL"]];
+let BSORT={k:"",d:-1};
+function bsSorted(){const r=bsRows();if(!BSORT.k)return r;const k=BSORT.k;
+  const v=({p,s})=>k==="num"?(+p.num>0?+p.num:999):k==="name"?String(p.name):k==="rt"?s.or+s.dr:k==="val"?eff(s):["m2","m3","mf"].includes(k)?s[k]*1000+s["a"+k.slice(1)]:(s[k]||0);
+  return r.slice().sort((a,b)=>{const A=v(a),B=v(b);const c=typeof A==="string"?A.localeCompare(B):A-B;return c*BSORT.d||String(a.p.name).localeCompare(b.p.name)})}
 function totals(){const t=STAT0();Object.values(G.st).forEach(s=>Object.keys(t).forEach(k=>t[k]+=s[k]||0));return t}
 const pct=(m,a)=>a?Math.round(100*m/a)+"%":"–";
 const eff=s=>s.pts+s.or+s.dr+s.ast+s.stl+s.blk-(s.a2-s.m2)-(s.a3-s.m3)-(s.af-s.mf)-s.tov;
@@ -1875,8 +1885,8 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||
     const EDB=!roG()&&(G.review||BSEDIT);const I=(id,k,v)=>EDB?`<input class="ein" inputmode="numeric" data-ej="${esc(id)}" data-ek="${k}" value="${v||0}" aria-label="${k}">`:v;
     const rv=G.review?`<div class="revb"><div><b>Rever antes de gravar</b><span>Confirma os números com a ficha oficial. Podes corrigir qualquer valor; os pontos e o resultado acertam-se sozinhos.</span></div><div class="bar" style="margin:0"><button class="btn gold" id="rv-ok">Gravar jogo · ${G.us}–${G.them}</button><button class="btn" id="rv-back">Voltar ao jogo</button></div></div>`
       :(!roG()&&G.status==="fim"?`<div class="bar" style="margin:0 0 8px;justify-content:flex-end"><button class="btn sm${BSEDIT?" gold":""}" id="bs-ed">${BSEDIT?"Terminar correções":"Corrigir estatística"}</button></div>`:"");
-    body=exp+rv+`<div class="tblw${EDB?" editing":""}"><table class="bs"><thead><tr><th class="l">Nº</th><th class="l">Atleta</th><th>MIN</th><th>PTS</th><th>2PT</th><th>3PT</th><th>LL</th><th>RO</th><th>RD</th><th>RT</th><th>AST</th><th>ROU</th><th>DL</th><th>PER</th><th>FP</th><th>DI</th><th>FL</th><th>T</th><th>F</th><th>FR</th><th>+/-</th><th>VAL</th></tr></thead><tbody>
-     ${bsRows().map(({p,s})=>`<tr class="${G.oncourt.includes(p.id)&&!fin?"oncourt":""}"><td class="l">${esc(p.num)}</td><td class="l">${esc(p.name)}</td><td>${fmtMin(s.sec)}</td><td><b>${s.pts}</b></td><td>${I(p.id,"m2",s.m2)}/${I(p.id,"a2",s.a2)}</td><td>${I(p.id,"m3",s.m3)}/${I(p.id,"a3",s.a3)}</td><td>${I(p.id,"mf",s.mf)}/${I(p.id,"af",s.af)}</td><td>${I(p.id,"or",s.or)}</td><td>${I(p.id,"dr",s.dr)}</td><td>${s.or+s.dr}</td><td>${I(p.id,"ast",s.ast)}</td><td>${I(p.id,"stl",s.stl)}</td><td>${I(p.id,"blk",s.blk)}</td><td>${I(p.id,"tov",s.tov)}</td><td>${I(p.id,"fp",s.fp)}</td><td>${I(p.id,"di",s.di)}</td><td>${I(p.id,"fl",s.fl)}</td><td>${I(p.id,"ft",s.ft)}</td><td><b>${s.pf}</b></td><td>${I(p.id,"fd",s.fd)}</td><td>${s.pm>0?"+":""}${s.pm}</td><td>${eff(s)}</td></tr>`).join("")}
+    body=exp+rv+`<div class="tblw${EDB?" editing":""}"><table class="bs"><thead><tr>${BSCOLS.map(([k,l])=>{const on=BSORT.k===k;return `<th class="${k==="num"||k==="name"?"l":""}${EDB?"":" srt-h"}${on?" srt":""}"${EDB?"":` data-bss="${k}" role="button" tabindex="0" aria-sort="${on?(BSORT.d>0?"ascending":"descending"):"none"}"`}>${l}${on?`<i>${BSORT.d>0?"▲":"▼"}</i>`:""}</th>`}).join("")}</tr></thead><tbody>
+     ${(EDB?bsRows():bsSorted()).map(({p,s})=>`<tr class="${G.oncourt.includes(p.id)&&!fin?"oncourt":""}"><td class="l">${esc(p.num)}</td><td class="l">${esc(p.name)}</td><td>${fmtMin(s.sec)}</td><td><b>${s.pts}</b></td><td>${I(p.id,"m2",s.m2)}/${I(p.id,"a2",s.a2)}</td><td>${I(p.id,"m3",s.m3)}/${I(p.id,"a3",s.a3)}</td><td>${I(p.id,"mf",s.mf)}/${I(p.id,"af",s.af)}</td><td>${I(p.id,"or",s.or)}</td><td>${I(p.id,"dr",s.dr)}</td><td>${s.or+s.dr}</td><td>${I(p.id,"ast",s.ast)}</td><td>${I(p.id,"stl",s.stl)}</td><td>${I(p.id,"blk",s.blk)}</td><td>${I(p.id,"tov",s.tov)}</td><td>${I(p.id,"fp",s.fp)}</td><td>${I(p.id,"di",s.di)}</td><td>${I(p.id,"fl",s.fl)}</td><td>${I(p.id,"ft",s.ft)}</td><td><b>${s.pf}</b></td><td>${I(p.id,"fd",s.fd)}</td><td>${s.pm>0?"+":""}${s.pm}</td><td>${eff(s)}</td></tr>`).join("")}
      <tr class="tot"><td></td><td class="l">Total</td><td></td><td>${t.pts}</td><td>${t.m2}/${t.a2} <small>${pct(t.m2,t.a2)}</small></td><td>${t.m3}/${t.a3} <small>${pct(t.m3,t.a3)}</small></td><td>${t.mf}/${t.af} <small>${pct(t.mf,t.af)}</small></td><td>${t.or}</td><td>${t.dr}</td><td>${t.or+t.dr}</td><td>${t.ast}</td><td>${t.stl}</td><td>${t.blk}</td><td>${t.tov}</td><td>${t.fp}</td><td>${t.di||0}</td><td>${t.fl||0}</td><td>${t.ft}</td><td>${t.pf}</td><td>${t.fd}</td><td></td><td>${eff(t)}</td></tr>
      ${(o=>`<tr class="oppr"><td></td><td class="l">${esc(G.opp)} <small>(equipa)</small></td><td></td><td>${o.pts}</td><td>${I("_o","m2",o.m2)}/${I("_o","a2",o.a2)} <small>${pct(o.m2,o.a2)}</small></td><td>${I("_o","m3",o.m3)}/${I("_o","a3",o.a3)} <small>${pct(o.m3,o.a3)}</small></td><td>${I("_o","mf",o.mf)}/${I("_o","af",o.af)} <small>${pct(o.mf,o.af)}</small></td><td>${I("_o","or",o.or)}</td><td>${I("_o","dr",o.dr)}</td><td>${o.or+o.dr}</td><td>${I("_o","ast",o.ast)}</td><td>${I("_o","stl",o.stl)}</td><td>${I("_o","blk",o.blk)}</td><td>${I("_o","tov",o.tov)}</td><td>${I("_o","fp",o.fp)}</td><td>${I("_o","di",o.di)}</td><td>${I("_o","fl",o.fl)}</td><td>${I("_o","ft",o.ft)}</td><td>${o.pf}</td><td>${I("_o","fd",o.fd)}</td><td></td><td>${eff(o)}</td></tr>`)(G.ost)}</tbody></table></div>
      <p class="hint">MIN minutos · 2PT/3PT/LL convertidos/tentados · RO/RD/RT ressaltos ofensivos/defensivos/total · AST assistências · ROU roubos · DL desarmes · PER perdas · FP faltas pessoais · DI disruptivas · FL flagrantes · T técnicas · F total de faltas · FR faltas recebidas · VAL valorização.</p>
@@ -1940,6 +1950,8 @@ function bind(){
   const cr=$("#c-run");if(cr)cr.onclick=()=>{if(G.clock<=0){toast("Período terminado");return}if(!G.running&&G.oncourt.length<5){toast("Escolhe primeiro o cinco inicial");return}
     if(!G.running&&!G.start5)G.start5=G.oncourt.slice();G.running=!G.running;store();render()};
   const ca=$("#clk");if(ca&&G.status!=="fim")ca.onclick=clockEdit;
+  document.querySelectorAll("[data-bss]").forEach(h=>{const go=()=>{const k=h.dataset.bss,first=(k==="num"||k==="name")?1:-1;
+    if(BSORT.k!==k)BSORT={k,d:first};else if(BSORT.d===first)BSORT.d=-first;else BSORT={k:"",d:-1};const y=scrollY;render();scrollTo(0,y)};h.onclick=go;h.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
   const cn=$("#c-next");if(cn)cn.onclick=periodPick;const ce=$("#c-end");if(ce)ce.onclick=endBox;
   const bu=$("#b-undo");if(bu)bu.onclick=undo;
   document.querySelectorAll("#b-xls").forEach(b=>b.onclick=exportXLS);
