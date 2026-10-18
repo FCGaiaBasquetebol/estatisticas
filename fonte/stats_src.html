@@ -2505,7 +2505,7 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   const ath=[...names.values()].sort((a,b)=>a.localeCompare(b,"pt"));
   const numOf=new Map();games.slice().reverse().forEach(g=>g.roster.forEach(p=>{const n=names.get(p.id);if(n&&p.num&&!numOf.has(n))numOf.set(n,/^\d+$/.test(p.num)?+p.num:p.num)}));
   Lst.getCell("A1").value="Todos os jogos";labels.slice().reverse().forEach((l,i)=>Lst.getCell("A"+(i+2)).value=l);
-  Lst.getCell("B1").value="Escolhe o atleta";ath.forEach((a,i)=>{Lst.getCell("B"+(i+2)).value=a;Lst.getCell("C"+(i+2)).value=numOf.has(a)?numOf.get(a):""});
+  Lst.getCell("B1").value="Todos os atletas";ath.forEach((a,i)=>{Lst.getCell("B"+(i+2)).value=a;Lst.getCell("C"+(i+2)).value=numOf.has(a)?numOf.get(a):""});
   const pfl=["Todas as provas"];gpf.forEach(x=>{if(!pfl.includes(x.prova))pfl.push(x.prova);const k=x.fase?x.prova+" · "+x.fase:"";if(k&&!pfl.includes(k))pfl.push(k)});
   pfl.forEach((x,i)=>Lst.getCell("D"+(i+1)).value=x);
   Lst.getCell("F4").value={formula:`Equipa!$K$4="Médias por jogo"`};
@@ -2533,7 +2533,7 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   lab(ws,"B4","Jogos");ws.mergeCells("C4:E4");box(ws.getCell("C4"),F(`COUNTIFS(Jogos!$I$6:$I$400,"Sim")&" de ${games.length}"`));ws.getCell("C4").alignment={horizontal:"center",vertical:"middle"};
   ws.mergeCells("F4:H4");link(ws.getCell("F4"),"Escolher ›","Jogos");
   lab(ws,"J4","Valores ▾");pick(ws,"K4:M4","Totais",'"Totais,Médias por jogo"');
-  lab(ws,"O4","Atleta ▾");pick(ws,"P4:T4","Escolhe o atleta",`Listas!$B$1:$B$${ath.length+1}`);
+  lab(ws,"O4","Atleta ▾");pick(ws,"P4:T4","Todos os atletas",`Listas!$B$1:$B$${ath.length+1}`);
   ws.mergeCells("U4:W4");link(ws.getCell("U4"),"Jogo a jogo ›","Atleta");
   // equipa
   sec(ws,6,"EQUIPA");
@@ -2552,11 +2552,13 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   const r0=13,n=Math.max(ath.length,1);
   ath.forEach((a,i)=>{const r=r0+i,fill=i%2?ZEB:undefined,B=`$B${r}`,J=`$C${r}`;
     const S=k=>A(`SUMIFS(${col(k)},${col("Atleta")},${B},${col("Tipo")},"Atleta",${CR})`,J);
-    put(ws,r,1,numOf.has(a)?numOf.get(a):"",{fill});put(ws,r,2,a,{b:1,fill});
-    put(ws,r,3,F(`COUNTIFS(${col("Atleta")},${B},${col("Tipo")},"Atleta",${CR},${col("Jogou")},1)`),{fill});
-    put(ws,r,4,F(`SUMIFS(${col("Seg")},${col("Atleta")},${B},${col("Tipo")},"Atleta",${CR})/86400/IF(${AV},MAX(1,${J}),1)`),{fill,fmt:"[m]:ss"});
-    Object.entries(CK).forEach(([c,k])=>put(ws,r,+c,F(S(k)),{fill,b:c==5||c==25}));
-    Object.entries(PC).forEach(([c,[m,t]])=>put(ws,r,+c,F(`IFERROR(${L(m)}${r}/${L(t)}${r},"")`),{fill,fmt:"0%"}));put(ws,r,17,F(`O${r}+P${r}`),{fill})});
+    put(ws,r,2,F(`IF($P$4="Todos os atletas",Listas!$B$${i+2},IF(${i}=0,$P$4,""))`),{b:1,fill});
+    put(ws,r,1,F(`IF(${B}="","",IFERROR(INDEX(Listas!$C$2:$C$${n+1},MATCH(${B},Listas!$B$2:$B$${n+1},0)),""))`),{fill});
+    const E=x=>`IF(${B}="","",${x})`;
+    put(ws,r,3,F(E(`COUNTIFS(${col("Atleta")},${B},${col("Tipo")},"Atleta",${CR},${col("Jogou")},1)`)),{fill});
+    put(ws,r,4,F(E(`SUMIFS(${col("Seg")},${col("Atleta")},${B},${col("Tipo")},"Atleta",${CR})/86400/IF(${AV},MAX(1,${J}),1)`)),{fill,fmt:"[m]:ss"});
+    Object.entries(CK).forEach(([c,k])=>put(ws,r,+c,F(E(S(k))),{fill,b:c==5||c==25}));
+    Object.entries(PC).forEach(([c,[m,t]])=>put(ws,r,+c,F(`IFERROR(${L(m)}${r}/${L(t)}${r},"")`),{fill,fmt:"0%"}));put(ws,r,17,F(E(`O${r}+P${r}`)),{fill})});
   const rt=r0+n,TF={fill:CREAM,b:1};
   put(ws,rt,1,"",TF);put(ws,rt,2,F(`IF(${AV},"Equipa · por jogo","Total equipa")`),TF);put(ws,rt,3,F("$C$8"),TF);
   put(ws,rt,4,F(`${sumT("Seg","Atleta")}/86400/IF(${AV},MAX(1,$C$8),1)`),{...TF,fmt:"[m]:ss"});
@@ -2590,7 +2592,7 @@ async function buildXLSX(games,title,fname,opt){opt=opt||{};let EX;try{if(!opt.q
   // ================= ATLETA =================
   wa.columns=[{width:12},{width:40},{width:8},...Array(22).fill({width:8})];
   band(wa,"FC GAIA · "+title,"Jogo a jogo do atleta escolhido no separador Equipa");
-  wa.mergeCells("B4:L4");const an=wa.getCell("B4");an.value=F(`IF(Equipa!$P$4="Escolhe o atleta","Escolhe o atleta no separador Equipa (Atleta ▾)",IFERROR("#"&INDEX(Listas!$C$2:$C$${n+1},MATCH(Equipa!$P$4,Listas!$B$2:$B$${n+1},0))&"  ","")&Equipa!$P$4)`);
+  wa.mergeCells("B4:L4");const an=wa.getCell("B4");an.value=F(`IF(Equipa!$P$4="Todos os atletas","Escolhe um atleta no separador Equipa (Atleta ▾)",IFERROR("#"&INDEX(Listas!$C$2:$C$${n+1},MATCH(Equipa!$P$4,Listas!$B$2:$B$${n+1},0))&"  ","")&Equipa!$P$4)`);
   an.font={name:"Arial",size:18,bold:true,color:{argb:INKC}};an.alignment={vertical:"middle"};wa.getRow(4).height=30;
   wa.mergeCells("V4:Y4");link(wa.getCell("V4"),"‹ Equipa","Equipa");wa.getCell("V4").alignment={horizontal:"right",vertical:"middle"};
   wa.mergeCells("B5:Y5");const fl=wa.getCell("B5");fl.value=F(`"Jogos a contar: "&Equipa!$C$4&" · "&Equipa!$K$4`);fl.font={name:"Arial",size:9,italic:true,color:{argb:MUTC}};

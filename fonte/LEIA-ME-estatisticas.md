@@ -175,3 +175,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v63
 - Backoffice com 3 separadores: Utilizadores · Ligações · Atividade. "Pessoas do clube" pode ser fechado (▸/▾), fica guardado no dispositivo.
+
+## v64
+- Excel: Atleta ▾ volta a filtrar a tabela de atletas da Equipa ("Todos os atletas" mostra todos) e continua a alimentar o separador Atleta.
