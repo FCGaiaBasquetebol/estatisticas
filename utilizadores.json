@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792346421929,
+ "atualizado": 1792346425785,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -186,6 +186,22 @@
    "dk": {
     "iv": "gH1TtJLzFQwC+zU1",
     "ct": "MjQKm3N5yKWf2L0V26oOiSEg+KY5J6+X3HD1me8C1Wvbwc/7iXMbFjYQ0DSQk49NW8ccFzmDtCsXbS6U"
+   }
+  },
+  {
+   "utilizador": "jose.nogueira",
+   "nome": "José Nogueira",
+   "perfil": "consulta",
+   "cargo": "Treinador",
+   "escaloes": [
+    "Sub-14 Masc B"
+   ],
+   "ativo": true,
+   "salt": "B9CGey4Ncyl7X4zBDWCmUA==",
+   "hash": "ScRderGsuibEoReoofeX9v7flZJLOajcXeW9hzwxB3g=",
+   "dk": {
+    "iv": "fVmKWTF7wWSQv5Nx",
+    "ct": "hiDDuRirc+pkcW2IQGNYrM6raiff79UJR0F7eI5nxyOBAtYCWeinY2+LhveywEXnU6ESbe4Fgf+bu09I"
    }
   }
  ]
