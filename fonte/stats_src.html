@@ -883,6 +883,12 @@ table.bs tr.prw{cursor:pointer}table.bs tr.prw:hover td{background:rgba(226,184,
 .pc-map svg.court{max-height:340px;width:100%}.pcl{max-height:340px;overflow:auto;margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:10px}.pcl li{display:flex;gap:10px;align-items:baseline;padding:7px 10px;border-bottom:1px solid var(--line);font-size:14px}.pcl li:last-child{border-bottom:0}.pcl .q{flex:none;min-width:70px;color:var(--muted);font-weight:700;font-size:12px}
 @media (max-width:640px){.pc-b{grid-template-columns:1fr}}
 :root[data-theme=light] .pc-tiles div{background:#fff}:root[data-theme=light] .pc-n,:root[data-theme=light] .pc-tiles div:first-child b{color:var(--gold-ink)}
+
+/* ===== v28: jogo de treino ===== */
+.demob{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:repeating-linear-gradient(135deg,#e2b812 0 14px,#d4aa0a 14px 28px);color:#111;border-radius:10px;padding:6px 12px;margin:0 0 8px;font-size:13px}
+.demob b{letter-spacing:1.5px}.demob span{flex:1;font-weight:600}.demob .btn{background:#111;color:#fff;border-color:#111}
+.htile.demo{border-style:dashed}
+body.fit .demob{padding:3px 10px;margin:0 0 4px;font-size:12px}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -913,7 +919,15 @@ const KJ="fcgaia-stats-jogos",KC="fcgaia-stats-atual";
 function readAll(){try{return JSON.parse(localStorage.getItem(KJ)||"{}")}catch(e){return {}}}
 function writeAll(m){try{localStorage.setItem(KJ,JSON.stringify(m));return true}catch(e){toast("Sem espaço para guardar! Exporta e apaga jogos antigos.");return false}}
 let WATCH=false,WTICK=null,WPOLL=null,WSEEN=0;
-const roG=()=>isRO()||WATCH;
+const roG=()=>(isRO()&&!(G&&G.demo))||WATCH;
+/* jogo de treino: nada é gravado nos jogos nem enviado */
+const DEMO_K="fcgaia-stats-demo";
+const DEMO_ROSTER=[["4","Atleta Quatro"],["5","Atleta Cinco"],["6","Atleta Seis"],["7","Atleta Sete"],["8","Atleta Oito"],["9","Atleta Nove"],["10","Atleta Dez"],["11","Atleta Onze"],["12","Atleta Doze"],["13","Atleta Treze"]];
+function startDemo(){stopWatch();WATCH=false;const old=(()=>{try{return JSON.parse(localStorage.getItem(DEMO_K)||"null")}catch(e){return null}})();
+  const go=()=>newGame({demo:true,team:"Demo",teamName:"Treino",gameNum:"",comp:"Jogo de treino",date:new Date().toISOString().slice(0,10),venue:"",home:true,opp:"Adversário Demo",np:4,per:10,roster:DEMO_ROSTER.map(([n,nm],i)=>({id:"demo"+i,name:nm,num:n,photo:""})),oncourt:[]});
+  if(old&&old.status!=="fim")confirmBox("Continuar o jogo de treino anterior? (Não começa um novo.)",()=>{G=fixGame(old);SEL=null;SUB=null;SIDE="us";VIEW="live";render();startTick()}),setTimeout(()=>{const no=document.querySelector(".modal #m-no");if(no){no.textContent="Começar de novo";no.onclick=()=>{no.closest(".modal").remove();go()}}},0);
+  else go()}
+function demoBar(){return G&&G.demo?`<div class="demob"><b>JOGO DE TREINO</b><span>Experimenta à vontade: nada é gravado nos jogos nem enviado para a base de dados.</span><button class="btn sm" id="dm-x">Sair do treino</button></div>`:""}
 const recOf=g=>g&&(g.lk||g.by)||null;
 const othersGame=g=>!!g&&g.status!=="fim"&&!!USER&&(isRO()||(()=>{const r=recOf(g);return !!r&&r.u!==USER.utilizador})());
 function openGame(id){const g=fixGame(readAll()[id]);if(!g)return;stopWatch();G=g;SEL=null;SUB=null;SIDE="us";BSEDIT=false;
@@ -929,7 +943,7 @@ function watchBar(){if(!WATCH)return "";const r=recOf(G)||{},ended=G.q>=G.np&&wa
   return `<div class="watchb"><span class="wdot${G.running?" on":""}"></span><span class="wtx"><b>A acompanhar ao vivo</b> · regista ${esc(r.n||"outro utilizador")} · <span id="w-age">${wAge()}</span><small>Só consulta: não dá para alterar enquanto outra pessoa regista.</small></span>
    ${isRO()?"":`${ended?`<button class="btn sm gold" id="w-end">Terminar e gravar jogo</button>`:""}${idle&&!ended?`<button class="btn sm" id="w-take">Assumir o registo</button>`:""}`}</div>`}
 function takeOver(){stopWatch();G.clock=watchClock();if(G.running){G.running=false;G.log.push({q:G.q,c:Math.round(G.clock),us:G.us,them:G.them,on:G.oncourt.slice(),t:"pausa"})}WATCH=false;store();Sync.soon(0)}
-function store(){if(!G||WATCH)return;if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();if(USER&&!isRO()){const me={u:USER.utilizador,n:USER.nome||USER.utilizador};if(!G.by)G.by=me;else if(G.by.u!==me.u)G.ed={...me,t:Date.now()};if(G.status!=="fim")G.lk={...me,t:Date.now()}}const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);if(G.running)Sync.later(15000);else Sync.soon(6000);
+function store(){if(!G||WATCH)return;if(G.demo){G.upd=Date.now();try{localStorage.setItem(DEMO_K,JSON.stringify({...G,undo:[]}))}catch(e){}return}if(!G.id)G.id="j"+(G.created||Date.now());G.upd=Date.now();if(USER&&!isRO()){const me={u:USER.utilizador,n:USER.nome||USER.utilizador};if(!G.by)G.by=me;else if(G.by.u!==me.u)G.ed={...me,t:Date.now()};if(G.status!=="fim")G.lk={...me,t:Date.now()}}const m=readAll();m[G.id]=G.status==="fim"?{...G,undo:[]}:G;writeAll(m);if(G.running)Sync.later(15000);else Sync.soon(6000);
   try{if(G.status==="fim")localStorage.removeItem(KC);else localStorage.setItem(KC,G.id)}catch(e){}}
 function load(){try{const old=localStorage.getItem(KEY);if(old){const g=JSON.parse(old);if(g){g.id=g.id||"j"+(g.created||Date.now());const m=readAll();m[g.id]=g;writeAll(m);localStorage.setItem(KC,g.id)}localStorage.removeItem(KEY)}}catch(e){}
   try{const id=localStorage.getItem(KC);return id?readAll()[id]||null:null}catch(e){return null}}
@@ -1321,7 +1335,8 @@ function goLogin(){const go=async()=>{if(WATCH){stopWatch();WATCH=false}else if(
   if(G&&G.status!=="fim"&&!roG())confirmBox("Gravar o jogo e ir para o início de sessão? Continuas o jogo em Jogos depois de entrares.",go);
   else go()}
 /* guia rápido */
-const HELP=[["Convoca no Plantel","No separador Plantel marca quem vai a jogo e carrega em “Convocar → escolher jogo”. O ✎ corrige nome e número; “+ Adicionar jogador” junta quem não está no plantel. A convocatória fica guardada para o jogo seguinte.","1"],
+const HELP=[["Experimenta primeiro","No Início, “Experimentar” abre um jogo de treino com atletas fictícios. Faz tudo como num jogo a sério: nada é gravado nos jogos nem enviado. “Sair do treino” volta ao Início.",""],
+ ["Convoca no Plantel","No separador Plantel marca quem vai a jogo e carrega em “Convocar → escolher jogo”. O ✎ corrige nome e número; “+ Adicionar jogador” junta quem não está no plantel. A convocatória fica guardada para o jogo seguinte.","1"],
  ["Escolhe o jogo","Em Novo jogo, o jogo de hoje (ou o próximo) já vem escolhido e os convocados também. Se for outro, abre “Escolher jogo de outra data…” ou “Outro jogo”. Carrega em Começar jogo.","2"],
  ["Escolhe o cinco inicial","Toca em 5 atletas do banco (ou arrasta-os para Em campo). O relógio só arranca com cinco em campo.","3"],
  ["Regista as jogadas","Toca no atleta e depois na ação dos lados do campo. Para um lançamento, toca no sítio do campo e escolhe Convertido ou Falhado. Depois de um cesto aparece “Assistência?” com os números dos colegas. Faltas: Pessoal e Recebida em destaque; Disruptiva, Flagrante e Técnica por baixo. Técnicas ao treinador ou ao banco: botão “Técnica banco”. Errado? ↶ Anular, em baixo.","4"],
@@ -1353,7 +1368,7 @@ async function boot(){$("#help").onclick=helpBox;$("#brand").onclick=e=>{e.preve
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
   Acc.init(onUser);
   $("#b-new").onclick=()=>{if(G&&G.running){toast("Pára o relógio primeiro");return}store();G=null;stopTick();SIDE="us";renderSetup()};
-  $("#b-save").onclick=()=>{if(!G)return;if(roG()){const w=WATCH;stopWatch();WATCH=false;G=null;stopTick();SETVIEW=w?"inicio":"epoca";renderSetup();return}const fin=G.status==="fim";if(G.running){G.running=false;addLog({t:"pausa"})}store();const n=G.opp;G=null;stopTick();SIDE="us";SEL=null;SUB=null;
+  $("#b-save").onclick=()=>{if(!G)return;if(G.demo){stopTick();G=null;SEL=null;SUB=null;SIDE="us";SETVIEW="inicio";renderSetup();toast("Jogo de treino: não foi gravado nem enviado.",3000,"ok");return}if(roG()){const w=WATCH;stopWatch();WATCH=false;G=null;stopTick();SETVIEW=w?"inicio":"epoca";renderSetup();return}const fin=G.status==="fim";if(G.running){G.running=false;addLog({t:"pausa"})}store();const n=G.opp;G=null;stopTick();SIDE="us";SEL=null;SUB=null;
     try{localStorage.removeItem(KC)}catch(e){}SETVIEW="epoca";renderSetup();saveNotice()};
   $("#b-cancel").onclick=()=>{if(!G)return;confirmBox(`Cancelar o jogo vs ${G.opp}? Tudo o que foi registado neste jogo é apagado.`,()=>{const g=G;G=null;stopTick();
     const m=readAll();delete m[g.id];writeAll(m);Sync.del(g);try{localStorage.removeItem(KC)}catch(e){}SEL=null;SUB=null;SIDE="us";SETVIEW="novo";renderSetup();toast("Jogo cancelado")})};
@@ -1392,10 +1407,11 @@ function homeView(){const ro=isRO(),first=(USER&&USER.nome||"").split(" ")[0];co
    ${ro?"":tile("plantel","plantel","Plantel",nConv?`${nConv} convocados guardados`:"Convocados, números e nomes")}
    ${tile("epoca","stats","Estatísticas",nG?`${nG} jogo${nG===1?"":"s"} gravado${nG===1?"":"s"}`:"Ainda sem jogos")}
    ${isCoord()?tile("users","users","Utilizadores","Criar e gerir acessos"):""}
+   ${tile("demo","jogo","Experimentar","Jogo de treino: nada é gravado","demo")}
   </div>
   ${ng.length?`<div class="hnext"><h3>Próximos jogos</h3>${ng.map(g=>{const home=g.home.startsWith("FC Gaia");return `<button class="hng" data-ng="${esc(g.team)}|${esc(g.num)}"><span class="hd"><b>${dl(g.d)}</b><small>${esc(g.time||"")}</small></span><span class="htx"><b>${esc(home?g.away:g.home)}</b><small>${esc(TN[g.team]||g.team)} · ${home?"Em casa":"Fora"}</small></span><span class="hgo">Preparar ›</span></button>`}).join("")}</div>`:""}
   <p class="ver">Versão ${esc(VER||"local")}</p></section>`}
-function bindHome(){document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{const k=b.dataset.home;if(k==="ajuda"){helpBox();return}SETVIEW=k;renderSetup();scrollTo(0,0)});
+function bindHome(){document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{const k=b.dataset.home;if(k==="ajuda"){helpBox();return}if(k==="demo"){startDemo();return}SETVIEW=k;renderSetup();scrollTo(0,0)});
   document.querySelectorAll(".hopen[data-open]").forEach(b=>b.onclick=()=>openGame(b.dataset.open));
   document.querySelectorAll("[data-ng]").forEach(b=>b.onclick=()=>{const [t,n]=b.dataset.ng.split("|");const S=SETUP;S.team=t;S.game=n;S.np=4;S.per=10;SETVIEW="novo";renderSetup();scrollTo(0,0)})}
 function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW==="novo"||SETVIEW==="users"||SETVIEW==="plantel"))SETVIEW="epoca";$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
@@ -1872,7 +1888,7 @@ function fitCourt(){const g=document.querySelector(".fit .cgrid");if(!g)return;c
   const w=g.clientWidth-(side?side.offsetWidth:0)-parseFloat(cs.columnGap||0),h=g.clientHeight;const s=Math.max(200,Math.floor(Math.min(w,h*1500/1400)));g.style.setProperty("--cw",s+"px")}
 addEventListener("resize",()=>{if(G&&VIEW==="live"){document.body.classList.toggle("fit",G.status!=="fim"&&FITQ.matches);fitCourt()}});
 function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||!!G.review;if(fin&&VIEW==="live")VIEW="team";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
-  $("#b-save").textContent=WATCH?"‹ Voltar":fin?"‹ Voltar":"Gravar e sair";$("#b-cancel").hidden=true;
+  $("#b-save").textContent=WATCH?"‹ Voltar":G.demo?"Sair do treino":fin?"‹ Voltar":"Gravar e sair";$("#b-cancel").hidden=true;
   const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
   const board=`<div class="board b2">
    <div class="bL">${fin?"":`<button class="cbtn run${G.running?" on":""}" id="c-run">${G.running?"❚❚ Parar":"▶ Iniciar"}</button>`}</div>
@@ -1928,7 +1944,8 @@ function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||
      <p class="hint">MIN minutos · 2PT/3PT/LL convertidos/tentados · RO/RD/RT ressaltos ofensivos/defensivos/total · AST assistências · ROU roubos · DL desarmes · PER perdas · FP faltas pessoais · DI disruptivas · FL flagrantes · T técnicas · F total de faltas · FR faltas recebidas · VAL valorização.</p>
      ${shotChart()}
      ${fin&&!WATCH?`<div class="bar">${roG()?"":`<button class="btn" id="b-reopen">Reabrir jogo</button>`}<button class="btn" id="b-list">Voltar aos jogos</button></div>`:""}`}
-  $("#app").innerHTML=board+watchBar()+tabs+body;bind();fitCourt();
+  $("#app").innerHTML=demoBar()+board+watchBar()+tabs+body;bind();fitCourt();
+  const dx=$("#dm-x");if(dx)dx.onclick=()=>$("#b-save").click();
   const we=$("#w-end");if(we)we.onclick=()=>confirmBox("Terminar o jogo e gravar? Passas a ser tu a fechar o registo.",()=>{takeOver();endBox()});
   const wt=$("#w-take");if(wt)wt.onclick=()=>confirmBox(`O registo está parado há algum tempo. Assumir o registo deste jogo? ${esc((recOf(G)||{}).n||"A outra pessoa")} deixa de poder alterar a partir de outro tablet sem voltar a assumir.`,()=>{takeOver();VIEW="live";render();startTick()})}
 /* estatísticas de equipa: FC Gaia vs adversário, parciais por período */
