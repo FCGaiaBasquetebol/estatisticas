@@ -184,3 +184,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v67
 - Início/Hoje: só jogos com data de hoje (deixa de mostrar jogos ao vivo das últimas 12 h de outros dias); setas ‹ › para andar para o lado quando não cabem todos.
+
+## v68
+- Excel: botões de navegação com fórmula HYPERLINK (a célula toda é a ligação); o Codigo.gs reescreve-os com #gid no Google Sheets. Separador Jogos com resumo de pontos marcados/sofridos/diferença (totais e médias, só jogos a contar).

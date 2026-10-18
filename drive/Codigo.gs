@@ -95,6 +95,7 @@ function sincronizar() {
         if (info.jogos) {
           const xb = raw_(e.path + "/estatisticas.xlsx").setContentType(MimeType.MICROSOFT_EXCEL);
           st.folha = folha_(st.folha, info.ficheiro, xb, pasta);
+          ligacoes_(st.folha);
           res.folhas++;
         }
         st.upd = info.upd;
@@ -126,6 +127,18 @@ function folha_(id, nome, blob, pasta) {
   }
   const novo = Drive.Files.create({ name: nome, mimeType: MimeType.GOOGLE_SHEETS, parents: [pasta.getId()] }, blob);
   return novo.id;
+}
+
+/* Botões de navegação: no Google Sheets as ligações entre separadores usam o número (gid) de cada separador. */
+function ligacoes_(id) {
+  try {
+    const ss = SpreadsheetApp.openById(id), g = n => { const s = ss.getSheetByName(n); return s ? s.getSheetId() : null; };
+    [["Equipa", "F4", "Jogos", "Escolher jogos ›"], ["Equipa", "P4", "Atleta", "Atletas: jogo a jogo ›"],
+     ["Jogos", "E4", "Equipa", "‹ Voltar ao ecrã principal"], ["Atleta", "U4", "Equipa", "‹ Voltar ao ecrã principal"]].forEach(([de, cel, para, txt]) => {
+      const s = ss.getSheetByName(de), gid = g(para);
+      if (s && gid !== null) s.getRange(cel).setFormula('=HYPERLINK("#gid=' + gid + '","' + txt + '")');
+    });
+  } catch (e) { Logger.log("Ligações: " + e.message); }
 }
 
 /* ===================== auxiliares ===================== */
