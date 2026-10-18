@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792347261592,
+ "atualizado": 1792347313345,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -280,6 +280,28 @@
    "dk": {
     "iv": "XYuABUU0ONfT43kv",
     "ct": "E2alRmj4pYR7CisX6oPRvjuDo3YiYel/8DHUQ5Wrs+P8XukLCwzM3SRn3YuY9w9mG8w/3e1RCsatbQgh"
+   }
+  },
+  {
+   "utilizador": "francisco.pinto",
+   "nome": "Francisco Pinto",
+   "perfil": "treinador",
+   "escaloes": [
+    "Seniores Masc",
+    "Esperanças",
+    "Masters",
+    "Sub-18 Masc A",
+    "Sub-18 Masc B",
+    "Sub-16 Masc A",
+    "Sub-16 Masc B",
+    "Sub-14 Masc A"
+   ],
+   "ativo": true,
+   "salt": "7QhKezc6p3T6zozXgK4o7g==",
+   "hash": "QQD+HrBJEbY5ilMunuxRt2yafcVkMew+MV8uj+xf+T8=",
+   "dk": {
+    "iv": "RFIfc7mTS4xp/SxN",
+    "ct": "U2N5fYhvaqn0mE652g8m4ffErEA+JCIb4pI0RnJvF9nC4QXBctP94JDJ2guRz/AKdqOYeT+dDdlG863F"
    }
   }
  ]
