@@ -169,3 +169,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v60
 - Escalões escritos sem espaço (Sub14 B, Sub16 A…) em toda a app, PDF, Excel e Drive; fixGame acerta g.teamName pelo nome atual.
+
+## v61
+- Backoffice → Ligações: cartão "Google Drive" com "Enviar tudo para o Drive" (marca todos os jogos terminados para exportação e mostra o progresso).

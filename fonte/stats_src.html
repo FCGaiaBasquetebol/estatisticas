@@ -1221,7 +1221,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
       const m2=readAll();Object.values(m2).forEach(g=>{if(g._sha&&!seen.has(g.id)&&canSee(g)&&!(G&&G.id===g.id)){delete m2[g.id];changed=true}});if(changed)writeAll(m2);
       try{if(await this.pullLive()&&!G&&SETVIEW==="inicio")renderSetup()}catch(e){}
       try{await Act.flush()}catch(e){}
-      try{await Exp.run()}catch(e){console.warn("export",e)}
+      try{await Exp.run()}catch(e){console.warn("export",e);if(Exp.manual){Exp.manual=false;toast("Não deu para enviar tudo para o Drive agora ("+e.message+"). Tenta outra vez.",5000,"warn")}}
       this.st="ok";this.last=Date.now()}
     catch(e){console.warn("sync",e);if(this.st!=="erro")this.st=navigator.onLine?"falha":"offline"}
     this.busy=false;this.paint();const left=this.pending();
@@ -1229,7 +1229,7 @@ const Sync={st:"",busy:false,t:null,last:0,announce:false,
     if(this.announce){const ann=this.announce;this.announce=false;this._again=false;if(this.st==="ok"&&!left)toast(ann==="save"?"✓ Estatísticas enviadas. Já estão disponíveis para o resto da equipa técnica.":"✓ Tudo sincronizado",3500,"ok");
       else{const sv=ann==="save",pre=sv?"Jogo gravado no tablet, mas ":"";
         toast(this.st==="erro"?(isCoord()?pre+(sv?"o":"O")+" GitHub recusou o token da base de dados. Em Utilizadores → Ligações, usa “Trocar token” e cola o token atual.":pre+(sv?"o":"O")+" teu acesso à base de dados falhou. Fala com o administrador."):sv?"Jogo gravado no tablet. Não deu para enviar agora — segue sozinho quando houver internet.":"Não deu para sincronizar agora. Tenta daqui a pouco.",6000,"warn")}}
-    else if(sent&&wasPending&&this.st==="ok"&&!(G&&G.running))toast(`✓ ${sent===1?"1 jogo enviado":sent+" jogos enviados"} para a base de dados`,3000,"ok");
+    else if(sent&&wasPending&&this.st==="ok"&&!(G&&G.running)&&Date.now()-(Exp.done||0)>4000)toast(`✓ ${sent===1?"1 jogo enviado":sent+" jogos enviados"} para a base de dados`,3000,"ok");
     if(changed&&!G)renderSetup()},
   paint(){const e=$("#sync");if(!e)return;const n=this.pending(),tk=!!this.tok();
     const S=!tk?["Só neste tablet","off","Não tens acesso à base de dados: os jogos ficam só neste tablet."]
@@ -1245,7 +1245,7 @@ const AQK="fcgaia-stats-atividade",ASTK="fcgaia-stats-atividade-jogos";
 const ACTL={login:["Entrou","entradas"],logout:["Saiu","entradas"],jogo_novo:["Começou a registar","jogos"],jogo_env:["Enviou jogo","jogos"],jogo_fim:["Terminou e enviou","jogos"],jogo_cor:["Corrigiu estatística","jogos"],
   del_req:["Pediu para apagar","apagar"],del_can:["Cancelou pedido de apagar","apagar"],del_rec:["Manteve jogo (recusou apagar)","apagar"],del:["Apagou jogo","apagar"],
   conta_nova:["Criou conta","contas"],conta_del:["Apagou conta","contas"],conta_pw:["Mudou palavra-passe","contas"],conta_off:["Desativou conta","contas"],conta_on:["Reativou conta","contas"],conta_edit:["Editou conta","contas"],
-  token:["Trocou token da base de dados","contas"],import:["Pediu importação dos Seniores","outros"]};
+  token:["Trocou token da base de dados","contas"],drive_all:["Enviou tudo para o Drive","outros"],import:["Pediu importação dos Seniores","outros"]};
 const devName=()=>{const u=navigator.userAgent;return /iPad|Macintosh/.test(u)&&navigator.maxTouchPoints>1?"iPad":/iPhone/.test(u)?"iPhone":/Android/.test(u)?(/Mobile/.test(u)?"Telemóvel Android":"Tablet Android"):"Computador"};
 const gameAct=g=>`${TN[g.team]||g.teamName||g.team} · ${scoreTxt(g,"FC Gaia")}${g.date?" ("+g.date.slice(8,10)+"/"+g.date.slice(5,7)+")":""}`;
 const Act={
@@ -1286,7 +1286,7 @@ const Exp={
       const prev=new Map((info.pdfs||[]).map(x=>[x.id,x])),pdfs=[];
       for(const g of list){const nm=gameFile(g,"pdf"),p=prev.get(g.id);
         if(p&&p.n===nm&&(p.u||0)>=(g.upd||0)){pdfs.push(p);continue}
-        jsPDF=jsPDF||await pdfLibs();const f=await makeGamePDF(jsPDF,g);
+        jsPDF=jsPDF||await pdfLibs();if(this.manual)toast(`Drive · ${TN[team]||team}: PDF ${list.indexOf(g)+1}/${list.length}`,20000,"busy");const f=await makeGamePDF(jsPDF,g);
         await this.put(`${base}/jogos/${nm}`,await blobB64(f),"PDF "+nm);
         if(p&&p.n!==nm){const old=await Sync.api(`${base}/jogos/${p.n}`);if(old.ok)await Sync.api(`${base}/jogos/${p.n}`,{method:"DELETE",body:{message:"PDF antigo",sha:(await old.json()).sha,branch:GD.branch}})}
         pdfs.push({id:g.id,n:nm,u:g.upd||Date.now()})}
@@ -1294,7 +1294,8 @@ const Exp={
       const nome=`Estatisticas de Jogo_${shortTeam(team)}_${ep}`;
       if(list.length){const buf=await buildXLSX(list,String(TN[team]||team).toUpperCase()+" · ÉPOCA "+ep,nome+".xlsx",{buffer:true,quiet:true});await this.put(`${base}/estatisticas.xlsx`,await blobB64(new Blob([buf])),"Excel "+nome)}
       await this.put(`${base}/info.json`,b64s(JSON.stringify({team,nome:shortTeam(team),epoca:ep,ficheiro:nome,upd:Date.now(),jogos:list.length,pdfs},null,1)),"Exportação "+nome);
-      const q2=this.q();if(q2[k]===q[k])delete q2[k];lsSet(XQK,JSON.stringify(q2))}}};
+      const q2=this.q();if(q2[k]===q[k])delete q2[k];lsSet(XQK,JSON.stringify(q2))}
+    if(this.manual){this.manual=false;this.done=Date.now();toast("✓ Tudo enviado. O Drive atualiza nos próximos 15 minutos.",5000,"ok");if(SETVIEW==="users"&&!G)renderSetup()}}};
 /* vista do administrador */
 let BOTAB="users",ACTV={list:null,busy:false,err:"",u:"",k:"",months:2,dirs:null};
 async function loadActivity(more){if(ACTV.busy)return;if(!Sync.tok()||!navigator.onLine){ACTV.err=navigator.onLine?"Sem acesso à base de dados.":"Sem internet: liga-te para ver a atividade.";refreshAct();return}
@@ -1394,6 +1395,12 @@ function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&
   return `<div class="card pub${pend||err?" on":""}"><h3 style="margin-top:0">${busy?"⏳ A publicar…":err?"⚠️ Por publicar":pend?"⚠️ Alterações por publicar":"✅ Publicado no site"}</h3>
    <p class="hint" style="margin-top:0">${busy?"A enviar utilizadores.json para o GitHub.":err?esc(PUBST):pend?"Há alterações que ainda não foram enviadas.":"Cada alteração é enviada automaticamente para o GitHub e fica ativa nos outros dispositivos em 1 a 2 minutos."}</p>
    <div class="bar">${pend||err?`<button class="btn gold" id="gh-pub"${busy?" disabled":""}>Publicar agora</button><button class="btn" id="u-disc">Descartar alterações</button>`:""}<button class="btn sm ghost" id="gh-off">Desligar GitHub neste dispositivo</button></div></div>`}
+function driveCard(){const n=Object.values(readAll()).filter(g=>g.status==="fim"&&!g.demo).length,q=Object.keys(Exp.q()).length;
+  return `<div class="card pub"><h3 style="margin-top:0">📁 Google Drive do clube</h3><p class="hint" style="margin-top:0">Depois de cada jogo terminado, o PDF e o Excel do escalão seguem para o Drive (pasta do escalão). Para enviar também os jogos que já existiam, usa o botão. Demora alguns segundos por jogo; deixa a app aberta.${q?` <b>Na fila:</b> ${q} ${q===1?"escalão":"escalões"}.`:""}</p>
+   <div class="bar" style="margin-bottom:0"><button class="btn sm gold" id="dr-all"${n&&Sync.tok()?"":" disabled"}>Enviar tudo para o Drive (${n} ${n===1?"jogo":"jogos"})</button></div></div>`}
+function exportAll(){if(!Sync.tok()){toast("Liga primeiro a base de dados.",3000,"warn");return}if(!navigator.onLine){toast("Sem internet: tenta quando houver ligação.",3000,"warn");return}
+  const gs=Object.values(readAll()).filter(g=>g.status==="fim"&&!g.demo);gs.forEach(g=>Exp.mark(g.team,g.date));Exp.manual=true;
+  toast(`A preparar ${gs.length} ${gs.length===1?"jogo":"jogos"} para o Drive…`,8000,"busy");Act.add("drive_all",`${gs.length} jogos`);Sync.soon(0)}
 function dbCard(){const tk=!!Sync.tok(),sem=USERS.filter(u=>u.ativo!==false&&!u.dk);
   if(tk)return `<div class="card pub"><h3 style="margin-top:0">☁︎ Base de dados dos jogos ligada</h3><p class="hint" style="margin-top:0">Os jogos são enviados para o repositório privado <b>${GD.repo}</b> sempre que há internet, e cada pessoa recebe os jogos dos seus escalões.${sem.length?` <b>Sem acesso ainda:</b> ${sem.map(u=>esc(u.nome)).join(", ")}. Para ativar, carrega em “Palavra-passe” e define uma nova para essa pessoa.`:""}</p><div class="bar" style="margin-bottom:0"><button class="btn sm" id="db-swap">Trocar token</button></div></div>`;
   return `<div class="card pub on"><h3 style="margin-top:0">☁︎ Ligar a base de dados dos jogos</h3>
@@ -1449,7 +1456,7 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
    </section>
   </div>
   <div class="usec" id="ligacoes"><h2>Ligações</h2><p class="hint">Fazem-se uma vez em cada computador ou tablet do administrador.</p>
-   <div class="lgrid">${pubCard(pend)}${dbCard()}</div></div>`}
+   <div class="lgrid">${pubCard(pend)}${dbCard()}${driveCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
   bindPeople();
   const gl=$("#u-golig");if(gl)gl.onclick=()=>$("#ligacoes").scrollIntoView({behavior:"smooth",block:"start"});
@@ -1457,6 +1464,7 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}
     const go=async pw=>{dbo.disabled=true;try{const keep=await dbConnect(t,pw);toast(keep?"Token trocado. Todos mantêm o acesso.":"Base de dados ligada",3000,"ok");Act.add("token");renderSetup();Sync.soon(0)}catch(x){dbo.disabled=false;e.textContent=x.message}};
     if(PWMEM)return go(PWMEM);askPw(async pw=>{const me=USERS.find(u=>u.utilizador===USER.utilizador);if(await pwHash(pw,me.salt)!==me.hash)throw new Error("Palavra-passe errada.");PWMEM=pw;go(pw)})};
+  const dra=$("#dr-all");if(dra)dra.onclick=()=>confirmBox("Enviar todos os jogos terminados para o Drive? Prepara o PDF de cada jogo e o Excel de cada escalão.",exportAll);
   const dl=$("#u-dl");if(dl)dl.onclick=()=>{Acc.download();toast("utilizadores.json descarregado")};
   const on=$("#gh-on");if(on)on.onclick=async()=>{const t=$("#gh-t").value.trim();if(!t){$("#gh-e").textContent="Cola o token.";return}
     lsSet(GK,t);on.disabled=true;try{await Acc.publish();toast("Ligado ao GitHub e publicado")}catch(e){lsSet(GK,null);PUBST="";renderSetup();const ee=$("#gh-e");if(ee)ee.textContent=e.message}};
