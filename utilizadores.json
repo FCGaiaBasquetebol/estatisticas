@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792346495738,
+ "atualizado": 1792347206585,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -235,6 +235,21 @@
    "dk": {
     "iv": "TdgKGEJ6SfT2q72h",
     "ct": "a5sgRXrke8E9dhRO7yDHRRvhwFiu62in0ddZjR1xf1BzES7sjatDABKndFCVjXWsMYp6vf0Qw8WR4sbT"
+   }
+  },
+  {
+   "utilizador": "helder.regalado",
+   "nome": "Helder Regalado",
+   "perfil": "treinador",
+   "escaloes": [
+    "Esperanças"
+   ],
+   "ativo": true,
+   "salt": "HY8jF1cAi1VqaWZtaJ/03g==",
+   "hash": "Mvuwv5p9oZGc3JCynp3nXe5G+fqIKR5/+FXoo4aj3rk=",
+   "dk": {
+    "iv": "0XBF4P4Sh82xj42b",
+    "ct": "Oh95tgAtUuj7cgUqVepmOlubgpbmZNy/aQaA3uHZ+OwSr1eMcDWwZi1GSyLgFMQuziDZxqwGFGZ9vYbB"
    }
   }
  ]
