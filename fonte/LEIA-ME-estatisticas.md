@@ -140,3 +140,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v52
 - PDF p.2: campo mais pequeno, quadros em 2 colunas e “Evolução do resultado” por baixo (linha FC Gaia vs adversário em degraus, linhas a separar períodos, maior vantagem, empates, trocas de liderança). `scoreSeries`, `scoreSVG`, `svgJPEG`.
+
+## v53
+- PDF p.1: sem destaques nem parciais; estatística de equipa em tabela larga (FC Gaia a dourado, adversário a azul); letra e espaçamento das linhas ajustam-se para encher a página (`fits(k,pad)`). Parciais vão para a p.2, junto da evolução do resultado (ficam na p.1 só se não houver p.2). Excel: sem destaques.
