@@ -910,6 +910,8 @@ body.fit .demob{padding:3px 10px;margin:0 0 4px;font-size:12px}
 
 .fibab{margin:0 0 10px;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:14px}.fibab a{color:var(--gold);font-weight:700}
 :root[data-theme=light] .fibab a{color:var(--gold-ink)}
+
+.sthead{display:flex;align-items:center;justify-content:space-between;gap:10px}.fibarun{font-size:12px!important;padding:6px 10px!important}
 </style></head>
 <body>
 <header class="top"><a class="brand" id="brand" href="#" title="Ir para o início de sessão"><img id="crest" alt=""><h1>FC Gaia<small>Estatísticas de jogo</small></h1></a><span class="sp"></span><button class="thm" id="help" type="button" aria-label="Ajuda" title="Guia rápido">?</button><button class="thm" id="thm" type="button" aria-label="Mudar tema"></button><div class="who" id="who"></div>
@@ -1613,13 +1615,13 @@ function seasonData(){const vg=visGames(),fb=new Set(vg.filter(g=>g.source).map(
 function seasonView(){const vg=visGames();const al=allowed();const teams=TEAMS.map(t=>t[0]).filter(t=>al.includes(t));
   EP.teams=(EP.teams||[]).filter(t=>teams.includes(t));const nT=t=>vg.filter(g=>g.team===t).length;
   const tbar=`<section class="ns epteams"><h3>${teams.length===1?"Escalão":"Escalões"}</h3>${teams.length===1?`<p class="teamone">${esc(TN[teams[0]]||teams[0])}</p>`:`<div class="tchips"><button class="tchip${EP.teams.length?"":" on"}" data-ept="" aria-pressed="${!EP.teams.length}">Todos</button>${teams.map(t=>{const on=EP.teams.includes(t),n=nT(t);return `<button class="tchip${on?" on":""}${n?"":" none"}" data-ept="${esc(t)}" aria-pressed="${on}">${esc(TN[t]||t)}${n?`<small>${n}</small>`:""}</button>`}).join("")}</div>`}</section>`;
-  if(!vg.length)return `<h2>Estatísticas</h2>${tbar}<p class="hint">Ainda não há jogos. Faz o primeiro em Novo jogo, ou importa uma cópia de segurança.</p>${savedList([])}`;
+  if(!vg.length)return `<div class="sthead"><h2>Estatísticas</h2>${isCoord()&&Sync.tok()?`<button class="btn sm fibarun" id="fiba-run" title="Ir buscar já as estatísticas dos Seniores à FIBA LiveStats / FPB">↻ Importar Seniores</button>`:""}</div>${tbar}<p class="hint">Ainda não há jogos. Faz o primeiro em Novo jogo, ou importa uma cópia de segurança.</p>${savedList([])}`;
   const {all,games,ath}=seasonData();const avg=EP.mode==="avg";const sel=EP.sel||"";const selA=sel&&sel!=="_o"?ath.find(a=>a.id===sel):null;
   const nAll=all.length,nSel=games.length;
   const gLab=nSel===nAll?`Todos os jogos (${nAll})`:nSel===0?"Nenhum jogo":nSel===1?`1 jogo · vs ${games[0].opp}`:`${nSel} de ${nAll} jogos`;
   const opts=ath.slice().sort((a,b)=>(+a.num||999)-(+b.num||999)).map(a=>`<option value="${esc(a.id)}"${sel===a.id?" selected":""}>${esc(a.num||"–")} · ${esc(a.name)}</option>`).join("");
   const w=games.filter(g=>g.us>g.them).length,l=games.filter(g=>g.us<g.them).length,pf=games.reduce((t,g)=>t+g.us,0),pa=games.reduce((t,g)=>t+g.them,0),pg=x=>games.length?(x/games.length).toFixed(1):"0";
-  return `<div class="sthead"><h2>Estatísticas</h2></div>${tbar}
+  return `<div class="sthead"><h2>Estatísticas</h2>${isCoord()&&Sync.tok()?`<button class="btn sm fibarun" id="fiba-run" title="Ir buscar já as estatísticas dos Seniores à FIBA LiveStats / FPB">↻ Importar Seniores</button>`:""}</div>${tbar}
   <div class="fbar" role="group" aria-label="Filtros">
    <div class="f"><span>Jogos</span><button class="fsel" id="ep-games" type="button">${esc(gLab)}<i>▾</i></button></div>
    <label class="f">Mostrar<select id="ep-sel"><option value="">Equipa (todos os atletas)</option>${opts}<option value="_o"${sel==="_o"?" selected":""}>Adversários</option></select></label>
@@ -1695,7 +1697,16 @@ function bindCharts(){document.querySelectorAll(".ch-w").forEach(w=>{const tip=w
 function seasonShots(games,ath){const k=EP.sel||"";const sh=games.flatMap(g=>g.log.filter(e=>e.x!=null&&(k==="_o"?e.side==="o":e.side!=="o"&&(!k||e.id===k))));
   const who=k==="_o"?"Adversários":k?(ath.find(a=>a.id===k)||{}).name||"Atleta":"FC Gaia (equipa)";
   return `<h3>Mapa de lançamentos · ${esc(who)}</h3>`+zoneBlock(sh,k==="_o",`<p class="hint" style="margin:0 0 10px">${sh.length} lançamentos em ${games.length} jogo${games.length===1?"":"s"}. Muda em “Mostrar”, no topo.</p>`)}
-function bindSeason(){bindCharts();bindSaved();const eg=$("#ep-games");if(eg)eg.onclick=gamesSheet;
+/* administrador: correr já a importação FIBA/FPB (workflow do repositório de dados) */
+async function runImport(btn){const wf=`https://api.github.com/repos/${GD.owner}/${GD.repo}/actions/workflows/fiba.yml`,h={Authorization:"Bearer "+Sync.tok(),Accept:"application/vnd.github+json"};
+  if(!navigator.onLine){toast("Sem internet.",3000,"warn");return}btn.disabled=true;const old=btn.textContent;btn.textContent="A pedir…";
+  try{const r=await fetch(wf+"/dispatches",{method:"POST",headers:{...h,"Content-Type":"application/json"},body:JSON.stringify({ref:GD.branch})});
+    if(r.status===403||r.status===404){toast("O token da base de dados não pode correr a importação. No GitHub, edita o token “dados” e junta Actions: Read and write.",7000,"warn");return}
+    if(!r.ok)throw new Error("GitHub "+r.status);
+    toast("Importação pedida. Demora 1 a 2 minutos; os jogos novos aparecem sozinhos.",5000,"ok");btn.textContent="A importar…";
+    setTimeout(()=>Sync.soon(0),90000);setTimeout(()=>Sync.soon(0),150000);setTimeout(()=>{btn.disabled=false;btn.textContent=old},150000)}
+  catch(e){toast("Não foi possível pedir a importação: "+e.message,5000,"warn")}finally{if(btn.textContent==="A pedir…"){btn.disabled=false;btn.textContent=old}}}
+function bindSeason(){const fr=$("#fiba-run");if(fr)fr.onclick=()=>runImport(fr);bindCharts();bindSaved();const eg=$("#ep-games");if(eg)eg.onclick=gamesSheet;
   const esl=$("#ep-sel");if(esl)esl.onchange=()=>{EP.sel=esl.value;const y=scrollY;renderSetup();scrollTo(0,y)};
   document.querySelectorAll("[data-ept]").forEach(b=>b.onclick=()=>{const t=b.dataset.ept;if(!t)EP.teams=[];else{const i=EP.teams.indexOf(t);if(i>=0)EP.teams.splice(i,1);else EP.teams.push(t)}EP.sel="";keepScroll(renderSetup)});
   document.querySelectorAll("[data-epm]").forEach(b=>b.onclick=()=>{EP.mode=b.dataset.epm;renderSetup()});
