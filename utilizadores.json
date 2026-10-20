@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792510372591,
+ "atualizado": 1792522182368,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -318,6 +318,24 @@
    "dk": {
     "iv": "/hlpQV/tzhMNTFUo",
     "ct": "uRXxr17hrWfY9RoDopf+WhsKyG0V33h8Gku2C6kFBaFuBekNprcFcGz7qUx23kNqDWgMcvaqGYh0ugGF"
+   }
+  },
+  {
+   "utilizador": "cesar.domingues",
+   "nome": "César Domingues",
+   "perfil": "consulta",
+   "cargo": "Treinador",
+   "escaloes": [
+    "Seniores Masc",
+    "Esperanças",
+    "Sub-18 Masc A"
+   ],
+   "ativo": true,
+   "salt": "PHdW5HK0YtMcs2gVRoCxJQ==",
+   "hash": "ZjIWwNvRe+Dhnx96G4091KKFTlGyCdQz81yN5cRuN2A=",
+   "dk": {
+    "iv": "RoOb9oUTe/aQ+oOl",
+    "ct": "VHV1ANxBypwNzCEauWuTOPNM2vSIP7tjFjGgngcOOkBoaMPhGiO+lFOFD9dWs2bRrzkjJmTvpE1JE5wk"
    }
   }
  ]
