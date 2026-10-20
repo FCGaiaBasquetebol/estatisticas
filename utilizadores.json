@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792353237226,
+ "atualizado": 1792510372591,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -303,6 +303,22 @@
     "ct": "U2N5fYhvaqn0mE652g8m4ffErEA+JCIb4pI0RnJvF9nC4QXBctP94JDJ2guRz/AKdqOYeT+dDdlG863F"
    },
    "cargo": "Diretor"
+  },
+  {
+   "utilizador": "bruno.quintela",
+   "nome": "Bruno Quintela",
+   "perfil": "consulta",
+   "cargo": "Diretor",
+   "escaloes": [
+    "*"
+   ],
+   "ativo": true,
+   "salt": "dCmcdnXMT8dmrfPGirc5XQ==",
+   "hash": "pDrhtinDFYdrMYtDStR9SpS1ha86Ku0SGaxCiDLoY4Y=",
+   "dk": {
+    "iv": "/hlpQV/tzhMNTFUo",
+    "ct": "uRXxr17hrWfY9RoDopf+WhsKyG0V33h8Gku2C6kFBaFuBekNprcFcGz7qUx23kNqDWgMcvaqGYh0ugGF"
+   }
   }
  ]
 }
