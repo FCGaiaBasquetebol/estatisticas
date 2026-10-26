@@ -1092,11 +1092,14 @@ const Acc={
     if(u.ativo===false)throw new Error("Conta desativada. Fala com o administrador.");
     if(LOGIN_KEEP){lsSet(US,sessKey(u));try{sessionStorage.removeItem(US)}catch(e){}}else{lsSet(US,null);try{sessionStorage.setItem(US,sessKey(u))}catch(e){}}
     lsSet("fcgaia-stats-ultimo",u.utilizador);PWMEM=pw;
-    if(u.dk){try{const x=await unwrapTok(u.dk,pw,u.salt);if(UFILE&&UFILE.tk){lsSet(KK,x);lsSet(DTK,await decK(UFILE.tk,x))}else lsSet(DTK,x)}catch(e){}}return {...u}},
-  async logout(){lsSet(US,null);try{sessionStorage.removeItem(US)}catch(e){}lsSet(DTK,null);lsSet(KK,null);PWMEM=""},
+    if(u.dk){try{const x=await unwrapTok(u.dk,pw,u.salt);if(UFILE&&UFILE.tk){lsSet(KK,x);lsSet(DTK,await decK(UFILE.tk,x))}else lsSet(DTK,x)}catch(e){}}
+    if(u.perfil==="coordenador"){if(u.gk&&!lsGet(GK)){try{lsSet(GK,await unwrapTok(u.gk,pw,u.salt));lsSet(GKA,"1")}catch(e){}}
+      else if(!u.gk&&lsGet(GK)){const gk=await gkFor(u,pw);if(gk)setTimeout(()=>this.save(USERS.map(x=>x.utilizador===u.utilizador?{...x,gk}:x)),0)}}
+    return {...u}},
+  async logout(){lsSet(US,null);try{sessionStorage.removeItem(US)}catch(e){}lsSet(DTK,null);lsSet(KK,null);PWMEM="";if(lsGet(GKA)==="1"){lsSet(GK,null);lsSet(GKA,null)}},
   async createUser(o){if(USERS.some(u=>u.utilizador===o.utilizador))throw new Error("Já existe esse nome de utilizador.");
     const c=await newCred(o.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),o.pw,c.salt);this.save(USERS.concat([{utilizador:o.utilizador,nome:o.nome,perfil:o.perfil||"treinador",...(o.cargo?{cargo:o.cargo}:{}),escaloes:o.escaloes||[],ativo:true,...c}]));if(USER)Act.add("conta_nova",`${o.nome} (${o.utilizador})`)},
-  async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),patch.pw,c.salt);Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
+  async updateUser(un,patch){patch={...patch};if("pw" in patch){const c=await newCred(patch.pw);if(dkSecret())c.dk=await wrapTok(dkSecret(),patch.pw,c.salt);{const tu=USERS.find(x=>x.utilizador===un);if(tu&&tu.perfil==="coordenador"){const gk=await gkFor({...tu,salt:c.salt},patch.pw);if(gk)c.gk=gk;else c.gk=undefined}}Object.assign(patch,c);if(USER&&USER.utilizador===un)PWMEM=patch.pw;delete patch.pw}
     const who=USERS.find(u=>u.utilizador===un),wl=who?`${who.nome} (${un})`:un;
     if(USER)Act.add(patch.hash?"conta_pw":"ativo" in patch?(patch.ativo?"conta_on":"conta_off"):"conta_edit",wl);
     this.save(USERS.map(u=>u.utilizador===un?{...u,...patch}:u));
@@ -1174,6 +1177,11 @@ async function decK(w,K){return new TextDecoder().decode(await crypto.subtle.dec
 /* o que se cifra com a palavra-passe de cada pessoa: a chave do clube (esquema novo) ou o próprio token (antigo) */
 const dkSecret=()=>{const K=lsGet(KK);return UFILE&&UFILE.tk&&K?K:Sync.tok()};
 async function refreshTok(){const K=lsGet(KK);if(K&&UFILE&&UFILE.tk){try{const t=await decK(UFILE.tk,K);if(t&&t!==lsGet(DTK)){lsSet(DTK,t);Sync.st="";Sync.soon(300)}}catch(e){}}}
+/* token de publicação de utilizadores: guardado cifrado (com a palavra-passe) só nas contas de administrador */
+const GKA="fcgaia-stats-github-token-auto";
+async function gkFor(u,pw){const t=lsGet(GK);if(!t||!u||u.perfil!=="coordenador")return null;try{return await wrapTok(t,pw,u.salt)}catch(e){return null}}
+async function gkStoreMe(pw){if(!USER||!pw)return;const me=USERS.find(x=>x.utilizador===USER.utilizador);const gk=await gkFor(me,pw);if(!gk)return;
+  Acc.save(USERS.map(u=>u.utilizador===me.utilizador?{...u,gk}:u))}
 async function unwrapTok(w,pw,salt){return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(w.iv)},await wrapKey(pw,salt),unb64(w.ct)))}
 const LIVEK="fcgaia-stats-live";let LIVE=(()=>{try{return JSON.parse(localStorage.getItem(LIVEK)||"{}")}catch(e){return {}}})(),LIVESHA="",HPOLL=null,HTICK=null;
 const Sync={st:"",busy:false,t:null,last:0,announce:false,
@@ -1387,7 +1395,7 @@ function credBox(un,pw,isNew){const u=USERS.find(x=>x.utilizador===un)||{utiliza
 let UEDIT=null;
 function pubCard(pend){const tk=!!lsGet(GK),busy=PUBST==="a publicar",err=PUBST&&PUBST!=="ok"&&!busy;
   if(!tk)return `<div class="card pub on"><h3 style="margin-top:0">${pend?"⚠️ Alterações por publicar":"Publicação automática desligada"}</h3>
-   <p class="hint" style="margin-top:0">Liga a área privada ao GitHub <b>uma vez neste dispositivo</b>. A partir daí, cada utilizador que crias ou alteras é enviado logo para o site e fica ativo em todos os dispositivos em 1 a 2 minutos.</p>
+   <p class="hint" style="margin-top:0">Liga a área privada ao GitHub <b>uma vez</b>. Fica guardado, cifrado com a tua palavra-passe, na tua conta de administrador: em qualquer aparelho onde entres como administrador podes criar e alterar utilizadores, e as alterações ficam ativas em todos os dispositivos em 1 a 2 minutos.</p>
    <details class="ghh"><summary>Como obter o token (5 minutos)</summary><ol class="hint">
     <li>No GitHub, abre o teu perfil e vai a <b>Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token</b>.</li>
     <li>Em <b>Resource owner</b> escolhe <b>${esc(GH.owner)}</b>, em Nome escreve “fcgaia-utilizadores” e em Expiração o prazo mais longo que o GitHub aceitar.</li>
@@ -1473,9 +1481,9 @@ function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelec
   const dra=$("#dr-all");if(dra)dra.onclick=()=>confirmBox("Enviar todos os jogos terminados para o Drive? Prepara o PDF de cada jogo e o Excel de cada escalão.",exportAll);
   const dl=$("#u-dl");if(dl)dl.onclick=()=>{Acc.download();toast("utilizadores.json descarregado")};
   const on=$("#gh-on");if(on)on.onclick=async()=>{const t=$("#gh-t").value.trim();if(!t){$("#gh-e").textContent="Cola o token.";return}
-    lsSet(GK,t);on.disabled=true;try{await Acc.publish();toast("Ligado ao GitHub e publicado")}catch(e){lsSet(GK,null);PUBST="";renderSetup();const ee=$("#gh-e");if(ee)ee.textContent=e.message}};
+    lsSet(GK,t);lsSet(GKA,null);on.disabled=true;try{await Acc.publish();toast("Ligado ao GitHub e publicado");const go=pw=>gkStoreMe(pw).then(()=>{toast("Ligado. Este acesso fica guardado na tua conta: já não precisas de o colar noutros aparelhos.",4500,"ok")});if(PWMEM)go(PWMEM);else askPw(async pw=>{const me=USERS.find(u=>u.utilizador===USER.utilizador);if(await pwHash(pw,me.salt)!==me.hash)throw new Error("Palavra-passe errada.");PWMEM=pw;go(pw)})}catch(e){lsSet(GK,null);PUBST="";renderSetup();const ee=$("#gh-e");if(ee)ee.textContent=e.message}};
   const pb=$("#gh-pub");if(pb)pb.onclick=async()=>{try{await Acc.publish();toast("Publicado")}catch(e){}};
-  const off=$("#gh-off");if(off)off.onclick=()=>confirmBox("Desligar o GitHub neste dispositivo? As alterações seguintes terão de ser publicadas à mão.",()=>{lsSet(GK,null);PUBST="";renderSetup()});
+  const off=$("#gh-off");if(off)off.onclick=()=>confirmBox("Desligar o GitHub neste dispositivo? As alterações seguintes terão de ser publicadas à mão.",()=>{if(USER)Acc.save(USERS.map(u=>u.utilizador===USER.utilizador?{...u,gk:undefined}:u));lsSet(GK,null);lsSet(GKA,null);PUBST="";renderSetup()});
   const dc=$("#u-disc");if(dc)dc.onclick=()=>confirmBox("Descartar as alterações e voltar à lista publicada?",()=>{Acc.discard();const me=USER&&USERS.find(u=>u.utilizador===USER.utilizador&&u.ativo!==false);if(!me||!USERS.some(u=>u.perfil==="coordenador"&&u.hash)){Acc.logout();USER=null;location.reload();return}USER={...me};whoBar();renderSetup()});
   const un=$("#u-n"),uu=$("#u-u");if(un&&uu){let touched=false;uu.oninput=()=>{touched=true;const v=uu.value.toLowerCase().replace(/\s+/g,"");if(v!==uu.value)uu.value=v};
     un.oninput=()=>{if(touched)return;const w=un.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]/g,"").split(/\s+/).filter(Boolean);uu.value=w.length>1?w[0]+"."+w[w.length-1]:(w[0]||"")}}

@@ -195,3 +195,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 - Ficha de jogo: filtro Período (Jogo todo / 1.º … / Prol.) em Equipa, Atletas e Jogadas (periodView recalcula a partir das jogadas; MIN e +/- sem dados por período mostram –; edição de jogadas desligada no filtro).
 - Corrigido NaN:NaN no relógio de jogos importados (fixGame acerta clock/q/np); marcador diz "FC Gaia"; jogadas do adversário com o nome dele.
 - Abrir/ver um jogo terminado já não o grava nem o reenvia (store só em jogos a decorrer; nunca em jogos importados).
+
+## v71
+- Token de publicação de utilizadores guardado cifrado (gk, com a palavra-passe) nas contas de administrador: ao entrar como admin em qualquer aparelho fica disponível; ao sair, é apagado desse aparelho (se veio da conta). Mudar a palavra-passe de um admin volta a cifrá-lo; "Desligar" remove-o da conta.
