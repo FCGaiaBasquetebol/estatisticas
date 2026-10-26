@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1793053071804,
+ "atualizado": 1793053119665,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -348,14 +348,15 @@
    "perfil": "consulta",
    "cargo": "Treinador",
    "escaloes": [
-    "Sub-16 Masc A"
+    "Sub-16 Masc A",
+    "Sub-16 Masc B"
    ],
    "ativo": true,
-   "salt": "gTEtegcqOVUa7YHJ4SU2Ww==",
-   "hash": "cJilMLSEMvSMP87/WYfAWYR5XeVl3wcglTPjRmBRDZQ=",
+   "salt": "U6fsSBhH963soMjR1voZXw==",
+   "hash": "HH1xqHXH737bWILzJcbDLYnM9KwBj4Xa6t21fKrJ7dg=",
    "dk": {
-    "iv": "/3lVQVsaD54nU1V6",
-    "ct": "8mK2BlUXhbvT8xWRiJsA80KAKD+eCZvLsd4GELXxo7qr9d0noSj7ZyDq4TrZYZi+R1YO+PEaZuHLPZIX"
+    "iv": "EtV3AD2A9CNrJLx4",
+    "ct": "bCIHVk58vA80WGu39PMPMWjU/qRfwzduFhGEGQeQoej1f909S37phcLqu6vdpFgmgTM4d/5+rxO7ddnQ"
    }
   }
  ]
