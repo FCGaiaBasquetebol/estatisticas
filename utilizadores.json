@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1792522182368,
+ "atualizado": 1793052636798,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -16,6 +16,10 @@
    "dk": {
     "iv": "OX/B8dNfmAQuYklI",
     "ct": "PS3hkvHflpHRcDPynGEL4jqwJD/4fzdaUzLEb2QebRPE/LzaflgVTiPQjJJrZ3tj2guBRLbV5lkOTiAA"
+   },
+   "gk": {
+    "iv": "ctnLuXv/Yy471D2m",
+    "ct": "hhKn0Ou7QTpcIPfr+025jW8e60gRKA+oGXl3yG6p1O7m5ZE++IEBYH4wsxLIt3YpRZUrsd8lOBWCAQyvgo2B3WnjckpO7SVMrOPNiavlQdc1V4BOVyttvB+LExhYwlqG62UxkLZR6i6N0m7Z8g=="
    }
   },
   {
