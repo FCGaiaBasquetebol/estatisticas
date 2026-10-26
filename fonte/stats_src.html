@@ -1093,7 +1093,7 @@ const Acc={
     if(LOGIN_KEEP){lsSet(US,sessKey(u));try{sessionStorage.removeItem(US)}catch(e){}}else{lsSet(US,null);try{sessionStorage.setItem(US,sessKey(u))}catch(e){}}
     lsSet("fcgaia-stats-ultimo",u.utilizador);PWMEM=pw;
     if(u.dk){try{const x=await unwrapTok(u.dk,pw,u.salt);if(UFILE&&UFILE.tk){lsSet(KK,x);lsSet(DTK,await decK(UFILE.tk,x))}else lsSet(DTK,x)}catch(e){}}
-    if(u.perfil==="coordenador"){if(u.gk&&!lsGet(GK)){try{lsSet(GK,await unwrapTok(u.gk,pw,u.salt));lsSet(GKA,"1")}catch(e){}}
+    if(u.perfil==="coordenador"){const g=myGk(u.utilizador);if(g&&!lsGet(GK)){try{lsSet(GK,await unwrapTok(g.gk,pw,g.salt));lsSet(GKA,"1");if(!u.gk)setTimeout(()=>{USER&&gkStoreMe(pw)},0)}catch(e){}}
       else if(!u.gk&&lsGet(GK)){const gk=await gkFor(u,pw);if(gk)setTimeout(()=>this.save(USERS.map(x=>x.utilizador===u.utilizador?{...x,gk}:x)),0)}}
     return {...u}},
   async logout(){lsSet(US,null);try{sessionStorage.removeItem(US)}catch(e){}lsSet(DTK,null);lsSet(KK,null);PWMEM="";if(lsGet(GKA)==="1"){lsSet(GK,null);lsSet(GKA,null)}},
@@ -1180,6 +1180,11 @@ async function refreshTok(){const K=lsGet(KK);if(K&&UFILE&&UFILE.tk){try{const t
 /* token de publicação de utilizadores: guardado cifrado (com a palavra-passe) só nas contas de administrador */
 const GKA="fcgaia-stats-github-token-auto";
 async function gkFor(u,pw){const t=lsGet(GK);if(!t||!u||u.perfil!=="coordenador")return null;try{return await wrapTok(t,pw,u.salt)}catch(e){return null}}
+/* o acesso guardado na conta pode estar na lista publicada mesmo que este aparelho tenha alterações locais por publicar */
+function myGk(un){un=un||(USER&&USER.utilizador);const l=USERS.find(u=>u.utilizador===un),p=UPUB&&(UPUB.utilizadores||[]).find(u=>u.utilizador===un);
+  return l&&l.gk?{gk:l.gk,salt:l.salt}:p&&p.gk?{gk:p.gk,salt:p.salt}:null}
+async function gkUnlock(pw){const g=myGk();if(!g)throw new Error("Esta conta ainda não tem o acesso guardado.");let t;try{t=await unwrapTok(g.gk,pw,g.salt)}catch(e){throw new Error("Palavra-passe errada.")}
+  lsSet(GK,t);lsSet(GKA,"1");PWMEM=pw;const me=USERS.find(u=>u.utilizador===USER.utilizador);if(me&&!me.gk)await gkStoreMe(pw);else if(Acc.pending())Acc.publish().catch(()=>{});return true}
 async function gkStoreMe(pw){if(!USER||!pw)return;const me=USERS.find(x=>x.utilizador===USER.utilizador);const gk=await gkFor(me,pw);if(!gk)return;
   Acc.save(USERS.map(u=>u.utilizador===me.utilizador?{...u,gk}:u))}
 async function unwrapTok(w,pw,salt){return new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(w.iv)},await wrapKey(pw,salt),unb64(w.ct)))}
@@ -1439,7 +1444,7 @@ function usersView(){const rows=USERS.slice().sort((a,b)=>(a.perfil===b.perfil?0
   const ini=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
   const miss=[!lsGet(GK)?"a <b>publicação de utilizadores</b> (sem ela, o que crias aqui só fica neste computador)":"",!Sync.tok()?"a <b>base de dados dos jogos</b>":""].filter(Boolean);
   return `<div class="uhead"><p class="hint">Quem pode entrar na área privada e em que escalões.</p></div>
-  ${miss.length?`<div class="ualert"><span>⚠️ Falta ligar ${miss.join(" e ")}.</span><button class="btn sm gold" id="u-golig">Ir para Ligações ›</button></div>`:""}
+  ${miss.length?`<div class="ualert"><span>⚠️ Falta ligar ${miss.join(" e ")}.</span>${!lsGet(GK)&&myGk()?`<button class="btn sm gold" id="u-gkon">Ativar com a minha palavra-passe</button>`:`<button class="btn sm gold" id="u-golig">Ir para Ligações ›</button>`}</div>`:""}
   ${ed?"":peopleCard()}
   <div class="ugrid">
    <section class="card uform${ed?" editing":""}">
@@ -1473,6 +1478,8 @@ function ligView(){const pend=Acc.pending();return `<div class="usec bo1" id="li
    <div class="lgrid">${pubCard(pend)}${dbCard()}${driveCard()}</div></div>`}
 function bindUsers(){const err=$("#u-err");const sel=()=>[...document.querySelectorAll("#u-esc input:checked")].map(i=>i.value);
   bindPeople();
+  const gko=$("#u-gkon");if(gko)gko.onclick=()=>{if(PWMEM){gkUnlock(PWMEM).then(()=>{toast("Publicação ligada",3000,"ok");renderSetup()}).catch(()=>askPw(async pw=>{await gkUnlock(pw);toast("Publicação ligada",3000,"ok");renderSetup()}));return}
+    askPw(async pw=>{await gkUnlock(pw);toast("Publicação ligada",3000,"ok");renderSetup()})};
   const gl=$("#u-golig");if(gl)gl.onclick=()=>{BOTAB="lig";renderSetup();scrollTo(0,0)};
   const dsw=$("#db-swap");if(dsw)dsw.onclick=()=>confirmBox(UFILE.tk?"Trocar o token da base de dados (por exemplo, quando expira)? Colas o novo a seguir e todos os utilizadores continuam com acesso.":"Trocar o token da base de dados? Colas o novo a seguir. Quem tinha acesso vai precisar de uma palavra-passe nova (só desta vez).",()=>{lsSet(DTK,null);Sync.st="";renderSetup()});
   const dbo=$("#db-on");if(dbo)dbo.onclick=async()=>{const t=$("#db-t").value.trim(),e=$("#db-e");if(!t){e.textContent="Cola o token.";return}

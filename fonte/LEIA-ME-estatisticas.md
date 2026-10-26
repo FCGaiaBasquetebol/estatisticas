@@ -198,3 +198,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v71
 - Token de publicação de utilizadores guardado cifrado (gk, com a palavra-passe) nas contas de administrador: ao entrar como admin em qualquer aparelho fica disponível; ao sair, é apagado desse aparelho (se veio da conta). Mudar a palavra-passe de um admin volta a cifrá-lo; "Desligar" remove-o da conta.
+
+## v72
+- Admin com sessão já aberta (ou com alterações locais por publicar): o aviso "Falta ligar a publicação" mostra "Ativar com a minha palavra-passe", que usa o acesso guardado na conta (também procura na lista publicada).
