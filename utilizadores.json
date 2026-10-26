@@ -3,7 +3,7 @@
   "iv": "iGcAe0Z0ps6Qm6r+",
   "ct": "tKpi8aUVtypo8PAwnFaXKcidC3sDbGILm+GqnwFqjqxlYQH1LD7Kr3fsCOX6IE3WPDbi+wbJXJBaXWrt55caNtlQ4+2zKRwe2CYnEMdpjjdCfh7ozS89lVGdmXWpJWsi0XMBuBT42bqwNRsoXw=="
  },
- "atualizado": 1793052636798,
+ "atualizado": 1793053071804,
  "utilizadores": [
   {
    "utilizador": "admin",
@@ -340,6 +340,22 @@
    "dk": {
     "iv": "RoOb9oUTe/aQ+oOl",
     "ct": "VHV1ANxBypwNzCEauWuTOPNM2vSIP7tjFjGgngcOOkBoaMPhGiO+lFOFD9dWs2bRrzkjJmTvpE1JE5wk"
+   }
+  },
+  {
+   "utilizador": "rui.martins",
+   "nome": "Rui Martins",
+   "perfil": "consulta",
+   "cargo": "Treinador",
+   "escaloes": [
+    "Sub-16 Masc A"
+   ],
+   "ativo": true,
+   "salt": "gTEtegcqOVUa7YHJ4SU2Ww==",
+   "hash": "cJilMLSEMvSMP87/WYfAWYR5XeVl3wcglTPjRmBRDZQ=",
+   "dk": {
+    "iv": "/3lVQVsaD54nU1V6",
+    "ct": "8mK2BlUXhbvT8xWRiJsA80KAKD+eCZvLsd4GELXxo7qr9d0noSj7ZyDq4TrZYZi+R1YO+PEaZuHLPZIX"
    }
   }
  ]
