@@ -201,3 +201,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v72
 - Admin com sessão já aberta (ou com alterações locais por publicar): o aviso "Falta ligar a publicação" mostra "Ativar com a minha palavra-passe", que usa o acesso guardado na conta (também procura na lista publicada).
+
+## v73
+- Mapas de lançamentos (ficha do jogo, Estatísticas da época, ficha do atleta): tocar numa marca mostra quem lançou, tipo e resultado, zona, período/tempo e, na época, o jogo. SHREG guarda os lançamentos desenhados em cada render.

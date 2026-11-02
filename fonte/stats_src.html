@@ -519,6 +519,9 @@ svg.court.live{border-radius:6px;box-shadow:0 0 0 3px #000,0 0 0 4px #333}
 .ua{grid-column:4;grid-row:1/3;margin:0;justify-content:flex-end;align-self:center}
 .usec{margin-top:36px;border-top:1px solid var(--line);padding-top:18px}
 .usec>.hint{margin:4px 0 14px}
+.mkg{cursor:pointer}.mk-hit{fill:transparent;stroke:none}.mkg:hover .mk-ok,.mkg:hover .mk-ko{stroke-width:12}
+.shtip{position:absolute;z-index:80;display:grid;gap:2px;max-width:260px;background:#111;color:#f2f2ee;border:1px solid #444;border-radius:10px;padding:8px 11px;box-shadow:0 8px 24px rgba(0,0,0,.4);font-size:13px;pointer-events:auto}
+.shtip b{font-size:14px}.shtip .ok{color:#5fd27a;font-weight:700}.shtip .ko{color:#ff7a6e;font-weight:700}.shtip small{color:#a8a8a0}
 .perf{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 4px}.perf>span{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}.perf small{color:var(--muted);font-size:12px}
 .pplt{flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:16px;margin-right:4px}.pplt:hover{border-color:var(--gold)}.pplt i{font-style:normal}.ppl.shut .ppl-h{margin:0}.ppl .ppl-h{align-items:center}
 .actf{margin-bottom:10px}.actt td{white-space:nowrap}.actt td:nth-child(4){white-space:normal;min-width:220px}.actt tr.apagar td:nth-child(3){color:var(--ko);font-weight:700}.actt tr.contas td:nth-child(3){color:var(--gold-ink,var(--gold))}
@@ -1632,7 +1635,7 @@ function bindHome(){
   Sync.pullLive().then(c=>{if(c&&!G&&SETVIEW==="inicio"){const y=scrollY;renderSetup();scrollTo(0,y)}});document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{const k=b.dataset.home;if(k==="ajuda"){helpBox();return}if(k==="demo"){startDemo();return}SETVIEW=k;renderSetup();scrollTo(0,0)});
   document.querySelectorAll(".hopen[data-open]").forEach(b=>b.onclick=()=>openGame(b.dataset.open));
   document.querySelectorAll("[data-ng]").forEach(b=>b.onclick=()=>{const [t,n]=b.dataset.ng.split("|");const S=SETUP;S.team=t;S.game=n;S.np=4;S.per=10;SETVIEW="novo";renderSetup();scrollTo(0,0)})}
-function renderSetup(){document.body.classList.remove("fit");if(isRO()&&(SETVIEW==="novo"||SETVIEW==="users"||SETVIEW==="plantel"))SETVIEW="epoca";$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
+function renderSetup(){document.body.classList.remove("fit");SHREG=[];if(isRO()&&(SETVIEW==="novo"||SETVIEW==="users"||SETVIEW==="plantel"))SETVIEW="epoca";$("#b-new").hidden=true;$("#gact").hidden=true;const S=SETUP;
   if(SETVIEW==="jogos")SETVIEW="epoca";
   if(SETVIEW==="inicio"){$("#app").innerHTML=snav()+homeView();bindNav();bindHome();return}
   if(SETVIEW==="epoca"){$("#app").innerHTML=snav()+seasonView();bindNav();bindSeason();return}
@@ -1861,7 +1864,7 @@ function bindCharts(){document.querySelectorAll(".ch-w").forEach(w=>{const tip=w
   w.querySelectorAll(".hit").forEach(r=>{r.addEventListener("mouseenter",()=>show(r));r.addEventListener("click",()=>show(r))});
   svg.addEventListener("mouseleave",()=>{tip.hidden=true;if(xh)xh.setAttribute("visibility","hidden")})})}
 /* mapa de lançamentos da época (equipa, um atleta ou o adversário), nos jogos escolhidos */
-function seasonShots(games,ath){const k=EP.sel||"";const sh=games.flatMap(g=>g.log.filter(e=>e.x!=null&&(k==="_o"?e.side==="o":e.side!=="o"&&(!k||e.id===k))));
+function seasonShots(games,ath){const k=EP.sel||"";const sh=games.flatMap(g=>g.log.filter(e=>e.x!=null&&(k==="_o"?e.side==="o":e.side!=="o"&&(!k||e.id===k))).map(e=>({...e,_g:g})));
   const who=k==="_o"?"Adversários":k?(ath.find(a=>a.id===k)||{}).name||"Atleta":"FC Gaia (equipa)";
   return `<h3>Mapa de lançamentos · ${esc(who)}</h3>`+zoneBlock(sh,k==="_o",`<p class="hint" style="margin:0 0 10px">${sh.length} lançamentos em ${games.length} jogo${games.length===1?"":"s"}. Muda em “Mostrar”, no topo.</p>`)}
 /* administrador: correr já a importação FIBA/FPB (workflow do repositório de dados) */
@@ -2002,7 +2005,14 @@ function zoneBlock(sh,opp,extra){const zs=zoneStats(sh),ps=ptsStats(sh),mode=SHO
   const hint={zonas:"Em cada zona: convertidos/tentados e %. Os lances livres não entram no mapa.",pts:"Amarelo: dentro da linha de 3 (2 pontos). Azul: fora da linha (3 pontos). Os lances livres não entram no mapa.",pontos:"● convertido · ✕ falhado. Os lances livres não entram no mapa."}[mode];
   return `<div class="sc-wrap"><div class="sc-court${opp?" o":""}">${seg}${courtSVG(sh,false,mode==="zonas"?zs:null,mode==="pts"?ps:null)}<p class="hint">${hint}</p></div>
    <div class="sc-side">${extra||""}${table}</div></div>`}
-function courtSVG(shots,live,zs,ps){const m=shots.map(e=>{const ok=e.t.endsWith("+");return ok?`<circle cx="${e.x}" cy="${e.y}" r="26" class="mk-ok"/>`:`<path d="M${e.x-22} ${e.y-22}L${e.x+22} ${e.y+22}M${e.x+22} ${e.y-22}L${e.x-22} ${e.y+22}" class="mk-ko"/>`}).join("");
+/* quem lançou: cada marca do mapa (fora do jogo ao vivo) guarda o lançamento; tocar mostra atleta, tipo, período e jogo */
+let SHREG=[];
+function shotInfo(e){const g=e._g||G,p=e.side==="o"?null:(g&&g.roster||[]).find(x=>x.id===e.id),np=(g&&g.np)||4;
+  const who=e.side==="o"?(g&&g.opp)||"Adversário":p?`#${p.num||"–"} ${p.name}`:"Atleta";
+  const q=e.q?(e.q>np?"Prol. "+(e.q-np):e.q+".º per."):"";
+  return {who,what:`${e.t[0]} pontos · ${e.t.endsWith("+")?"convertido":"falhado"}`,when:[q,e.c!=null?fmtT(e.c):""].filter(Boolean).join(" "),game:e._g?`vs ${e._g.opp}${e._g.date?" · "+e._g.date.slice(8,10)+"/"+e._g.date.slice(5,7):""}`:"",zone:"Z"+zoneN(e.x,e.y)}}
+function courtSVG(shots,live,zs,ps){const m=shots.map(e=>{const ok=e.t.endsWith("+"),mk=ok?`<circle cx="${e.x}" cy="${e.y}" r="26" class="mk-ok"/>`:`<path d="M${e.x-22} ${e.y-22}L${e.x+22} ${e.y+22}M${e.x+22} ${e.y-22}L${e.x-22} ${e.y+22}" class="mk-ko"/>`;
+    if(live)return mk;const k=SHREG.push(e)-1,i=shotInfo(e);return `<g class="mkg" data-sh="${k}"><title>${esc(i.who+" · "+i.what+(i.when?" · "+i.when:"")+(i.game?" · "+i.game:""))}</title>${mk}<circle cx="${e.x}" cy="${e.y}" r="46" class="mk-hit"/></g>`}).join("");
   return `<svg class="court${live?" live":""}" viewBox="0 0 1500 1400" ${live?'id="court"':""} role="img" aria-label="Campo de basquetebol">
    ${live?`<defs><pattern id="maple" width="120" height="1400" patternUnits="userSpaceOnUse"><rect width="120" height="1400" fill="#d6b07a"/><rect x="0" width="60" height="1400" fill="#d0a970"/><path d="M60 0V1400M120 0V1400" stroke="#b98f55" stroke-width="2" opacity=".55"/><path d="M0 310H60M60 760H120M0 1130H60" stroke="#b98f55" stroke-width="2" opacity=".5"/></pattern></defs>`:""}<rect x="0" y="0" width="1500" height="1400" class="c-floor"/>${zs?zonesLayer(zs):ps?ptsLayer(ps):""}
    <path class="c-3p" d="M${C3} 0V${YC.toFixed(1)}A${R3} ${R3} 0 0 0 ${1500-C3} ${YC.toFixed(1)}V0"/>
@@ -2162,6 +2172,11 @@ function playerCard(id){const order=(BSORT.k?bsSorted():bsRows()).map(r=>r.p.id)
     pv.onclick=()=>{if(i>0){cur=order[i-1];draw()}};nx.onclick=()=>{if(i<order.length-1){cur=order[i+1];draw()}}};
   document.body.appendChild(m);draw();m.onclick=e=>{if(e.target===m)m.remove()};
   const k=e=>{if(!document.body.contains(m)){removeEventListener("keydown",k);return}if(e.key==="Escape")m.remove();if(e.key==="ArrowLeft")m.querySelector("#pc-prev").click();if(e.key==="ArrowRight")m.querySelector("#pc-next").click()};addEventListener("keydown",k)}
+document.addEventListener("click",ev=>{const t=ev.target.closest&&ev.target.closest(".mkg[data-sh]"),old=document.getElementById("shtip");
+  if(!t){if(old&&!ev.target.closest("#shtip"))old.remove();return}const e=SHREG[+t.dataset.sh];if(!e)return;const i=shotInfo(e);
+  const d=old||document.createElement("div");d.id="shtip";d.className="shtip";d.innerHTML=`<b>${esc(i.who)}</b><span class="${e.t.endsWith("+")?"ok":"ko"}">${esc(i.what)}</span><small>${esc([i.zone,i.when,i.game].filter(Boolean).join(" · "))}</small>`;
+  if(!old)document.body.appendChild(d);const r=t.getBoundingClientRect(),w=d.offsetWidth,h=d.offsetHeight;
+  d.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left+r.width/2-w/2+scrollX))+"px";d.style.top=(r.top+scrollY-h-8<scrollY+4?r.bottom+scrollY+8:r.top+scrollY-h-8)+"px"});
 /* volta a desenhar mantendo a posição da página e o deslizamento lateral das tabelas */
 function keepScroll(f){const y=scrollY,xs=[...document.querySelectorAll(".tblw")].map(e=>e.scrollLeft);
   if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();f();
@@ -2181,7 +2196,7 @@ let PER=0;const q2l=q=>q>(G?G.np:4)?"prolongamento "+(q-G.np):q+".º período";
 function periodView(g,q){const R={st:{},ost:{...STAT0(),sec:null},us:0,them:0,tfUs:{},tfThem:{},coach:{us:{c:0,b:0},them:{c:0,b:0}}};
   g.roster.forEach(p=>{R.st[p.id]={...STAT0(),sec:null}});const evs=g.log.filter(e=>e.q===q);evs.forEach(e=>applyEv({...e},R));if(!evs.some(e=>e.on&&e.on.length))Object.values(R.st).forEach(x=>x.pm=null);
   return {...g,st:R.st,ost:R.ost,us:R.us,them:R.them,log:evs,qs:undefined,adj:undefined,coach:R.coach}}
-function render(){if(!G)return renderSetup();const fin=G.status==="fim"||roG()||!!G.review;if(fin&&VIEW==="live")VIEW="team";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
+function render(){if(!G)return renderSetup();SHREG=[];const fin=G.status==="fim"||roG()||!!G.review;if(fin&&VIEW==="live")VIEW="team";document.body.classList.toggle("fit",VIEW==="live"&&!fin&&FITQ.matches);$("#b-new").hidden=true;$("#gact").hidden=false;
   $("#b-save").textContent=WATCH?"‹ Voltar":G.demo?"Sair do treino":fin?"‹ Voltar":"Gravar e sair";$("#b-cancel").hidden=true;
   const tfU=G.tfUs[tfKey()]||0,tfT=G.tfThem[tfKey()]||0;
   const tsc=k=>{const us=k==="us",tf=us?tfU:tfT,ti=toInfo(k);
