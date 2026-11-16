@@ -204,3 +204,6 @@ Cola este texto no início do novo chat e anexa o ficheiro `fcgaia-estatisticas-
 
 ## v73
 - Mapas de lançamentos (ficha do jogo, Estatísticas da época, ficha do atleta): tocar numa marca mostra quem lançou, tipo e resultado, zona, período/tempo e, na época, o jogo. SHREG guarda os lançamentos desenhados em cada render.
+
+## v75
+- PDF: as áreas de toque das marcas (mk-hit) apareciam como bolas pretas no campo do PDF; ficam invisíveis.

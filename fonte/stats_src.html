@@ -2416,7 +2416,7 @@ function svgJPEG(svg,w,h){return new Promise(res=>{try{const im=new Image();im.o
 /* desenha o campo com as zonas (o mesmo da app) numa imagem para o PDF */
 function courtPNG(shots,floor,okc){return new Promise(res=>{try{
   const st=`<style>.c-floor{fill:${floor}}.c-paint{fill:rgba(0,0,0,.035);stroke:#6b6b6b;stroke-width:5}.c-line,.c-3p{fill:none;stroke:#6b6b6b;stroke-width:5}.c-board{stroke:#333;stroke-width:8}.c-rim{fill:none;stroke:#e2541b;stroke-width:6}.c-out{fill:none;stroke:#333;stroke-width:10}
-   .mk-ok{fill:${okc};stroke:#fff;stroke-width:6}.mk-ko{stroke:#c62828;stroke-width:10;stroke-linecap:round;fill:none}.zsep2 path{fill:none;stroke:rgba(0,0,0,.32);stroke-width:5}
+   .mk-hit{fill:none;stroke:none}.mk-ok{fill:${okc};stroke:#fff;stroke-width:6}.mk-ko{stroke:#c62828;stroke-width:10;stroke-linecap:round;fill:none}.zsep2 path{fill:none;stroke:rgba(0,0,0,.32);stroke-width:5}
    .zl text{text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:12px;stroke-linejoin:round;font-family:Arial,Helvetica,sans-serif;font-weight:700}.zl-n{font-size:60px;fill:#333}.zl-v{font-size:48px;fill:#111}.zl-v.cs{text-anchor:start}.zl-v.ce{text-anchor:end}</style>`;
   const zs=zoneStats(shots);let s=courtSVG(shots,false,zs,null).replace(/fill="#111"/g,`fill="${floor}"`).replace(/^\s*<svg /,`<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1400" `).replace(/(<svg[^>]*>)/,"$1"+st);
   const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=1500;c.height=1400;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,1500,1400);x.drawImage(im,0,0,1500,1400);res(c.toDataURL("image/jpeg",.88))}catch(e){res(null)}};
